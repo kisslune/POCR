@@ -1,4 +1,4 @@
-### Plans:
+### Plan:
 
 - Include our work to the open-source tool [SVF](https://github.com/SVF-tools/SVF).
 
