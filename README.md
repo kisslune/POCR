@@ -11,7 +11,7 @@
 sudo apt install cmake gcc g++ libtinfo-dev libz-dev zip wget npm
 ```
 
-### 2. Clone Repository
+### 2. Clone repository
 
 ```
 git clone https://github.com/kisslune/POCR.git
@@ -24,7 +24,7 @@ cd POCR
 source ./build.sh
 ```
 
-### 4. Setup Environment
+### 4. Setup environment
 
 
 ```
