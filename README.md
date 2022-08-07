@@ -34,7 +34,7 @@ POCR provides a general CFL-reachability solver, which accepts an input GRAMMAR_
 
 
 ```
-cfl -std GRAMMAR_FILE GRAPH_FILE
+cfl GRAMMAR_FILE GRAPH_FILE
 ```
 
 The GRAMMAR_FILE should be normalized with the following format:
