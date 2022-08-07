@@ -5,18 +5,26 @@
 
 ## Setup POCR
 
-### Build POCR on Ubuntu or MacOS:
+### 1. Install dependencies
 
 ```
-sudo apt install cmake gcc g++ libtinfo-dev libz-dev zip wget
-git clone https://github.com/SVF-tools/POCR.git
+sudo apt install cmake gcc g++ libtinfo-dev libz-dev zip wget npm
+```
+
+### 2. Clone Repository
+
+```
+git clone https://github.com/kisslune/POCR.git
+```
+
+### 3. Build POCR
+
+```
 cd POCR
 source ./build.sh
 ```
 
-### Setup environment
-
-After building POCR, you can use the following command to setup the environment variables to point to the release version executables of POCR:
+### 4. Setup Environment
 
 
 ```
