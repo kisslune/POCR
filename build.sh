@@ -18,8 +18,6 @@ if [ -z "$SVF_DIR" ]; then
   export LLVM_DIR=$install_path/$LLVMHome
   export Z3_DIR=$install_path/$Z3Home
   export PATH=$LLVM_DIR/bin:$PATH
-  echo "export LLVM_DIR=$install_path/$LLVMHome" >>~/.bashrc
-  echo "export Z3_DIR=$install_path/$Z3Home" >>~/.bashrc
   export SVF_DIR=$install_path/SVF/
 
   echo "LLVM_DIR="$LLVM_DIR
