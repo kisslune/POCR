@@ -134,4 +134,4 @@ cfl -std vf.cfg art.vfg
 
 - Merge our work to the upstream [SVF](https://github.com/SVF-tools/SVF).
 
-- Develop a grammar parser for the general CFL-reachability solver so that it can can automatically identify the transitive relations in the input grammar to benefit from the *POCR* algorithm in the solving procedure.
+- Implement the *POCR* algorithm on more clients.
