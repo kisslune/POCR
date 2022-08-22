@@ -134,4 +134,4 @@ cfl -std vf.cfg art.vfg
 
 - Merge our work to the upstream [SVF](https://github.com/SVF-tools/SVF).
 
-- Implement the *POCR* algorithm on more clients.
+- Implement the *POCR* algorithm for more clients.
