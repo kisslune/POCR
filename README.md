@@ -62,7 +62,7 @@ EDGE_SOURCE    EDGE_DESTINATION    EDGE_LABEL    LABEL_INDEX
 
 **Note**: the symbols should also be separated by a tab character, i.e., `"\t"` and any EDGE_LABEL having a subscript should end with "\_i". For example,  an edge $1 \xrightarrow{X_3} 2$ is denoted by 
 ```1    2    X_i    3``` 
-in the GRAPH_FILE.
+in GRAPH_FILE.
 
 
 ### Field-Sensitive Alias Analyzer
