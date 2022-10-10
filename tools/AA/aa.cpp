@@ -8,6 +8,7 @@
 #include "AA/AliasAnalysis.h"
 
 using namespace SVF;
+using namespace std;
 
 static llvm::cl::opt<bool> Default_AA("std", llvm::cl::init(false), llvm::cl::desc("Standard alias analysis"));
 static llvm::cl::opt<bool> Pocr_AA("pocr", llvm::cl::init(false), llvm::cl::desc("POCR alias analysis"));
