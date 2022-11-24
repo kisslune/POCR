@@ -5,7 +5,7 @@
 
 #include <sstream>
 #include "FastCluster/fastcluster.h"
-#include "MemoryModel/PTAStat.h"
+#include "Util/PTAStat.h"
 #include "MemoryModel/PointerAnalysisImpl.h"
 #include "Util/NodeIDAllocator.h"
 #include "MSSA/MemSSA.h"
