@@ -47,7 +47,7 @@ int main(int argc, char** argv)
         aa->analyze();
     }
     else
-        cout << "No alias analysis solver specified!" << endl;
+        std::cout << "No alias analysis solver specified!" << std::endl;
 
     return 0;
 }

@@ -8,6 +8,7 @@
 #include "VFA/VFAnalysis.h"
 
 using namespace SVF;
+using namespace std;
 
 static llvm::cl::opt<bool> Default_VFA("std", llvm::cl::init(false), llvm::cl::desc("Standard valueflow analysis"));
 static llvm::cl::opt<bool> Pocr_VFA("pocr", llvm::cl::init(false), llvm::cl::desc("POCR valueflow analysis"));
