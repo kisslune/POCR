@@ -88,7 +88,7 @@ public:
 
 
 /*
- * Generic CFL solver for demand-driven analysis based on different graphs (e.g. PAG, VFG, ThreadVFG)
+ * Generic CFL solver for all-pair analysis based on different graphs (e.g. PAG, VFG, ThreadVFG)
  * Extend this class for sophisticated CFL-reachability resolution (e.g. field, flow, path)
  */
 class CFLBase
