@@ -2,7 +2,7 @@
  // Author: Kisslune
  */
 
-#include "SVF-FE/LLVMUtil.h"
+#include "SVF-LLVM/LLVMUtil.h"
 #include "CFLSolver/CFLSolver.h"
 
 using namespace SVF;

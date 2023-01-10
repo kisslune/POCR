@@ -7,7 +7,7 @@
 
 
 #include <sstream>
-#include "SVF-FE/CPPUtil.h"
+#include "Util/CppUtil.h"
 #include "Util/SVFUtil.h"
 #include "AA/AliasAnalysis.h"
 

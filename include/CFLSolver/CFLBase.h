@@ -11,7 +11,7 @@
 #define CFLRSOLVER_H_
 
 #include "Graphs/PTACallGraph.h"
-#include "MemoryModel/SVFIR.h"
+#include "SVFIR/SVFIR.h"
 #include "Util/SVFUtil.h"
 #include "Util/SCC.h"
 #include "CFLGraphs/CFLData.h"
@@ -219,7 +219,12 @@ public:
     {
         for (int i = 0; i < argc; ++i) {
             std::ifstream f(argv[i]);
-            if (f.good()) {
+            if (i == 0)
+            {
+                arg_vec[arg_num] = argv[i];
+                arg_num++;
+            }
+            else if (f.good()) {
                 inFileVec.push_back(argv[i]);
             }
             else {
