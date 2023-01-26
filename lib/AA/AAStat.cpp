@@ -64,10 +64,10 @@ void AAStat::performStat()
 {
     endClk();
 
-    if (CFLOpt::graphStat)
+    if (CFLOpt::graphStat())
         pegStat();
 
-    if (!CFLOpt::PStat)
+    if (!CFLOpt::PStat())
         return;
 
     aa->countSumEdges();

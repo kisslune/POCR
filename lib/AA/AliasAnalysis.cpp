@@ -54,7 +54,7 @@ void AliasAnalysis::dumpStat()
 void AliasAnalysis::finalize()
 {
     dumpStat();
-    if (CFLOpt::writeGraph)
+    if (CFLOpt::writeGraph())
         graph()->writeGraph("peg");
 }
 
@@ -71,7 +71,7 @@ void AliasAnalysis::analyze()
     do {
         numOfIteration++;
         reanalyze = false;
-        if (CFLOpt::solveCFL)
+        if (CFLOpt::solveCFL())
             solve();
     } while (reanalyze);
 
