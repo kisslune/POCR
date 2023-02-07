@@ -9,11 +9,11 @@
 
 using namespace SVF;
 
-static llvm::cl::opt<bool> Default_AA("std", llvm::cl::init(false), llvm::cl::desc("Standard alias analysis"));
-static llvm::cl::opt<bool> Pocr_AA("pocr", llvm::cl::init(false), llvm::cl::desc("POCR alias analysis"));
-static llvm::cl::opt<bool> Gspan_AA("gspan", llvm::cl::init(false), llvm::cl::desc("POCR alias analysis"));
-static llvm::cl::opt<bool> Gr_AA("gr", llvm::cl::init(false), llvm::cl::desc("POCR alias analysis"));
-static llvm::cl::opt<bool> GrGspan_AA("grgspan", llvm::cl::init(false), llvm::cl::desc("POCR alias analysis"));
+static Option<bool> Default_AA("std", "Standard alias analysis", false);
+static Option<bool> Pocr_AA("pocr", "POCR alias analysis", false);
+static Option<bool> Gspan_AA("gspan", "POCR alias analysis", false);
+static Option<bool> Gr_AA("gr", "POCR alias analysis", false);
+static Option<bool> GrGspan_AA("grgspan", "POCR alias analysis", false);
 
 
 int main(int argc, char** argv)
@@ -27,26 +27,26 @@ int main(int argc, char** argv)
         std::cout << arg_vec[i];
     }
     CFLBase::processArgs(argc, argv, arg_num, arg_vec, inFileVec);
-    llvm::cl::ParseCommandLineOptions(arg_num, arg_vec, "Alias analysis\n");
+    OptionBase::parseOptions(arg_num, arg_vec, "Alias analysis\n", "[options] <input>");
 
     StdAA* aa;
-    if (Default_AA) {
+    if (Default_AA()) {
         aa = new StdAA(inFileVec[0]);
         aa->analyze();
     }
-    else if (Pocr_AA) {
+    else if (Pocr_AA()) {
         aa = new PocrAA(inFileVec[0]);
         aa->analyze();
     }
-    else if (Gspan_AA) {
+    else if (Gspan_AA()) {
         aa = new GspanAA(inFileVec[0]);
         aa->analyze();
     }
-    else if (Gr_AA) {
+    else if (Gr_AA()) {
         aa = new GRAA(inFileVec[0]);
         aa->analyze();
     }
-    else if (GrGspan_AA) {
+    else if (GrGspan_AA()) {
         aa = new GRGspanAA(inFileVec[0]);
         aa->analyze();
     }

@@ -34,7 +34,7 @@ void VFAnalysis::analyze()
     do {
         numOfIteration++;
         reanalyze = false;
-        if (CFLOpt::solveCFL)
+        if (CFLOpt::solveCFL())
             solve();
     } while (reanalyze);
 
@@ -52,7 +52,7 @@ void VFAnalysis::analyze()
 void VFAnalysis::finalize()
 {
     dumpStat();
-    if (CFLOpt::writeGraph)
+    if (CFLOpt::writeGraph())
         graph()->writeGraph("vfg");
 }
 
