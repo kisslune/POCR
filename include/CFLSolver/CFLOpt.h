@@ -1,15 +1,9 @@
 //===- Options.h -- Command line options ------------------------//
 
-#ifndef OPTIONS_H_
-#define OPTIONS_H_
+#ifndef CFLOpt_H_
+#define CFLOpt_H_
 
-#include <sstream>
-#include "FastCluster/fastcluster.h"
-#include "MemoryModel/PTAStat.h"
-#include "MemoryModel/PointerAnalysisImpl.h"
-#include "Util/NodeIDAllocator.h"
-#include "MSSA/MemSSA.h"
-#include "WPA/WPAPass.h"
+#include <Util/Options.h>
 
 namespace SVF
 {
@@ -29,4 +23,4 @@ public:
 };
 }  // namespace SVF
 
-#endif  // ifdef OPTIONS_H_
+#endif
