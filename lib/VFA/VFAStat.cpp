@@ -63,10 +63,10 @@ void VFAStat::performStat()
 {
     endClk();
 
-    if (CFLOpt::graphStat)
+    if (CFLOpt::graphStat())
         vfgStat();
 
-    if (!CFLOpt::PStat)
+    if (!CFLOpt::PStat())
         return;
 
     ivf->countSumEdges();

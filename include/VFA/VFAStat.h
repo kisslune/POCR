@@ -11,7 +11,8 @@
 #define IVFSTAT_H_
 
 
-#include "Util/BasicTypes.h"
+#include "SVF-LLVM/BasicTypes.h"
+#include "SVFIR/SVFType.h"
 #include <iostream>
 #include <map>
 #include <string>

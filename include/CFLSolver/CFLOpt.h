@@ -3,14 +3,7 @@
 #ifndef CFLOpt_H_
 #define CFLOpt_H_
 
-//#include <sstream>
 #include <Util/Options.h>
-//#include "FastCluster/fastcluster.h"
-//#include <Util/PTAStat.h>
-//#include "MemoryModel/PointerAnalysisImpl.h"
-//#include "Util/NodeIDAllocator.h"
-//#include "MSSA/MemSSA.h"
-//#include "WPA/WPAPass.h"
 
 namespace SVF
 {
@@ -23,10 +16,10 @@ public:
 
     /// CFL Options
     static const u32_t timeOut;
-    static const llvm::cl::opt<bool> PStat;
-    static const llvm::cl::opt<bool> solveCFL;
-    static const llvm::cl::opt<bool> writeGraph;
-    static const llvm::cl::opt<bool> graphStat;
+    static const Option<bool> PStat;
+    static const Option<bool> solveCFL;
+    static const Option<bool> writeGraph;
+    static const Option<bool> graphStat;
 };
 }  // namespace SVF
 

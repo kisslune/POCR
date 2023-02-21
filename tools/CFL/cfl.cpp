@@ -2,11 +2,10 @@
  // Author: Kisslune
  */
 
-#include "SVF-FE/LLVMUtil.h"
+#include "SVF-LLVM/LLVMUtil.h"
 #include "CFLSolver/CFLSolver.h"
 
 using namespace SVF;
-using namespace std;
 
 static llvm::cl::opt<bool> Default_CFL("std", llvm::cl::init(false), llvm::cl::desc("Standard alias analysis"));
 static llvm::cl::opt<bool> Pocr_CFL("pocr", llvm::cl::init(false), llvm::cl::desc("POCR alias analysis"));

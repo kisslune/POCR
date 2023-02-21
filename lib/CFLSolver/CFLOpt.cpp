@@ -7,28 +7,28 @@ namespace SVF
 {
 const u32_t CFLOpt::timeOut = 24 * 3600;     // in second
 
-const llvm::cl::opt<bool> CFLOpt::PStat(
+const Option<bool> CFLOpt::PStat(
         "pstat",
-        llvm::cl::init(true),
-        llvm::cl::desc("Statistic for Pointer analysis")
+        "Statistic for Pointer analysis",
+        true
 );
 
-const llvm::cl::opt<bool> CFLOpt::solveCFL(
+const Option<bool> CFLOpt::solveCFL(
         "solve",
-        llvm::cl::init(true),
-        llvm::cl::desc("solve CFL-reachability")
+        "solve CFL-reachability",
+        true
 );
 
-const llvm::cl::opt<bool> CFLOpt::writeGraph(
+const Option<bool> CFLOpt::writeGraph(
         "write-graph",
-        llvm::cl::init(false),
-        llvm::cl::desc("solve CFL-reachability")
+        "solve CFL-reachability",
+        false
 );
 
-const llvm::cl::opt<bool> CFLOpt::graphStat(
+const Option<bool> CFLOpt::graphStat(
         "graph-stat",
-        llvm::cl::init(true),
-        llvm::cl::desc("Graph statistics")
+        "Graph statistics",
+        true
 );
 
 } // namespace SVF.

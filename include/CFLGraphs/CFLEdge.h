@@ -8,7 +8,8 @@
 #ifndef PEGEDGE_H_
 #define PEGEDGE_H_
 
-#include "MemoryModel/SVFIR.h"
+#include "SVFIR/SVFIR.h"
+#include "SVF-LLVM/LLVMUtil.h"
 
 namespace SVF
 {
