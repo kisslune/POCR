@@ -24,7 +24,7 @@ void StdCFL::initialize()
 void StdCFL::finalize()
 {
     dumpStat();
-    if (CFLOpt::writeGraph)
+    if (CFLOpt::writeGraph())
         graph()->writeGraph("cflg");
 }
 
@@ -41,7 +41,7 @@ void StdCFL::analyze()
     do {
         numOfIteration++;
         reanalyze = false;
-        if (CFLOpt::solveCFL)
+        if (CFLOpt::solveCFL())
             solve();
     } while (reanalyze);
 
@@ -169,7 +169,7 @@ bool StdCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
 
 void StdCFL::dumpStat()
 {
-    if (CFLOpt::PStat && stat)
+    if (CFLOpt::PStat() && stat)
         stat->performStat();
 }
 

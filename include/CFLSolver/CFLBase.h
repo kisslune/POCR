@@ -11,7 +11,7 @@
 #define CFLRSOLVER_H_
 
 #include "Graphs/PTACallGraph.h"
-#include "MemoryModel/SVFIR.h"
+#include "SVFIR/SVFIR.h"
 #include "Util/SVFUtil.h"
 #include "Util/SCC.h"
 #include "CFLGraphs/CFLData.h"
@@ -88,7 +88,7 @@ public:
 
 
 /*
- * Generic CFL solver for demand-driven analysis based on different graphs (e.g. PAG, VFG, ThreadVFG)
+ * Generic CFL solver for all-pair analysis based on different graphs (e.g. PAG, VFG, ThreadVFG)
  * Extend this class for sophisticated CFL-reachability resolution (e.g. field, flow, path)
  */
 class CFLBase
@@ -219,7 +219,12 @@ public:
     {
         for (int i = 0; i < argc; ++i) {
             std::ifstream f(argv[i]);
-            if (f.good()) {
+            if (i == 0)
+            {
+                arg_vec[arg_num] = argv[i];
+                arg_num++;
+            }
+            else if (f.good()) {
                 inFileVec.push_back(argv[i]);
             }
             else {

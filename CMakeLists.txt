@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.13.4)
 
 project("POCR-svf")
 
-
-
 # To support both in- and out-of-source builds,
 # we check for the presence of the add_llvm_loadable_module command.
 # - if this command is not present, we are building out-of-source
@@ -82,10 +80,12 @@ Please set this to environment variable to point to the SVF_DIR directory or set
     endif()
 endif()
 
-set(SVF_LIB "${SVF_DIR}/Release-build/lib/libSvf.a")
+set(SVF_LIB "${SVF_DIR}/Release-build/svf/libSvfCore.a")
 set(LLVMCudd "${SVF_DIR}/Release-build/lib/CUDD/libCudd.a")
-set(SVF_HEADER "${SVF_DIR}/include")
-include_directories(${SVF_HEADER})
+set(SVF_HEADER "${SVF_DIR}/svf/include") 
+set(SVF_LLVM "${SVF_DIR}/svf-llvm/include")
+set(SVF_Config "${SVF_DIR}/Release-build/include")
+include_directories(${SVF_HEADER} ${SVF_LLVM} ${SVF_Config})
 
 
 add_subdirectory(lib)

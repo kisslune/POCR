@@ -1,6 +1,6 @@
 # Intro
 
-**POCR** is a light-weight CFL-reachability tool developed upon the open-source tool [SVF](https://github.com/SVF-tools/SVF.git) and run on Ubuntu (20.04 or newer) or MacOS. It includes a general CFL-reachability solver and to specific solvers for field-sensitive alias analysis and context-sensitive value-flow analysis, where our fast CFL-reachability algorithm *POCR* is implemented.
+**POCR** is a light-weight CFL-reachability tool developed upon the open-source tool [SVF](https://github.com/SVF-tools/SVF.git) and run on Ubuntu (20.04 or higher) or MacOS. It includes a general CFL-reachability solver and to specific solvers for field-sensitive alias analysis and context-sensitive value-flow analysis, where our fast CFL-reachability algorithm *POCR* is implemented.
 
 
 ## Setup POCR
@@ -62,7 +62,7 @@ EDGE_SOURCE    EDGE_DESTINATION    EDGE_LABEL    LABEL_INDEX
 
 **Note**: the symbols should also be separated by a tab character, i.e., `"\t"` and any EDGE_LABEL having a subscript should end with "\_i". For example,  an edge $1 \xrightarrow{X_3} 2$ is denoted by 
 ```1    2    X_i    3``` 
-in the GRAPH_FILE.
+in GRAPH_FILE.
 
 
 ### Field-Sensitive Alias Analyzer
@@ -134,4 +134,4 @@ cfl -std vf.cfg art.vfg
 
 - Merge our work to the upstream [SVF](https://github.com/SVF-tools/SVF).
 
-- Implement the *POCR* algorithm on more clients.
+- Implement the *POCR* algorithm for more clients.
