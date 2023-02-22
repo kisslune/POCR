@@ -31,7 +31,7 @@ AliasAnalysis::AliasAnalysis(std::string& gName) : stat(nullptr),
 void AliasAnalysis::initialize()
 {
     setGraph(new PEG());
-    graph()->readGraph(graphName);
+    graph()->readGraph(graphName);  // read a uni-directed graph
 
     stat = new AAStat(this);
 }
