@@ -23,6 +23,26 @@ namespace SVF
 class AliasAnalysis : public CFLBase
 {
 public:
+    typedef SCCDetection<PEG*> SCC;
+
+    enum Words
+    {
+        fault,
+        epsilon,
+        a,
+        abar,
+        d,
+        dbar,
+        f,
+        fbar,
+
+        M,
+        V,
+        DV,
+        A,
+        Abar,
+        FV
+    };
     /// Statistics
     //@{
     AAStat* stat;
@@ -41,6 +61,11 @@ protected:
     /// Graph
     PEG* _graph;
     std::string graphName;
+
+    /// Graph simplification
+    SCC* scc;
+//    PEGCompact* compact;
+//    PEGInterDyck* interDyck;
 
 public:
     AliasAnalysis(std::string& gName);
@@ -89,6 +114,17 @@ public:
         sleep(CFLOpt::timeOut);
         assert(false && "Time out!!");
     }
+
+    /// Graph simplifcation
+    //@{
+    void simplifyGraph();
+//    void graphCompact();
+//    void interDyckGS();
+    void SCCElimination();
+    void SCCDetect();
+    void mergeSCCCycle();
+    void mergeSCCNodes(NodeID repNodeId, const NodeBS& subNodes);
+    // @}
 };
 
 
@@ -97,26 +133,6 @@ public:
  */
 class StdAA : public AliasAnalysis
 {
-public:
-    enum Words
-    {
-        fault,
-        epsilon,
-        a,
-        abar,
-        d,
-        dbar,
-        f,
-        fbar,
-
-        M,
-        V,
-        DV,
-        A,
-        Abar,
-        FV
-    };
-
 protected:
     std::map<NodeID, NodeSet> valAlias;
 

@@ -23,7 +23,8 @@ AliasAnalysis::AliasAnalysis(std::string& gName) : stat(nullptr),
                                                    timeOfSolving(0),
                                                    reanalyze(false),
                                                    _graph(nullptr),
-                                                   graphName(gName)
+                                                   graphName(gName),
+                                                   scc(nullptr)
 {
 }
 
@@ -68,7 +69,8 @@ void AliasAnalysis::analyze()
     // Start solving
     double propStart = stat->getClk();
 
-    do {
+    do
+    {
         numOfIteration++;
         reanalyze = false;
         if (CFLOpt::solveCFL())
@@ -145,21 +147,25 @@ void StdAA::finalize()
 
 void StdAA::initSolver()
 {
-    for (CFLEdge* edge: graph()->getPEGEdges()) {
-        if (edge->getEdgeKind() == PEG::Asgn) {
+    for (CFLEdge* edge: graph()->getPEGEdges())
+    {
+        if (edge->getEdgeKind() == PEG::Asgn)
+        {
             addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
             addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(abar, 0));
             pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
             pushIntoWorklist(edge->getDstID(), edge->getSrcID(), std::make_pair(abar, 0));
         }
-        else if (edge->getEdgeKind() == PEG::Gep) {
+        else if (edge->getEdgeKind() == PEG::Gep)
+        {
             u32_t offset = edge->getEdgeIdx();
             addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(f, offset));
             addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(fbar, offset));
             pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(f, offset));
             pushIntoWorklist(edge->getDstID(), edge->getSrcID(), std::make_pair(fbar, offset));
         }
-        else if (edge->getEdgeKind() == PEG::Deref) {
+        else if (edge->getEdgeKind() == PEG::Deref)
+        {
             addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(d, 0));
             addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(dbar, 0));
             pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(d, 0));
@@ -168,7 +174,8 @@ void StdAA::initSolver()
     }
 
     /// V ::= epsilon
-    for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter) {
+    for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter)
+    {
         NodeID nodeId = nIter->first;
         addEdge(nodeId, nodeId, std::make_pair(V, 0));
         pushIntoWorklist(nodeId, nodeId, std::make_pair(V, 0));
@@ -189,12 +196,14 @@ bool StdAA::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
 void StdAA::processCFLItem(CFLItem item)
 {
     Label newTy = unarySumm(item.type());
-    if (addEdge(item.src(), item.dst(), newTy)) {
+    if (addEdge(item.src(), item.dst(), newTy))
+    {
         checks++;
         pushIntoWorklist(item.src(), item.dst(), newTy);
     }
 
-    for (auto& iter: cflData()->getSuccMap(item.dst())) {
+    for (auto& iter: cflData()->getSuccMap(item.dst()))
+    {
         Label rty = iter.first;
         newTy = binarySumm(item.type(), rty);
         NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
@@ -203,7 +212,8 @@ void StdAA::processCFLItem(CFLItem item)
             pushIntoWorklist(item.src(), diffDst, newTy);
     }
 
-    for (auto& iter: cflData()->getPredMap(item.src())) {
+    for (auto& iter: cflData()->getPredMap(item.src()))
+    {
         Label lty = iter.first;
         newTy = binarySumm(lty, item.type());
         NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
@@ -216,7 +226,8 @@ void StdAA::processCFLItem(CFLItem item)
 
 void StdAA::dumpAlias()
 {
-    for (auto& it: valAlias) {
+    for (auto& it: valAlias)
+    {
         NodeID nId1 = it.first;
         outs() << "\nNode " << nId1 << " ";
         outs() << "  mayAlias with: { ";
@@ -230,22 +241,28 @@ void StdAA::dumpAlias()
 void StdAA::countSumEdges()
 {
     numOfSumEdges = 0;
-    std::set<int> s = {M, V, DV, FV,A,Abar};
+    std::set<int> s = {M, V, DV, FV, A, Abar};
 
-    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1) {
-        for (auto& iter2: iter1->second) {
+    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
+    {
+        for (auto& iter2: iter1->second)
+        {
             if (s.find(iter2.first.first) != s.end())
                 numOfSumEdges += iter2.second.count();
         }
     }
 
     std::set<int> s1 = {A};
-    for (auto it = cflData()->begin(); it != cflData()->end(); ++it) {
+    for (auto it = cflData()->begin(); it != cflData()->end(); ++it)
+    {
         cflData()->addEdge(it->first, it->first, std::make_pair(A, 0));
     }
-    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1) {
-        for (auto& iter2: iter1->second) {
-            if (s1.find(iter2.first.first) != s1.end()) {
+    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
+    {
+        for (auto& iter2: iter1->second)
+        {
+            if (s1.find(iter2.first.first) != s1.end())
+            {
                 numOfTEdges += iter2.second.count() * 2;
 //                numOfSumEdges += iter2.second.count() * 2;
             }

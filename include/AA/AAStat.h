@@ -66,6 +66,9 @@ public:
 
     double startTime;
     double endTime;
+    double sccTime;
+    double gcTime;
+    double interDyckTime;
 
     virtual void performStat();
     void pegStat();
