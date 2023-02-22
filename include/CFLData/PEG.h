@@ -38,9 +38,7 @@ protected:
 
 public:
     /// Constructor
-    PEG() : maxNodeID(0)
-    {
-    }
+    PEG();
 
     /// copy constructor
     PEG(const PEG& rhs)

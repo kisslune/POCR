@@ -45,8 +45,7 @@ protected:
 
 public:
     /// Constructor
-    IVFG()
-    {}
+    IVFG();
 
     void readGraph(std::string fname);   /// build from graph file
     void copyBuild(const IVFG& rhs);  /// copy builder

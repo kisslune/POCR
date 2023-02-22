@@ -16,23 +16,17 @@ using namespace SVF;
 using namespace SVFUtil;
 
 
-
-void IVFG::copyBuild(const IVFG& rhs)
+IVFG::IVFG()
 {
-    /// initialize nodes
-    for (auto it = rhs.begin(), eit = rhs.end(); it != eit; ++it) {
-        if (!it->second->hasIncomingEdge() && !it->second->hasOutgoingEdge())
-            continue;
-        addIVFGNode(it->first);
-    }
-
-    /// initialize edges
-    for (auto edge: rhs.getIVFGEdges()) {
-        addEdge(edge->getSrcID(), edge->getDstID(), edge->getEdgeKind(), edge->getEdgeIdx());
-    }
+    /// Specify direct edge kinds for construction
+    CFLNode::directEdgeKinds.clear();
+    CFLNode::directEdgeKinds.insert(DirectVF);
 }
 
 
+/*!
+ * Read a VFG from file
+ */
 void IVFG::readGraph(std::string fname)
 {
     std::ifstream gFile;
@@ -67,6 +61,22 @@ void IVFG::readGraph(std::string fname)
     }
 
     gFile.close();
+}
+
+
+void IVFG::copyBuild(const IVFG& rhs)
+{
+    /// initialize nodes
+    for (auto it = rhs.begin(), eit = rhs.end(); it != eit; ++it) {
+        if (!it->second->hasIncomingEdge() && !it->second->hasOutgoingEdge())
+            continue;
+        addIVFGNode(it->first);
+    }
+
+    /// initialize edges
+    for (auto edge: rhs.getIVFGEdges()) {
+        addEdge(edge->getSrcID(), edge->getDstID(), edge->getEdgeKind(), edge->getEdgeIdx());
+    }
 }
 
 

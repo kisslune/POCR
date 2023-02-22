@@ -10,6 +10,8 @@
 using namespace SVF;
 using namespace SVFUtil;
 
+std::set<CFLEdge::GEdgeKind> CFLNode::directEdgeKinds;
+
 void CFLGraph::readGraph(std::string fname)
 {
     std::ifstream gFile;

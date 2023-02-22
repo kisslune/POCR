@@ -15,6 +15,18 @@
 using namespace SVF;
 using namespace SVFUtil;
 
+
+/*!
+ * Constructor
+ */
+PEG::PEG() : maxNodeID(0)
+{
+    /// Specify direct edge kinds for construction
+    CFLNode::directEdgeKinds.clear();
+    CFLNode::directEdgeKinds.insert(Asgn);
+}
+
+
 /*!
  * Construct a `uni-directed` PEG by reading from graph.
  */
