@@ -52,8 +52,8 @@ void VFAStat::vfgStat()
         totalEdgeNumber++;
     }
 
-    PTNumStatMap["NumOfNodes"] = totalNodeNumber;
-    PTNumStatMap["NumOfEdges"] = totalEdgeNumber;
+    PTNumStatMap["#Nodes"] = totalNodeNumber;
+    PTNumStatMap["#Edges"] = totalEdgeNumber;
 
     VFAStat::printStat("LG Stats");
 }
