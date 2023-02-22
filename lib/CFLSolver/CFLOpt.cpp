@@ -15,19 +15,37 @@ const Option<bool> CFLOpt::PStat(
 
 const Option<bool> CFLOpt::solveCFL(
         "solve",
-        "solve CFL-reachability",
+        "Solve CFL-reachability",
         true
 );
 
 const Option<bool> CFLOpt::writeGraph(
         "write-graph",
-        "solve CFL-reachability",
+        "Solve CFL-reachability",
         false
 );
 
 const Option<bool> CFLOpt::graphStat(
         "graph-stat",
         "Graph statistics",
+        true
+);
+
+const Option<bool> CFLOpt::scc(
+        "scc",
+        "Enable cycle elimination",
+        true
+);
+
+const Option<bool> CFLOpt::gc(
+        "gf",
+        "Enable graph folding",
+        true
+);
+
+const Option<bool> CFLOpt::interDyck(
+        "interdyck",
+        "Eliminating non-Dyck-contributing edges",
         true
 );
 
