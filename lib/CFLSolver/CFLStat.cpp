@@ -36,8 +36,8 @@ void CFLStat::printStat(std::string statname)
 
 void CFLStat::graphStat()
 {
-    PTNumStatMap["NumOfNodes"] = numOfNodes;
-    PTNumStatMap["NumOfEdges"] = numOfEdges;
+    PTNumStatMap["#Nodes"] = numOfNodes;
+    PTNumStatMap["#Edges"] = numOfEdges;
 
     CFLStat::printStat("CFLGraph Stats");
 }
@@ -52,8 +52,8 @@ void CFLStat::performStat()
     cfl->countSumEdges();
 
     timeStatMap["AnalysisTime"] = cfl->timeOfSolving;
-    PTNumStatMap["Checks"] = cfl->checks;
-    PTNumStatMap["NumOfSumEdges"] = cfl->numOfSumEdges - numOfEdges;
+    PTNumStatMap["#Checks"] = cfl->checks;
+    PTNumStatMap["#SumEdges"] = cfl->numOfSumEdges - numOfEdges;
 
     CFLStat::printStat("CFL-reachability analysis Stats");
 }

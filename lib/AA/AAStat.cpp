@@ -53,8 +53,8 @@ void AAStat::pegStat()
         totalEdgeNumber++;
     }
 
-    PTNumStatMap["NumOfNodes"] = totalNodeNumber;
-    PTNumStatMap["NumOfEdges"] = totalEdgeNumber * 2;
+    PTNumStatMap["#Nodes"] = totalNodeNumber;
+    PTNumStatMap["#Edges"] = totalEdgeNumber * 2;
 
     AAStat::printStat("PEG Stats");
 }
