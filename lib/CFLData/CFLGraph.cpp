@@ -4,7 +4,7 @@
 
 #include "CFLSolver/CFLBase.h"
 #include "Util/SVFUtil.h"
-#include "CFLGraphs/CFLGraph.h"
+#include "CFLData/CFLGraph.h"
 #include <iostream>
 
 using namespace SVF;

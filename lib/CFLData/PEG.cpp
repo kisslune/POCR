@@ -9,13 +9,15 @@
 
 #include "CFLSolver/CFLBase.h"
 #include "Util/SVFUtil.h"
-#include "CFLGraphs/PEG.h"
+#include "CFLData/PEG.h"
 #include <iostream>
 
 using namespace SVF;
 using namespace SVFUtil;
 
-
+/*!
+ * Construct a `uni-directed` PEG by reading from graph.
+ */
 void PEG::readGraph(std::string fname)
 {
     std::ifstream gFile;
