@@ -14,7 +14,7 @@
 #include "SVFIR/SVFIR.h"
 #include "Util/SVFUtil.h"
 #include "Util/SCC.h"
-#include "CFLGraphs/CFLData.h"
+#include "CFLData/CFLData.h"
 #include <fstream>
 #include <thread>
 #include <pthread.h>

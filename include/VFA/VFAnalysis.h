@@ -9,7 +9,7 @@
 #define IVFANALYSIS_H_
 
 #include "CFLSolver/CFLBase.h"
-#include "CFLGraphs/IVFG.h"
+#include "CFLData/IVFG.h"
 #include "CFLSolver/CFLOpt.h"
 #include "VFAStat.h"
 

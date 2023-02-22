@@ -1,6 +1,6 @@
 file (GLOB SOURCES
+        CFLData/*.cpp
         CFLSolver/*.cpp
-        CFLGraphs/*.cpp
         AA/*.cpp
         VFA/*.cpp
 )

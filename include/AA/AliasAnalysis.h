@@ -11,7 +11,7 @@
 #define ALIASANALYSIS_H_
 
 #include "CFLSolver/CFLBase.h"
-#include "CFLGraphs/PEG.h"
+#include "CFLData/PEG.h"
 #include "AAStat.h"
 #include "CFLSolver/CFLOpt.h"
 

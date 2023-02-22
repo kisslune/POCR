@@ -9,7 +9,7 @@
 
 #include "CFLSolver/CFLBase.h"
 #include "Util/SVFUtil.h"
-#include "CFLGraphs/PEG.h"
+#include "CFLData/PEG.h"
 #include <iostream>
 
 using namespace SVF;

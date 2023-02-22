@@ -3,7 +3,7 @@
 //
 
 #include "CFLSolver/CFLBase.h"
-#include "CFLGraphs/CFGrammar.h"
+#include "CFLData/CFGrammar.h"
 #include <iostream>
 
 using namespace SVF;

@@ -7,7 +7,7 @@
 #define POCR_SVF_CFLSOLVER_H
 
 #include "CFLBase.h"
-#include "CFLGraphs/CFLGraph.h"
+#include "CFLData/CFLGraph.h"
 #include "CFLOpt.h"
 #include "CFLStat.h"
 
