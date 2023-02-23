@@ -35,6 +35,8 @@ void AliasAnalysis::initialize()
     graph()->readGraph(graphName);  // read a uni-directed graph
 
     stat = new AAStat(this);
+    /// Graph simplification
+    simplifyGraph();
 }
 
 
