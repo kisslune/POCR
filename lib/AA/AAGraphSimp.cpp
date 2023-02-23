@@ -12,10 +12,10 @@ void AliasAnalysis::simplifyGraph()
     {
         SCCElimination();
     }
-//    if (CFLOpt::gc())
-//    {
-//        graphCompact();
-//    }
+    if (CFLOpt::gc())
+    {
+        graphCompact();
+    }
 //    if (CFLOpt::interDyck())
 //    {
 //        interDyckGS();
@@ -23,20 +23,20 @@ void AliasAnalysis::simplifyGraph()
 }
 
 
-//void AliasAnalysis::graphCompact()
-//{
+void AliasAnalysis::graphCompact()
+{
 
-//    double startClk = stat->getClk();
-//
-//    if (!compact)
-//        compact = new PEGCompact(_graph);
-//    compact->compactGraph();
-//
-//    double endClk = stat->getClk();
-//    stat->gcTime = (endClk - startClk) / TIMEINTERVAL;
-//}
-//
-//
+    double startClk = stat->getClk();
+
+    if (!compact)
+        compact = new PEGCompact(_graph);
+    compact->compactGraph();
+
+    double endClk = stat->getClk();
+    stat->gcTime = (endClk - startClk) / TIMEINTERVAL;
+}
+
+
 //void AliasAnalysis::interDyckGS()
 //{
 //    double startClk = stat->getClk();

@@ -13,7 +13,7 @@
 #include "CFLSolver/CFLBase.h"
 #include "CFLData/PEG.h"
 #include "AAStat.h"
-#include "CFLSolver/CFLOpt.h"
+#include "PEGFold.h"
 
 namespace SVF
 {
@@ -64,7 +64,7 @@ protected:
 
     /// Graph simplification
     SCC* scc;
-//    PEGCompact* compact;
+    PEGCompact* compact;
 //    PEGInterDyck* interDyck;
 
 public:
@@ -118,7 +118,7 @@ public:
     /// Graph simplifcation
     //@{
     void simplifyGraph();
-//    void graphCompact();
+    void graphCompact();
 //    void interDyckGS();
     void SCCElimination();
     void SCCDetect();

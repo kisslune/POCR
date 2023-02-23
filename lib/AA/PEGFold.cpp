@@ -1,0 +1,35 @@
+/* -------------------- PEGFold.cpp ------------------ */
+//
+// Created by kisslune on 2/22/23.
+//
+
+#include "AA/PEGFold.h"
+
+using namespace SVF;
+
+
+void PEGCompact::compactGraph()
+{
+    /// detect compactable pairs
+    for (auto edge : peg->getPEGEdges()) {
+        if (edge->getEdgeKind() != PEG::Asgn)
+            continue;
+
+        auto dstInAEdges = edge->getDstNode()->getInEdgeWithTy(PEG::Asgn);
+        auto dstInEdges = edge->getDstNode()->getInEdges();
+        if (dstInAEdges.size() <= 1 && dstInEdges.size() == dstInAEdges.size())
+            compactPairs.push(std::make_pair(edge->getSrcID(),edge->getDstID()));
+    }
+
+    /// merge compactable pairs
+    while (!compactPairs.empty()) {
+        NodePair pair = compactPairs.top();
+        compactPairs.pop();
+        NodeID src = peg->repNodeID(pair.first);
+        NodeID dst = peg->repNodeID(pair.second);
+        if  (src == dst)
+            continue;
+
+        peg->mergeNodeToRep(dst,src);
+    }
+}
