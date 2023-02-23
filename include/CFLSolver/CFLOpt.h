@@ -22,7 +22,7 @@ public:
     static const Option<bool> graphStat;
 
     static const Option<bool> scc;
-    static const Option<bool> gc;
+    static const Option<bool> gf;
     static const Option<bool> interDyck;
 };
 }  // namespace SVF

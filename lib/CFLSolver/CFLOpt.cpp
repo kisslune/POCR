@@ -37,7 +37,7 @@ const Option<bool> CFLOpt::scc(
         true
 );
 
-const Option<bool> CFLOpt::gc(
+const Option<bool> CFLOpt::gf(
         "gf",
         "Enable graph folding",
         true
@@ -45,7 +45,7 @@ const Option<bool> CFLOpt::gc(
 
 const Option<bool> CFLOpt::interDyck(
         "interdyck",
-        "Eliminating non-Dyck-contributing edges",
+        "Enable non-Dyck-contributing edge elimination",
         true
 );
 

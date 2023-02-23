@@ -67,7 +67,7 @@ public:
     double startTime;
     double endTime;
     double sccTime;
-    double gcTime;
+    double gfTime;
     double interDyckTime;
 
     virtual void performStat();

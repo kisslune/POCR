@@ -8,7 +8,7 @@
 using namespace SVF;
 
 
-void PEGCompact::compactGraph()
+void PEGFold::foldGraph()
 {
     /// detect compactable pairs
     for (auto edge : peg->getPEGEdges()) {
@@ -18,13 +18,13 @@ void PEGCompact::compactGraph()
         auto dstInAEdges = edge->getDstNode()->getInEdgeWithTy(PEG::Asgn);
         auto dstInEdges = edge->getDstNode()->getInEdges();
         if (dstInAEdges.size() <= 1 && dstInEdges.size() == dstInAEdges.size())
-            compactPairs.push(std::make_pair(edge->getSrcID(),edge->getDstID()));
+            foldablePairs.push(std::make_pair(edge->getSrcID(), edge->getDstID()));
     }
 
     /// merge compactable pairs
-    while (!compactPairs.empty()) {
-        NodePair pair = compactPairs.top();
-        compactPairs.pop();
+    while (!foldablePairs.empty()) {
+        NodePair pair = foldablePairs.top();
+        foldablePairs.pop();
         NodeID src = peg->repNodeID(pair.first);
         NodeID dst = peg->repNodeID(pair.second);
         if  (src == dst)

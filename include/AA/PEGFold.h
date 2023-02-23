@@ -11,19 +11,19 @@
 namespace SVF
 {
 /*!
- *
+ * Graph folding instance for PEGs
  */
-class PEGCompact
+class PEGFold
 {
 private:
     PEG* peg;
-    std::stack<NodePair> compactPairs;
+    std::stack<NodePair> foldablePairs;
 
 public:
-    PEGCompact(PEG* g) : peg(g)
+    PEGFold(PEG* g) : peg(g)
     {}
 
-    void compactGraph();
+    void foldGraph();
 };
 }
 

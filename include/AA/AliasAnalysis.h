@@ -64,7 +64,7 @@ protected:
 
     /// Graph simplification
     SCC* scc;
-    PEGCompact* compact;
+    PEGFold* pegFold;
 //    PEGInterDyck* interDyck;
 
 public:
@@ -118,7 +118,7 @@ public:
     /// Graph simplifcation
     //@{
     void simplifyGraph();
-    void graphCompact();
+    void graphFolding();
 //    void interDyckGS();
     void SCCElimination();
     void SCCDetect();

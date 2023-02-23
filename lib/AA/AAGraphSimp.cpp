@@ -12,9 +12,9 @@ void AliasAnalysis::simplifyGraph()
     {
         SCCElimination();
     }
-    if (CFLOpt::gc())
+    if (CFLOpt::gf())
     {
-        graphCompact();
+        graphFolding();
     }
 //    if (CFLOpt::interDyck())
 //    {
@@ -23,17 +23,17 @@ void AliasAnalysis::simplifyGraph()
 }
 
 
-void AliasAnalysis::graphCompact()
+void AliasAnalysis::graphFolding()
 {
 
     double startClk = stat->getClk();
 
-    if (!compact)
-        compact = new PEGCompact(_graph);
-    compact->compactGraph();
+    if (!pegFold)
+        pegFold = new PEGFold(_graph);
+    pegFold->foldGraph();
 
     double endClk = stat->getClk();
-    stat->gcTime = (endClk - startClk) / TIMEINTERVAL;
+    stat->gfTime = (endClk - startClk) / TIMEINTERVAL;
 }
 
 
