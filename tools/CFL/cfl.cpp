@@ -7,8 +7,8 @@
 
 using namespace SVF;
 
-static llvm::cl::opt<bool> Default_CFL("std", llvm::cl::init(false), llvm::cl::desc("Standard alias analysis"));
-static llvm::cl::opt<bool> Pocr_CFL("pocr", llvm::cl::init(false), llvm::cl::desc("POCR alias analysis"));
+static Option<bool> Default_CFL("std", "Standard alias analysis", false);
+static Option<bool> Pocr_CFL("pocr", "POCR alias analysis", false);
 
 
 int main(int argc, char** argv)
@@ -18,15 +18,15 @@ int main(int argc, char** argv)
     std::vector<std::string> moduleNameVec;
     std::vector<std::string> inFileVec;
     CFLBase::processArgs(argc, argv, arg_num, arg_vec, inFileVec);
-    llvm::cl::ParseCommandLineOptions(arg_num, arg_vec, "CFL-reachability analysis\n");
+    OptionBase::parseOptions(arg_num, arg_vec, "CFL-reachability analysis\n", "[options] <input>");
 
     StdCFL* cfl;
 
-    if (Default_CFL) {
+    if (Default_CFL()) {
         cfl = new StdCFL(inFileVec[0], inFileVec[1]);
         cfl->analyze();
     }
-    else if (Pocr_CFL) {
+    else if (Pocr_CFL()) {
         cfl = new PocrCFL(inFileVec[0], inFileVec[1]);
         cfl->analyze();
     }

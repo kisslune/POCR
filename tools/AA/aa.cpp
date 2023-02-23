@@ -22,10 +22,6 @@ int main(int argc, char** argv)
     char** arg_vec = new char* [argc];
     std::vector<std::string> moduleNameVec;
     std::vector<std::string> inFileVec;
-    for(auto i = 0; i < arg_num; i++)
-    {
-        std::cout << arg_vec[i];
-    }
     CFLBase::processArgs(argc, argv, arg_num, arg_vec, inFileVec);
     OptionBase::parseOptions(arg_num, arg_vec, "Alias analysis\n", "[options] <input>");
 
