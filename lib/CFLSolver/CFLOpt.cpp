@@ -9,25 +9,25 @@ const u32_t CFLOpt::timeOut = 24 * 3600;     // in second
 
 const Option<bool> CFLOpt::PStat(
         "pstat",
-        "Statistic for Pointer analysis",
+        "Print statistics",
         true
 );
 
 const Option<bool> CFLOpt::solveCFL(
         "solve",
-        "Solve CFL-reachability",
+        "Perform dynamic CFL-reachability solving",
         true
 );
 
 const Option<bool> CFLOpt::writeGraph(
         "write-graph",
-        "Solve CFL-reachability",
+        "Write the graph into file",
         false
 );
 
 const Option<bool> CFLOpt::graphStat(
         "graph-stat",
-        "Graph statistics",
+        "Conduct graph statistics",
         true
 );
 

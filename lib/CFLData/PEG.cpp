@@ -276,6 +276,9 @@ void PEG::updateNodeRepAndSubs(NodeID nodeId, NodeID newRepId)
 }
 
 
+/*!
+ * Write graph to file
+ */
 void PEG::writeGraph(std::string name)
 {
     std::ofstream outFile(name + ".g", std::ios::out);

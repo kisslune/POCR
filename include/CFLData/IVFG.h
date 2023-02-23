@@ -119,6 +119,8 @@ public:
     /// Remove direct edge from their src and dst edge sets
     void removeIVFGEdge(CFLEdge* edge);
 
+    /// Rep/sub methods
+    //@{
     inline NodeID repNodeID(NodeID id) const
     {
         NodeToRepMap::const_iterator it = nodeToRepMap.find(id);
@@ -128,8 +130,70 @@ public:
             return it->second;
     }
 
+    inline NodeBS& subNodeIds(NodeID id)
+    {
+        nodeToSubsMap[id].set(id);
+        return nodeToSubsMap[id];
+    }
+
+    inline void setRep(NodeID node, NodeID rep)
+    {
+        nodeToRepMap[node] = rep;
+    }
+
+    inline void setSubs(NodeID node, NodeBS& subs)
+    {
+        nodeToSubsMap[node] |= subs;
+    }
+
+    inline void resetSubs(NodeID node)
+    {
+        nodeToSubsMap.erase(node);
+    }
+    //@}
+
+    /// merge nodes
+    void mergeNodeToRep(NodeID nodeId, NodeID newRepId);
+    void reTargetDstOfEdge(CFLEdge* edge, CFLNode* newDstNode);
+    void reTargetSrcOfEdge(CFLEdge* edge, CFLNode* newSrcNode);
+    bool moveInEdgesToRepNode(CFLNode* node, CFLNode* rep);
+    bool moveOutEdgesToRepNode(CFLNode* node, CFLNode* rep);
+    void updateNodeRepAndSubs(NodeID nodeId, NodeID newRepId);
+
+    inline bool moveEdgesToRepNode(CFLNode* node, CFLNode* rep)
+    {
+        bool gepIn = moveInEdgesToRepNode(node, rep);
+        bool gepOut = moveOutEdgesToRepNode(node, rep);
+        return (gepIn || gepOut);
+    }
+
     /// Dump cflData into dot file
     void writeGraph(std::string name);
+};
+
+
+/* !
+ * GenericGraphTraits specializations for the generic graph algorithms.
+ * Provide graph traits for traversing from a constraint node using standard graph traversals.
+ */
+template<>
+struct GenericGraphTraits<SVF::CFLNode*>
+        : public GenericGraphTraits<SVF::GenericNode<CFLNode, CFLEdge>*>
+{
+};
+
+/// Inverse GenericGraphTraits specializations for Value flow node, it is used for inverse traversal.
+template<>
+struct GenericGraphTraits<Inverse<SVF::CFLNode*> >
+        : public GenericGraphTraits<Inverse<SVF::GenericNode<CFLNode, CFLEdge>*> >
+{
+};
+
+template<>
+struct GenericGraphTraits<SVF::IVFG*>
+        : public GenericGraphTraits<SVF::GenericGraph<CFLNode, CFLEdge>*>
+{
+    typedef CFLNode* NodeRef;
 };
 
 }

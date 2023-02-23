@@ -20,10 +20,23 @@ namespace SVF
 class VFAnalysis : public CFLBase
 {
 public:
+    typedef SCCDetection<IVFG*> SCC;
+
+    enum Words
+    {
+        fault,
+        a,
+        call,
+        ret,
+
+        A,      // valueflow
+        B,
+        Cl,     // call a
+    };
+
     // Statistics
     //@{
     VFAStat* stat;
-
     u32_t numOfIteration;
     u32_t checks;
     u32_t numOfTEdges;
@@ -38,6 +51,10 @@ protected:
     /// Graph
     IVFG* _graph;
     std::string graphName;
+    /// Graph simplifiation
+    SCC* scc;
+//    IVFGCompact* compact;
+//    IVFGInterDyck* interDyck;
 
 public:
 
@@ -101,6 +118,17 @@ public:
         sleep(CFLOpt::timeOut);
         assert(false && "Time out!!");
     }
+
+    /// Graph simplification
+    //@{
+    void simplifyGraph();
+//    void graphCompact();
+//    void interDyckGS();
+    void SCCElimination();
+    void SCCDetect();
+    void mergeSCCCycle();
+    void mergeSCCNodes(NodeID repNodeId, const NodeBS& subNodes);
+    //@}
 };
 
 
@@ -109,19 +137,6 @@ public:
  */
 class StdVFA : public VFAnalysis
 {
-public:
-    enum Words
-    {
-        fault,
-        a,
-        call,
-        ret,
-
-        A,      // valueflow
-        B,
-        Cl,     // call a
-    };
-
 public:
     StdVFA(std::string gName) : VFAnalysis(gName)
     {}

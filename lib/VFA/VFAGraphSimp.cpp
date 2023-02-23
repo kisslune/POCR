@@ -7,29 +7,29 @@
 
 using namespace SVF;
 
-//void StdVFA::simplifyGraph()
-//{
-////    if (CFLOpt::simplifyGraph) {
-////        SCCElimination();
-////        graphCompact();
-////    }
-//
-//    if (CFLOpt::scc)
-//    {
+void VFAnalysis::simplifyGraph()
+{
+//    if (CFLOpt::simplifyGraph) {
 //        SCCElimination();
+//        graphCompact();
 //    }
-//    if (CFLOpt::gc)
+
+    if (CFLOpt::scc())
+    {
+        SCCElimination();
+    }
+//    if (CFLOpt::gf())
 //    {
 //        graphCompact();
 //    }
-//    if (CFLOpt::interDyck)
+//    if (CFLOpt::interDyck())
 //    {
 //        interDyckGS();
 //    }
-//}
-//
-//
-//void StdVFA::graphCompact()
+}
+
+
+//void VFAnalysis::graphCompact()
 //{
 //    double startClk = stat->getClk();
 //
@@ -40,22 +40,9 @@ using namespace SVF;
 //    double endClk = stat->getClk();
 //    stat->gcTime = (endClk - startClk) / TIMEINTERVAL;
 //}
-//
-//
-//void StdVFA::SCCElimination()
-//{
-//    double startClk = stat->getClk();
-//
-//    if (!scc)
-//        scc = new SCC(_graph);
-//    SCCDetect();
-//
-//    double endClk = stat->getClk();
-//    stat->sccTime = (endClk - startClk) / TIMEINTERVAL;
-//}
-//
-//
-//void StdVFA::interDyckGS()
+
+
+//void VFAnalysis::interDyckGS()
 //{
 //    double startClk = stat->getClk();
 //
@@ -70,46 +57,59 @@ using namespace SVF;
 //    stat->interDyckTime = (endClk - startClk) / TIMEINTERVAL;
 //}
 //
-//
-//void StdVFA::SCCDetect()
-//{
-//    scc->find();
-//    mergeSCCCycle();
-//}
-//
-//
-//void StdVFA::mergeSCCCycle()
-//{
-//    NodeStack revTopoOrder;
-//    NodeBS repNodes;
-//    NodeStack& topoOrder = scc->topoNodeStack();
-//    while (!topoOrder.empty()) {
-//        NodeID repNodeId = topoOrder.top();
-//        topoOrder.pop();
-//        revTopoOrder.push(repNodeId);
-//        repNodes.set(repNodeId);
-//
-//        const NodeBS& subNodes = scc->subNodes(repNodeId);
-//        // merge sub nodes to rep node
-//        mergeSCCNodes(repNodeId, subNodes);
-//    }
-//
-//    // restore the topological order for later solving.
-//    while (!revTopoOrder.empty()) {
-//        NodeID nodeId = revTopoOrder.top();
-//        revTopoOrder.pop();
-//        topoOrder.push(nodeId);
-//    }
-//}
-//
-//
-//void StdVFA::mergeSCCNodes(NodeID repNodeId, const NodeBS& subNodes)
-//{
-//    for (NodeBS::iterator nodeIt = subNodes.begin(); nodeIt != subNodes.end(); nodeIt++) {
-//        NodeID subNodeId = *nodeIt;
-//        if (subNodeId != repNodeId) {
-//            graph()->mergeNodeToRep(subNodeId, repNodeId);
-//        }
-//    }
-//}
-//
+
+void VFAnalysis::SCCElimination()
+{
+    double startClk = stat->getClk();
+
+    if (!scc)
+        scc = new SCC(_graph);
+    SCCDetect();
+
+    double endClk = stat->getClk();
+    stat->sccTime = (endClk - startClk) / TIMEINTERVAL;
+}
+
+
+void VFAnalysis::SCCDetect()
+{
+    scc->find();
+    mergeSCCCycle();
+}
+
+
+void VFAnalysis::mergeSCCCycle()
+{
+    NodeStack revTopoOrder;
+    NodeBS repNodes;
+    NodeStack& topoOrder = scc->topoNodeStack();
+    while (!topoOrder.empty()) {
+        NodeID repNodeId = topoOrder.top();
+        topoOrder.pop();
+        revTopoOrder.push(repNodeId);
+        repNodes.set(repNodeId);
+
+        const NodeBS& subNodes = scc->subNodes(repNodeId);
+        // merge sub nodes to rep node
+        mergeSCCNodes(repNodeId, subNodes);
+    }
+
+    // restore the topological order for later solving.
+    while (!revTopoOrder.empty()) {
+        NodeID nodeId = revTopoOrder.top();
+        revTopoOrder.pop();
+        topoOrder.push(nodeId);
+    }
+}
+
+
+void VFAnalysis::mergeSCCNodes(NodeID repNodeId, const NodeBS& subNodes)
+{
+    for (NodeBS::iterator nodeIt = subNodes.begin(); nodeIt != subNodes.end(); nodeIt++) {
+        NodeID subNodeId = *nodeIt;
+        if (subNodeId != repNodeId) {
+            graph()->mergeNodeToRep(subNodeId, repNodeId);
+        }
+    }
+}
+

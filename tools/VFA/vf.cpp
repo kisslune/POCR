@@ -8,13 +8,12 @@
 #include "VFA/VFAnalysis.h"
 
 using namespace SVF;
-using namespace std;
 
-static llvm::cl::opt<bool> Default_VFA("std", llvm::cl::init(false), llvm::cl::desc("Standard valueflow analysis"));
-static llvm::cl::opt<bool> Pocr_VFA("pocr", llvm::cl::init(false), llvm::cl::desc("POCR valueflow analysis"));
-static llvm::cl::opt<bool> Gspan_VFA("gspan", llvm::cl::init(false), llvm::cl::desc("POCR valueflow analysis"));
-static llvm::cl::opt<bool> Gr_VFA("gr", llvm::cl::init(false), llvm::cl::desc("POCR valueflow analysis"));
-static llvm::cl::opt<bool> GrGspan_VFA("grgspan", llvm::cl::init(false), llvm::cl::desc("POCR valueflow analysis"));
+static Option<bool> Default_VFA("std", "Standard valueflow analysis", false);
+static Option<bool> Pocr_VFA("pocr", "POCR valueflow analysis", false);
+static Option<bool> Gspan_VFA("gspan", "POCR valueflow analysis", false);
+static Option<bool> Gr_VFA("gr", "POCR valueflow analysis", false);
+static Option<bool> GrGspan_VFA("grgspan", "POCR valueflow analysis", false);
 
 
 int main(int argc, char** argv)
@@ -24,31 +23,31 @@ int main(int argc, char** argv)
     std::vector<std::string> moduleNameVec;
     std::vector<std::string> inFileVec;
     CFLBase::processArgs(argc, argv, arg_num, arg_vec, inFileVec);
-    llvm::cl::ParseCommandLineOptions(arg_num, arg_vec, "Valueflow analysis\n");
+    OptionBase::parseOptions(arg_num, arg_vec, "Valueflow analysis\n", "[options] <input>");
 
     StdVFA* vfa;
-    if (Default_VFA) {
+    if (Default_VFA()) {
         vfa = new StdVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (Pocr_VFA) {
+    else if (Pocr_VFA()) {
         vfa = new PocrVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (Gspan_VFA) {
+    else if (Gspan_VFA()) {
         vfa = new GspanVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (Gr_VFA) {
+    else if (Gr_VFA()) {
         vfa = new GRVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (GrGspan_VFA) {
+    else if (GrGspan_VFA()) {
         vfa = new GRGspanVFA(inFileVec[0]);
         vfa->analyze();
     }
     else
-        cout << "No valueflow analysis solver specified!" << endl;
+        std::cout << "No valueflow analysis solver specified!" << std::endl;
 
     return 0;
 }

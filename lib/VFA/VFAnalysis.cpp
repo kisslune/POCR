@@ -19,6 +19,8 @@ void VFAnalysis::initialize()
     graph()->readGraph(graphName);
 
     stat = new VFAStat(this);
+    /// Graph simplification
+    simplifyGraph();
 }
 
 

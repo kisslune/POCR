@@ -14,7 +14,7 @@
 #include <Util/SVFUtil.h>
 #include <Util/SCC.h>
 #include "CFLData/CFLData.h"
-#include "CFLSolver/CFLOpt.h"
+#include "CFLOpt.h"
 #include <fstream>
 #include <thread>
 #include <pthread.h>

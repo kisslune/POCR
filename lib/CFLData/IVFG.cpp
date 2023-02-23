@@ -119,6 +119,125 @@ void IVFG::removeIVFGEdge(CFLEdge* edge)
 }
 
 
+void IVFG::reTargetDstOfEdge(CFLEdge* edge, CFLNode* newDstNode)
+{
+    NodeID newDstNodeID = newDstNode->getId();
+    NodeID srcId = edge->getSrcID();
+
+    addEdge(srcId, newDstNodeID, edge->getEdgeKind(), edge->getEdgeIdx());
+    removeIVFGEdge(edge);
+}
+
+
+void IVFG::reTargetSrcOfEdge(CFLEdge* edge, CFLNode* newSrcNode)
+{
+    NodeID newSrcNodeID = newSrcNode->getId();
+    NodeID dstId = edge->getDstID();
+
+    addEdge(newSrcNodeID, dstId, edge->getEdgeKind(), edge->getEdgeIdx());
+    removeIVFGEdge(edge);
+}
+
+
+bool IVFG::moveInEdgesToRepNode(CFLNode* node, CFLNode* rep)
+{
+    std::vector<CFLEdge*> sccEdges;
+    std::vector<CFLEdge*> nonSccEdges;
+    for (CFLNode::const_iterator it = node->InEdgeBegin(), eit = node->InEdgeEnd(); it != eit; ++it)
+    {
+        CFLEdge* subInEdge = *it;
+        if (repNodeID(subInEdge->getSrcID()) != rep->getId())
+            nonSccEdges.push_back(subInEdge);
+        else
+            sccEdges.push_back(subInEdge);
+    }
+    /// if this edge is outside scc, then re-target edge dst to rep
+    while (!nonSccEdges.empty())
+    {
+        CFLEdge* edge = nonSccEdges.back();
+        nonSccEdges.pop_back();
+        reTargetDstOfEdge(edge, rep);
+    }
+
+    bool selfCycle = !sccEdges.empty();
+    /// if this edge is inside scc, then remove this edge and two end nodes
+    while (!sccEdges.empty())
+    {
+        CFLEdge* edge = sccEdges.back();
+        sccEdges.pop_back();
+        reTargetDstOfEdge(edge, rep);
+    }
+    return selfCycle;
+}
+
+
+bool IVFG::moveOutEdgesToRepNode(CFLNode* node, CFLNode* rep)
+{
+
+    std::vector<CFLEdge*> sccEdges;
+    std::vector<CFLEdge*> nonSccEdges;
+
+    for (CFLNode::const_iterator it = node->OutEdgeBegin(), eit = node->OutEdgeEnd(); it != eit;
+         ++it)
+    {
+        CFLEdge* subOutEdge = *it;
+        if (repNodeID(subOutEdge->getDstID()) != rep->getId())
+            nonSccEdges.push_back(subOutEdge);
+        else
+            sccEdges.push_back(subOutEdge);
+    }
+    /// if this edge is outside scc, then re-target edge src to rep
+    while (!nonSccEdges.empty())
+    {
+        CFLEdge* edge = nonSccEdges.back();
+        nonSccEdges.pop_back();
+        reTargetSrcOfEdge(edge, rep);
+    }
+    bool selfCycle = !sccEdges.empty();
+    /// if this edge is inside scc, then remove this edge and two end nodes
+    while (!sccEdges.empty())
+    {
+        CFLEdge* edge = sccEdges.back();
+        sccEdges.pop_back();
+        reTargetSrcOfEdge(edge, rep);
+    }
+    return selfCycle;
+}
+
+
+void IVFG::mergeNodeToRep(NodeID nodeId, NodeID newRepId)
+{
+    if (nodeId == newRepId || repNodeID(nodeId) != nodeId)
+        return;
+
+    CFLNode* node = getIVFGNode(nodeId);
+    /// move the edges from node to rep, and remove the node
+    moveEdgesToRepNode(node, getIVFGNode(newRepId));
+    /// set rep and sub relations
+    updateNodeRepAndSubs(node->getId(), newRepId);
+    removeIVFGNode(node);
+}
+
+
+void IVFG::updateNodeRepAndSubs(NodeID nodeId, NodeID newRepId)
+{
+    setRep(nodeId, newRepId);
+    NodeBS repSubs;
+    repSubs.set(nodeId);
+    /// update nodeToRepMap, for each subs of current node updates its rep to newRepId
+    ///  update nodeToSubsMap, union its subs with its rep Subs
+    NodeBS& nodeSubs = subNodeIds(nodeId);
+    for (NodeID subId: nodeSubs)
+        setRep(subId, newRepId);
+    repSubs |= nodeSubs;
+    setSubs(newRepId, repSubs);
+    resetSubs(nodeId);
+}
+
+
+/*!
+ * Write graph to file
+ */
 void IVFG::writeGraph(std::string name)
 {
     std::ofstream outFile(name + ".g", std::ios::out);
