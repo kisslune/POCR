@@ -10,7 +10,6 @@
 #ifndef CFLRSOLVER_H_
 #define CFLRSOLVER_H_
 
-#include <Graphs/PTACallGraph.h>
 #include <SVFIR/SVFIR.h>
 #include <Util/SVFUtil.h>
 #include <Util/SCC.h>

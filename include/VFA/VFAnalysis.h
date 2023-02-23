@@ -10,7 +10,6 @@
 
 #include "CFLSolver/CFLBase.h"
 #include "CFLData/IVFG.h"
-#include "CFLSolver/CFLOpt.h"
 #include "VFAStat.h"
 
 namespace SVF

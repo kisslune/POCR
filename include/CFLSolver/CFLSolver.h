@@ -8,7 +8,6 @@
 
 #include "CFLBase.h"
 #include "CFLData/CFLGraph.h"
-#include "CFLOpt.h"
 #include "CFLStat.h"
 
 namespace SVF
