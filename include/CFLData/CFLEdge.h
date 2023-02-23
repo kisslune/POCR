@@ -32,6 +32,7 @@ public:
 
 protected:
     u32_t idx;
+    bool _isDyckContributing;
 
 public:
     /// Constructor
@@ -54,6 +55,16 @@ public:
     {
         return (rhs->getEdgeKind() == this->getEdgeKind() && rhs->getSrcID() == this->getSrcID()
                 && rhs->getDstID() == this->getDstID() && rhs->getEdgeIdx() == this->getEdgeIdx());
+    }
+
+    inline bool isDyckContributing() const
+    {
+        return _isDyckContributing;
+    }
+
+    inline void setDyckContributing()
+    {
+        _isDyckContributing = true;
     }
 };
 

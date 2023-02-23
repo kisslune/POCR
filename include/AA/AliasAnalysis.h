@@ -14,6 +14,7 @@
 #include "CFLData/PEG.h"
 #include "AAStat.h"
 #include "PEGFold.h"
+#include "PEGInterDyck.h"
 
 namespace SVF
 {
@@ -65,7 +66,7 @@ protected:
     /// Graph simplification
     SCC* scc;
     PEGFold* pegFold;
-//    PEGInterDyck* interDyck;
+    PEGInterDyck* interDyck;
 
 public:
     AliasAnalysis(std::string& gName);
@@ -119,7 +120,7 @@ public:
     //@{
     void simplifyGraph();
     void graphFolding();
-//    void interDyckGS();
+    void interDyckGS();
     void SCCElimination();
     void SCCDetect();
     void mergeSCCCycle();

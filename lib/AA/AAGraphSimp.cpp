@@ -16,10 +16,10 @@ void AliasAnalysis::simplifyGraph()
     {
         graphFolding();
     }
-//    if (CFLOpt::interDyck())
-//    {
-//        interDyckGS();
-//    }
+    if (CFLOpt::interDyck())
+    {
+        interDyckGS();
+    }
 }
 
 
@@ -37,20 +37,20 @@ void AliasAnalysis::graphFolding()
 }
 
 
-//void AliasAnalysis::interDyckGS()
-//{
-//    double startClk = stat->getClk();
-//
-//    if (!interDyck)
-//        interDyck = new PEGInterDyck(_graph);
-//
-//    interDyck->buildSubGraph();
-//    interDyck->fastDyck();
-//    interDyck->pruneEdges();
-//
-//    double endClk = stat->getClk();
-//    stat->interDyckTime = (endClk - startClk) / TIMEINTERVAL;
-//}
+void AliasAnalysis::interDyckGS()
+{
+    double startClk = stat->getClk();
+
+    if (!interDyck)
+        interDyck = new PEGInterDyck(_graph);
+
+    interDyck->buildSubGraph();
+    interDyck->fastDyck();
+    interDyck->pruneEdges();
+
+    double endClk = stat->getClk();
+    stat->interDyckTime = (endClk - startClk) / TIMEINTERVAL;
+}
 
 
 void AliasAnalysis::SCCElimination()
