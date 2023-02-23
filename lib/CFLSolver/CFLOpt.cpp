@@ -46,7 +46,7 @@ const Option<bool> CFLOpt::gf(
 const Option<bool> CFLOpt::interDyck(
         "interdyck",
         "Enable non-Dyck-contributing edge elimination",
-        true
+        false   // slower than expected
 );
 
 } // namespace SVF.
