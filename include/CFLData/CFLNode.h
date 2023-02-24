@@ -34,6 +34,8 @@ private:
     CFLEdge::CFLEdgeSetTy directInEdges;    /// direct inedges for SCC
     CFLEdge::CFLEdgeSetTy directOutEdges;   /// direct outedges for SCC
 
+    bool _isSrc;
+
 public:
     static std::set <CFLEdge::GEdgeKind> directEdgeKinds;
 
@@ -154,6 +156,17 @@ public:
     }
     //@}
 
+    /// Source info
+    //@{
+    inline bool isSrc() const
+    {
+        return _isSrc;
+    }
+    inline void setSrc()
+    {
+        _isSrc = true;
+    }
+    //@}
 };
 
 }

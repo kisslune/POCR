@@ -11,6 +11,7 @@
 #include "CFLSolver/CFLBase.h"
 #include "CFLData/IVFG.h"
 #include "VFAStat.h"
+#include "IVFGFold.h"
 
 namespace SVF
 {
@@ -53,7 +54,7 @@ protected:
     std::string graphName;
     /// Graph simplifiation
     SCC* scc;
-//    IVFGCompact* compact;
+    IVFGCompact* compact;
 //    IVFGInterDyck* interDyck;
 
 public:
@@ -122,7 +123,7 @@ public:
     /// Graph simplification
     //@{
     void simplifyGraph();
-//    void graphCompact();
+    void graphCompact();
 //    void interDyckGS();
     void SCCElimination();
     void SCCDetect();

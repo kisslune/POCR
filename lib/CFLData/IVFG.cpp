@@ -58,6 +58,11 @@ void IVFG::readGraph(std::string fname)
         if (vec[2] == "ret_i") {
             addEdge(src, dst, RetVF, std::stoi(vec[3]));
         }
+        if (vec[2] == "src")
+        {
+            CFLNode* node = getIVFGNode(src);
+            node->setSrc();
+        }
     }
 
     gFile.close();

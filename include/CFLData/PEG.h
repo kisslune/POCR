@@ -65,11 +65,6 @@ public:
         return maxNodeID;
     }
 
-    inline const CFLEdge::CFLEdgeSetTy& getPEGEdges() const
-    {
-        return pegEdgeSet;
-    }
-
     inline CFLNode* getPEGNode(NodeID id) const
     {
         id = repNodeID(id);
@@ -99,6 +94,11 @@ public:
 
     // Find and get edges
     //@{
+    inline const CFLEdge::CFLEdgeSetTy& getPEGEdges() const
+    {
+        return pegEdgeSet;
+    }
+
     inline bool hasEdge(CFLNode* src, CFLNode* dst, CFLEdge::GEdgeKind kind, u32_t idx)
     {
         CFLEdge edge(src, dst, kind, idx);

@@ -18,10 +18,10 @@ void VFAnalysis::simplifyGraph()
     {
         SCCElimination();
     }
-//    if (CFLOpt::gf())
-//    {
-//        graphCompact();
-//    }
+    if (CFLOpt::gf())
+    {
+        graphCompact();
+    }
 //    if (CFLOpt::interDyck())
 //    {
 //        interDyckGS();
@@ -29,17 +29,17 @@ void VFAnalysis::simplifyGraph()
 }
 
 
-//void VFAnalysis::graphCompact()
-//{
-//    double startClk = stat->getClk();
-//
-//    if (!compact)
-//        compact = new IVFGCompact(_graph);
-//    compact->compactGraph();
-//
-//    double endClk = stat->getClk();
-//    stat->gcTime = (endClk - startClk) / TIMEINTERVAL;
-//}
+void VFAnalysis::graphCompact()
+{
+    double startClk = stat->getClk();
+
+    if (!compact)
+        compact = new IVFGCompact(_graph);
+    compact->compactGraph();
+
+    double endClk = stat->getClk();
+    stat->gfTime = (endClk - startClk) / TIMEINTERVAL;
+}
 
 
 //void VFAnalysis::interDyckGS()
