@@ -14,20 +14,6 @@
 using namespace SVF;
 using namespace SVFUtil;
 
-AliasAnalysis::AliasAnalysis(std::string& gName) : stat(nullptr),
-                                                   numOfIteration(0),
-                                                   checks(0),
-                                                   numOfTEdges(0),
-                                                   numOfSumEdges(0),
-                                                   numOfAdd(0),
-                                                   timeOfSolving(0),
-                                                   reanalyze(false),
-                                                   _graph(nullptr),
-                                                   graphName(gName),
-                                                   scc(nullptr)
-{
-}
-
 
 void AliasAnalysis::initialize()
 {

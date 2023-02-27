@@ -39,7 +39,7 @@ private:
 public:
     static std::set <CFLEdge::GEdgeKind> directEdgeKinds;
 
-    CFLNode(NodeID i) : GenericPEGNodeTy(i, 0)
+    CFLNode(NodeID i) : GenericPEGNodeTy(i, 0), _isSrc(false)
     {
     }
 

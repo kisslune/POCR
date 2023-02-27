@@ -69,7 +69,20 @@ protected:
     PEGInterDyck* interDyck;
 
 public:
-    AliasAnalysis(std::string& gName);
+    AliasAnalysis(std::string& gName) : stat(nullptr),
+                                        numOfIteration(0),
+                                        checks(0),
+                                        numOfTEdges(0),
+                                        numOfSumEdges(0),
+                                        numOfAdd(0),
+                                        timeOfSolving(0),
+                                        reanalyze(false),
+                                        _graph(nullptr),
+                                        graphName(gName),
+                                        scc(nullptr),
+                                        pegFold(nullptr),
+                                        interDyck(nullptr)
+    {};
 
     virtual ~AliasAnalysis()
     {
