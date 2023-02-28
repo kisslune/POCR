@@ -55,7 +55,7 @@ protected:
     std::string graphName;
     /// Graph simplifiation
     SCC* scc;
-    IVFGCompact* compact;
+    IVFGFold* ivfgFold;
     IVFGInterDyck* interDyck;
 
 public:
@@ -70,7 +70,7 @@ public:
                                      _graph(nullptr),
                                      graphName(gName),
                                      scc(nullptr),
-                                     compact(nullptr),
+                                     ivfgFold(nullptr),
                                      interDyck(nullptr)
     {}
 
@@ -125,7 +125,7 @@ public:
     /// Graph simplification
     //@{
     void simplifyGraph();
-    void graphCompact();
+    void graphFolding();
     void interDyckGS();
     void SCCElimination();
     void SCCDetect();

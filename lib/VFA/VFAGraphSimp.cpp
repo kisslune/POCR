@@ -20,7 +20,7 @@ void VFAnalysis::simplifyGraph()
     }
     if (CFLOpt::gf())
     {
-        graphCompact();
+        graphFolding();
     }
     if (CFLOpt::interDyck())
     {
@@ -29,13 +29,13 @@ void VFAnalysis::simplifyGraph()
 }
 
 
-void VFAnalysis::graphCompact()
+void VFAnalysis::graphFolding()
 {
     double startClk = stat->getClk();
 
-    if (!compact)
-        compact = new IVFGCompact(_graph);
-    compact->compactGraph();
+    if (!ivfgFold)
+        ivfgFold = new IVFGFold(_graph);
+    ivfgFold->compactGraph();
 
     double endClk = stat->getClk();
     stat->gfTime = (endClk - startClk) / TIMEINTERVAL;

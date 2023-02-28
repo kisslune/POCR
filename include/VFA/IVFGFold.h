@@ -13,14 +13,14 @@ namespace SVF
 /*!
  * Graph folding instance for VFGs
  */
-class IVFGCompact
+class IVFGFold
 {
 private:
     IVFG* lg;
-    std::stack<NodePair> compactPairs;
+    std::stack<NodePair> foldablePairs;
 
 public:
-    IVFGCompact(IVFG* g) : lg(g)
+    IVFGFold(IVFG* g) : lg(g)
     {}
 
     void compactGraph();
