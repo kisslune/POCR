@@ -51,11 +51,29 @@ public:
         return idx;
     }
 
+    /// Methods for binary tree comparison
+    //@{
+    typedef struct equalGEdge
+    {
+        bool operator()(const CFLEdge* lhs, const CFLEdge* rhs) const
+        {
+            if (lhs->getEdgeKind() != rhs->getEdgeKind())
+                return lhs->getEdgeKind() < rhs->getEdgeKind();
+            else if (lhs->getSrcID() != rhs->getSrcID())
+                return lhs->getSrcID() < rhs->getSrcID();
+            else if (lhs->getDstID() != rhs->getDstID())
+                return lhs->getDstID() < rhs->getDstID();
+            else
+                return lhs->getEdgeIdx() < rhs->getEdgeIdx();
+        }
+    } equalGEdge;
+
     inline bool operator==(const CFLEdge* rhs) const
     {
         return (rhs->getEdgeKind() == this->getEdgeKind() && rhs->getSrcID() == this->getSrcID()
                 && rhs->getDstID() == this->getDstID() && rhs->getEdgeIdx() == this->getEdgeIdx());
     }
+    //@}
 
     inline bool isDyckContributing() const
     {

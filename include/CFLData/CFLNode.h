@@ -142,6 +142,9 @@ public:
         CFLEdge::GEdgeKind k = inEdge->getEdgeKind();
         u32_t num2 = inPEGEdges[k].erase(inEdge);
 
+        if (directEdgeKinds.find(k) != directEdgeKinds.end())
+            directInEdges.erase(inEdge);
+
         return num1 && num2;
     }
 
@@ -151,6 +154,9 @@ public:
 
         CFLEdge::GEdgeKind k = outEdge->getEdgeKind();
         u32_t num2 = outPEGEdges[k].erase(outEdge);
+
+        if (directEdgeKinds.find(k) != directEdgeKinds.end())
+            directOutEdges.erase(outEdge);
 
         return num1 && num2;
     }

@@ -22,10 +22,10 @@ void VFAnalysis::simplifyGraph()
     {
         graphCompact();
     }
-//    if (CFLOpt::interDyck())
-//    {
-//        interDyckGS();
-//    }
+    if (CFLOpt::interDyck())
+    {
+        interDyckGS();
+    }
 }
 
 
@@ -42,21 +42,21 @@ void VFAnalysis::graphCompact()
 }
 
 
-//void VFAnalysis::interDyckGS()
-//{
-//    double startClk = stat->getClk();
-//
-//    if (!interDyck)
-//        interDyck = new IVFGInterDyck(_graph);
-//
-//    interDyck->buildSubGraph();
-//    interDyck->fastDyck();
-//    interDyck->pruneEdges();
-//
-//    double endClk = stat->getClk();
-//    stat->interDyckTime = (endClk - startClk) / TIMEINTERVAL;
-//}
-//
+void VFAnalysis::interDyckGS()
+{
+    double startClk = stat->getClk();
+
+    if (!interDyck)
+        interDyck = new IVFGInterDyck(_graph);
+
+    interDyck->buildSubGraph();
+    interDyck->fastDyck();
+    interDyck->pruneEdges();
+
+    double endClk = stat->getClk();
+    stat->interDyckTime = (endClk - startClk) / TIMEINTERVAL;
+}
+
 
 void VFAnalysis::SCCElimination()
 {

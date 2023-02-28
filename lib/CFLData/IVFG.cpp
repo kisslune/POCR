@@ -31,14 +31,16 @@ void IVFG::readGraph(std::string fname)
 {
     std::ifstream gFile;
     gFile.open(fname, std::ios::in);
-    if (!gFile.is_open()) {
+    if (!gFile.is_open())
+    {
         std::cout << "error opening " << fname << std::endl;
         exit(0);
     }
 
     NodeSet nodeSet;
     std::string line;
-    while (getline(gFile, line)) {
+    while (getline(gFile, line))
+    {
         std::vector<std::string> vec = CFLBase::split(line, '\t');
         if (vec.empty())
             continue;
@@ -49,13 +51,16 @@ void IVFG::readGraph(std::string fname)
         addIVFGNode(src);
         addIVFGNode(dst);
 
-        if (vec[2] == "a") {
+        if (vec[2] == "a")
+        {
             addEdge(src, dst, DirectVF);
         }
-        if (vec[2] == "call_i") {
+        if (vec[2] == "call_i")
+        {
             addEdge(src, dst, CallVF, std::stoi(vec[3]));
         }
-        if (vec[2] == "ret_i") {
+        if (vec[2] == "ret_i")
+        {
             addEdge(src, dst, RetVF, std::stoi(vec[3]));
         }
         if (vec[2] == "src")
@@ -72,28 +77,30 @@ void IVFG::readGraph(std::string fname)
 void IVFG::copyBuild(const IVFG& rhs)
 {
     /// initialize nodes
-    for (auto it = rhs.begin(), eit = rhs.end(); it != eit; ++it) {
+    for (auto it = rhs.begin(), eit = rhs.end(); it != eit; ++it)
+    {
         if (!it->second->hasIncomingEdge() && !it->second->hasOutgoingEdge())
             continue;
         addIVFGNode(it->first);
     }
 
     /// initialize edges
-    for (auto edge: rhs.getIVFGEdges()) {
+    for (auto edge: rhs.getIVFGEdges())
+    {
         addEdge(edge->getSrcID(), edge->getDstID(), edge->getEdgeKind(), edge->getEdgeIdx());
     }
 }
 
 
 //@{
-bool IVFG::addEdge(NodeID srcId, NodeID dstId, CFLEdge::GEdgeKind k, CallsiteID idx)
+bool IVFG::addEdge(NodeID srcId, NodeID dstId, CFLEdge::GEdgeKind k, u32_t idx)
 {
     CFLNode* src = getIVFGNode(srcId);
     CFLNode* dst = getIVFGNode(dstId);
     return addEdge(src, dst, k, idx);
 }
 
-bool IVFG::addEdge(CFLNode* src, CFLNode* dst, CFLEdge::GEdgeKind k, CallsiteID idx)
+bool IVFG::addEdge(CFLNode* src, CFLNode* dst, CFLEdge::GEdgeKind k, u32_t idx)
 {
     if (hasEdge(src, dst, k, idx))
         return false;
@@ -129,6 +136,7 @@ void IVFG::reTargetDstOfEdge(CFLEdge* edge, CFLNode* newDstNode)
     NodeID newDstNodeID = newDstNode->getId();
     NodeID srcId = edge->getSrcID();
 
+    // TODO
     addEdge(srcId, newDstNodeID, edge->getEdgeKind(), edge->getEdgeIdx());
     removeIVFGEdge(edge);
 }
@@ -139,6 +147,7 @@ void IVFG::reTargetSrcOfEdge(CFLEdge* edge, CFLNode* newSrcNode)
     NodeID newSrcNodeID = newSrcNode->getId();
     NodeID dstId = edge->getDstID();
 
+    // TODO
     addEdge(newSrcNodeID, dstId, edge->getEdgeKind(), edge->getEdgeIdx());
     removeIVFGEdge(edge);
 }
@@ -148,9 +157,8 @@ bool IVFG::moveInEdgesToRepNode(CFLNode* node, CFLNode* rep)
 {
     std::vector<CFLEdge*> sccEdges;
     std::vector<CFLEdge*> nonSccEdges;
-    for (CFLNode::const_iterator it = node->InEdgeBegin(), eit = node->InEdgeEnd(); it != eit; ++it)
+    for (auto subInEdge: node->getInEdges())
     {
-        CFLEdge* subInEdge = *it;
         if (repNodeID(subInEdge->getSrcID()) != rep->getId())
             nonSccEdges.push_back(subInEdge);
         else
@@ -182,10 +190,8 @@ bool IVFG::moveOutEdgesToRepNode(CFLNode* node, CFLNode* rep)
     std::vector<CFLEdge*> sccEdges;
     std::vector<CFLEdge*> nonSccEdges;
 
-    for (CFLNode::const_iterator it = node->OutEdgeBegin(), eit = node->OutEdgeEnd(); it != eit;
-         ++it)
+    for (auto subOutEdge: node->getOutEdges())
     {
-        CFLEdge* subOutEdge = *it;
         if (repNodeID(subOutEdge->getDstID()) != rep->getId())
             nonSccEdges.push_back(subOutEdge);
         else
@@ -246,28 +252,34 @@ void IVFG::updateNodeRepAndSubs(NodeID nodeId, NodeID newRepId)
 void IVFG::writeGraph(std::string name)
 {
     std::ofstream outFile(name + ".g", std::ios::out);
-    if (!outFile) {
+    if (!outFile)
+    {
         std::cout << "error opening file!";
         return;
     }
 
     std::set<NodeID> srcs;
 
-    for (auto nIt = begin(); nIt != end(); ++nIt) {
+    for (auto nIt = begin(); nIt != end(); ++nIt)
+    {
         srcs.insert(nIt->first);
     }
 
-    for (auto src: srcs) {
+    for (auto src: srcs)
+    {
         auto node = getIVFGNode(src);
-        for (auto edge: node->getOutEdgeWithTy(DirectVF)) {
+        for (auto edge: node->getOutEdgeWithTy(DirectVF))
+        {
             NodeID dst = edge->getDstID();
             outFile << src << "\t" << dst << "\ta" << std::endl;
         }
-        for (auto edge: node->getOutEdgeWithTy(CallVF)) {
+        for (auto edge: node->getOutEdgeWithTy(CallVF))
+        {
             NodeID dst = edge->getDstID();
             outFile << src << "\t" << dst << "\tcall_i" << "\t" << edge->getEdgeIdx() << std::endl;
         }
-        for (auto edge: node->getOutEdgeWithTy(RetVF)) {
+        for (auto edge: node->getOutEdgeWithTy(RetVF))
+        {
             NodeID dst = edge->getDstID();
             outFile << src << "\t" << dst << "\tret_i" << "\t" << edge->getEdgeIdx() << std::endl;
         }

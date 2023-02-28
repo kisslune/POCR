@@ -162,9 +162,9 @@ public:
 
     inline bool moveEdgesToRepNode(CFLNode* node, CFLNode* rep)
     {
-        bool gepIn = moveInEdgesToRepNode(node, rep);
-        bool gepOut = moveOutEdgesToRepNode(node, rep);
-        return (gepIn || gepOut);
+        bool inSelfCycle = moveInEdgesToRepNode(node, rep);
+        bool outSelfCycle = moveOutEdgesToRepNode(node, rep);
+        return (inSelfCycle || outSelfCycle);
     }
 
     /// Dump cflData into dot file

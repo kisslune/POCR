@@ -12,6 +12,7 @@
 #include "CFLData/IVFG.h"
 #include "VFAStat.h"
 #include "IVFGFold.h"
+#include "IVFGInterDyck.h"
 
 namespace SVF
 {
@@ -55,21 +56,22 @@ protected:
     /// Graph simplifiation
     SCC* scc;
     IVFGCompact* compact;
-//    IVFGInterDyck* interDyck;
+    IVFGInterDyck* interDyck;
 
 public:
-
     /// Constructor
-    VFAnalysis(std::string& gName) :
-            numOfIteration(0),
-            checks(0),
-            numOfTEdges(0),
-            numOfSumEdges(0),
-            numOfAdd(0),
-            timeOfSolving(0),
-            reanalyze(false),
-            _graph(nullptr),
-            graphName(gName)
+    VFAnalysis(std::string& gName) : numOfIteration(0),
+                                     checks(0),
+                                     numOfTEdges(0),
+                                     numOfSumEdges(0),
+                                     numOfAdd(0),
+                                     timeOfSolving(0),
+                                     reanalyze(false),
+                                     _graph(nullptr),
+                                     graphName(gName),
+                                     scc(nullptr),
+                                     compact(nullptr),
+                                     interDyck(nullptr)
     {}
 
     /// Destructor
@@ -124,7 +126,7 @@ public:
     //@{
     void simplifyGraph();
     void graphCompact();
-//    void interDyckGS();
+    void interDyckGS();
     void SCCElimination();
     void SCCDetect();
     void mergeSCCCycle();
@@ -177,7 +179,7 @@ protected:
     CallRetMap clChildren;
 
 public:
-    PocrVFA(std::string& gName) : StdVFA(gName)
+    PocrVFA(std::string gName) : StdVFA(gName)
     {}
 
     void initSolver();
@@ -202,7 +204,7 @@ protected:
     CFLData* _oldData;
 
 public:
-    GspanVFA(std::string& gName) : StdVFA(gName), _oldData(nullptr)
+    GspanVFA(std::string gName) : StdVFA(gName), _oldData(nullptr)
     {
         if (!_oldData)
             _oldData = new CFLData();
@@ -225,7 +227,7 @@ public:
 class GRVFA : public StdVFA
 {
 public:
-    GRVFA(std::string& gName) : StdVFA(gName)
+    GRVFA(std::string gName) : StdVFA(gName)
     {}
 
     Label binarySumm(Label lty, Label rty);
@@ -239,7 +241,7 @@ public:
 class GRGspanVFA : public GspanVFA
 {
 public:
-    GRGspanVFA(std::string& gName) : GspanVFA(gName)
+    GRGspanVFA(std::string gName) : GspanVFA(gName)
     {}
 
     Label binarySumm(Label lty, Label rty);
