@@ -11,20 +11,20 @@ using namespace SVF;
 void IVFGFold::compactGraph()
 {
     /// detect compactable pairs
-    for (auto edge: lg->getIVFGEdges()) {
+    for (auto edge: lg->getIVFGEdges())
+    {
         if (edge->getEdgeKind() != IVFG::DirectVF)
             continue;
 
         auto srcOutEdges = edge->getSrcNode()->getOutEdges();
         auto dstInEdges = edge->getDstNode()->getInEdges();
-//        if (dstInEdges.size() <= 1 && !edge->getDstNode()->isSrc())   /// src info required
-//            compactPairs.push(std::make_pair(edge->getSrcID(), edge->getDstID()));
-        if (dstInEdges.size() <= 1)     /// src info not required
+        if (dstInEdges.size() <= 1 && !edge->getDstNode()->isSrc())   /// src info required
             foldablePairs.push(std::make_pair(edge->getSrcID(), edge->getDstID()));
     }
 
     /// merge compactable pairs
-    while (!foldablePairs.empty()) {
+    while (!foldablePairs.empty())
+    {
         NodePair pair = foldablePairs.top();
         foldablePairs.pop();
         NodeID src = lg->repNodeID(pair.first);

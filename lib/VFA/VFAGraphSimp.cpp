@@ -83,7 +83,8 @@ void VFAnalysis::mergeSCCCycle()
     NodeStack revTopoOrder;
     NodeBS repNodes;
     NodeStack& topoOrder = scc->topoNodeStack();
-    while (!topoOrder.empty()) {
+    while (!topoOrder.empty())
+    {
         NodeID repNodeId = topoOrder.top();
         topoOrder.pop();
         revTopoOrder.push(repNodeId);
@@ -95,7 +96,8 @@ void VFAnalysis::mergeSCCCycle()
     }
 
     // restore the topological order for later solving.
-    while (!revTopoOrder.empty()) {
+    while (!revTopoOrder.empty())
+    {
         NodeID nodeId = revTopoOrder.top();
         revTopoOrder.pop();
         topoOrder.push(nodeId);
@@ -105,9 +107,11 @@ void VFAnalysis::mergeSCCCycle()
 
 void VFAnalysis::mergeSCCNodes(NodeID repNodeId, const NodeBS& subNodes)
 {
-    for (NodeBS::iterator nodeIt = subNodes.begin(); nodeIt != subNodes.end(); nodeIt++) {
+    for (NodeBS::iterator nodeIt = subNodes.begin(); nodeIt != subNodes.end(); nodeIt++)
+    {
         NodeID subNodeId = *nodeIt;
-        if (subNodeId != repNodeId) {
+        if (subNodeId != repNodeId)
+        {
             graph()->mergeNodeToRep(subNodeId, repNodeId);
         }
     }

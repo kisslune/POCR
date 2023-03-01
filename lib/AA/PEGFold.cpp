@@ -11,7 +11,8 @@ using namespace SVF;
 void PEGFold::foldGraph()
 {
     /// detect compactable pairs
-    for (auto edge : peg->getPEGEdges()) {
+    for (auto edge: peg->getPEGEdges())
+    {
         if (edge->getEdgeKind() != PEG::Asgn)
             continue;
 
@@ -22,14 +23,15 @@ void PEGFold::foldGraph()
     }
 
     /// merge compactable pairs
-    while (!foldablePairs.empty()) {
+    while (!foldablePairs.empty())
+    {
         NodePair pair = foldablePairs.top();
         foldablePairs.pop();
         NodeID src = peg->repNodeID(pair.first);
         NodeID dst = peg->repNodeID(pair.second);
-        if  (src == dst)
+        if (src == dst)
             continue;
 
-        peg->mergeNodeToRep(dst,src);
+        peg->mergeNodeToRep(dst, src);
     }
 }
