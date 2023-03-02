@@ -8,9 +8,9 @@
 using namespace SVF;
 
 
-void IVFGFold::compactGraph()
+void IVFGFold::foldGraph()
 {
-    /// detect compactable pairs
+    /// detect foldable pairs
     for (auto edge: lg->getIVFGEdges())
     {
         if (edge->getEdgeKind() != IVFG::DirectVF)
@@ -22,7 +22,7 @@ void IVFGFold::compactGraph()
             foldablePairs.push(std::make_pair(edge->getSrcID(), edge->getDstID()));
     }
 
-    /// merge compactable pairs
+    /// merge foldable pairs
     while (!foldablePairs.empty())
     {
         NodePair pair = foldablePairs.top();

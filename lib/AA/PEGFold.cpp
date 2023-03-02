@@ -10,7 +10,7 @@ using namespace SVF;
 
 void PEGFold::foldGraph()
 {
-    /// detect compactable pairs
+    /// detect foldable pairs
     for (auto edge: peg->getPEGEdges())
     {
         if (edge->getEdgeKind() != PEG::Asgn)
@@ -22,7 +22,7 @@ void PEGFold::foldGraph()
             foldablePairs.push(std::make_pair(edge->getSrcID(), edge->getDstID()));
     }
 
-    /// merge compactable pairs
+    /// merge foldable pairs
     while (!foldablePairs.empty())
     {
         NodePair pair = foldablePairs.top();

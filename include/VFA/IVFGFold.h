@@ -23,7 +23,7 @@ public:
     IVFGFold(IVFG* g) : lg(g)
     {}
 
-    void compactGraph();
+    void foldGraph();
 };
 
 }

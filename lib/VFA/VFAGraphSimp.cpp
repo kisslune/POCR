@@ -35,7 +35,7 @@ void VFAnalysis::graphFolding()
 
     if (!ivfgFold)
         ivfgFold = new IVFGFold(_graph);
-    ivfgFold->compactGraph();
+    ivfgFold->foldGraph();
 
     double endClk = stat->getClk();
     stat->gfTime = (endClk - startClk) / TIMEINTERVAL;
