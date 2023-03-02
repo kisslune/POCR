@@ -53,20 +53,17 @@ public:
 
     /// Methods for binary tree comparison
     //@{
-    typedef struct equalGEdge
+    inline bool operator<(const CFLEdge& rhs) const
     {
-        bool operator()(const CFLEdge* lhs, const CFLEdge* rhs) const
-        {
-            if (lhs->getEdgeKind() != rhs->getEdgeKind())
-                return lhs->getEdgeKind() < rhs->getEdgeKind();
-            else if (lhs->getSrcID() != rhs->getSrcID())
-                return lhs->getSrcID() < rhs->getSrcID();
-            else if (lhs->getDstID() != rhs->getDstID())
-                return lhs->getDstID() < rhs->getDstID();
-            else
-                return lhs->getEdgeIdx() < rhs->getEdgeIdx();
-        }
-    } equalGEdge;
+        if (getEdgeKind() != rhs.getEdgeKind())
+            return getEdgeKind() < rhs.getEdgeKind();
+        else if (getSrcID() != rhs.getSrcID())
+            return getSrcID() < rhs.getSrcID();
+        else if (getDstID() != rhs.getDstID())
+            return getDstID() < rhs.getDstID();
+        else
+            return getEdgeIdx() < rhs.getEdgeIdx();
+    }
 
     inline bool operator==(const CFLEdge* rhs) const
     {

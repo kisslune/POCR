@@ -42,23 +42,23 @@ public:
     ~CFLItem()
     {}
 
+    /// Methods for binary tree comparison
+    //@{
     inline bool operator<(const CFLItem& rhs) const
     {
-        if (_src < rhs._src)
-            return true;
-        else if (_src == rhs._src) {
-            if (_dst < rhs._dst)
-                return true;
-            else if ((_dst == rhs._dst) && (_type < rhs._type))
-                return true;
-        }
-        return false;
+        if (_src != rhs._src)
+            return _src < rhs._src;
+        else if (_dst != rhs._dst)
+            return _dst < rhs._dst;
+        else
+            return _type < rhs._type;
     }
 
     inline bool operator==(const CFLItem& rhs) const
     {
         return (_src == rhs._src) && (_dst == rhs._dst) && (_type == rhs._type);
     }
+    //@}
 
     NodeID src()
     {
