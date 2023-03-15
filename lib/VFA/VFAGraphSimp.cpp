@@ -9,10 +9,7 @@ using namespace SVF;
 
 void VFAnalysis::simplifyGraph()
 {
-//    if (CFLOpt::simplifyGraph) {
-//        SCCElimination();
-//        graphCompact();
-//    }
+    double startClk = stat->getClk();
 
     if (CFLOpt::scc())
     {
@@ -26,6 +23,9 @@ void VFAnalysis::simplifyGraph()
     {
         interDyckGS();
     }
+
+    double endClk = stat->getClk();
+    stat->gsTime = (endClk - startClk) / TIMEINTERVAL;
 }
 
 
@@ -52,6 +52,9 @@ void VFAnalysis::interDyckGS()
     interDyck->buildSubGraph();
     interDyck->fastDyck();
     interDyck->pruneEdges();
+
+    delete interDyck;
+    interDyck = nullptr;
 
     double endClk = stat->getClk();
     stat->interDyckTime = (endClk - startClk) / TIMEINTERVAL;

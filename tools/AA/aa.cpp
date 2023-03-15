@@ -11,9 +11,9 @@ using namespace SVF;
 
 static Option<bool> Default_AA("std", "Standard alias analysis", false);
 static Option<bool> Pocr_AA("pocr", "POCR alias analysis", false);
-static Option<bool> Gspan_AA("gspan", "POCR alias analysis", false);
-static Option<bool> Gr_AA("gr", "POCR alias analysis", false);
-static Option<bool> GrGspan_AA("grgspan", "POCR alias analysis", false);
+static Option<bool> Gspan_AA("gspan", "Graspan alias analysis", false);
+static Option<bool> Gr_AA("gr", "Grammar rewritting alias analysis", false);
+static Option<bool> GrGspan_AA("grgspan", "Grammar rewritting Graspan alias analysis", false);
 
 
 int main(int argc, char** argv)

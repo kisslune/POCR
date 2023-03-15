@@ -18,7 +18,7 @@ void IVFGFold::foldGraph()
 
         auto srcOutEdges = edge->getSrcNode()->getOutEdges();
         auto dstInEdges = edge->getDstNode()->getInEdges();
-        if (dstInEdges.size() <= 1 && !edge->getDstNode()->isSrc())   /// src info required
+        if (dstInEdges.size() <= 1 && !edge->getDstNode()->isSrc())
             foldablePairs.push(std::make_pair(edge->getSrcID(), edge->getDstID()));
     }
 

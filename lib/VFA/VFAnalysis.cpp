@@ -19,6 +19,8 @@ void VFAnalysis::initialize()
     graph()->readGraph(graphName);
 
     stat = new VFAStat(this);
+    stat->setMemUsageBefore();
+
     /// Graph simplification
     simplifyGraph();
 }
@@ -53,6 +55,8 @@ void VFAnalysis::analyze()
 
 void VFAnalysis::finalize()
 {
+    stat->setMemUsageAfter();
+
     dumpStat();
     if (CFLOpt::writeGraph())
         graph()->writeGraph("vfg");

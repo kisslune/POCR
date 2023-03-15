@@ -20,6 +20,7 @@ namespace SVF
 {
 
 class AliasAnalysis;
+
 class PEG;
 
 /*!
@@ -35,8 +36,7 @@ private:
     AliasAnalysis* aa;
 
 public:
-    AAStat(AliasAnalysis* p)
-            : aa(p), startTime(0), endTime(0)
+    AAStat(AliasAnalysis* p) : aa(p)
     {
         startClk();
     };
@@ -60,7 +60,6 @@ public:
         return CLOCK_IN_MS();
     }
 
-    NUMStatMap generalNumMap;
     NUMStatMap PTNumStatMap;
     TIMEStatMap timeStatMap;
 
@@ -69,6 +68,16 @@ public:
     double sccTime;
     double gfTime;
     double interDyckTime;
+    double gsTime;
+
+    /// Memory usage, in KB
+    u32_t _vmrssUsageBefore;
+    u32_t _vmrssUsageAfter;
+    u32_t _vmsizeUsageBefore;
+    u32_t _vmsizeUsageAfter;
+
+    void setMemUsageBefore();
+    void setMemUsageAfter();
 
     virtual void performStat();
     void pegStat();

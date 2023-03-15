@@ -8,6 +8,8 @@ using namespace SVF;
 
 void AliasAnalysis::simplifyGraph()
 {
+    double startClk = stat->getClk();
+
     if (CFLOpt::scc())
     {
         SCCElimination();
@@ -20,6 +22,9 @@ void AliasAnalysis::simplifyGraph()
     {
         interDyckGS();
     }
+
+    double endClk = stat->getClk();
+    stat->gsTime = (endClk - startClk) / TIMEINTERVAL;
 }
 
 
@@ -47,6 +52,9 @@ void AliasAnalysis::interDyckGS()
     interDyck->buildSubGraph();
     interDyck->fastDyck();
     interDyck->pruneEdges();
+
+    delete interDyck;
+    interDyck = nullptr;
 
     double endClk = stat->getClk();
     stat->interDyckTime = (endClk - startClk) / TIMEINTERVAL;

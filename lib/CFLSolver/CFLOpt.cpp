@@ -34,13 +34,13 @@ const Option<bool> CFLOpt::graphStat(
 const Option<bool> CFLOpt::scc(
         "scc",
         "Enable cycle elimination",
-        true
+        false
 );
 
 const Option<bool> CFLOpt::gf(
         "gf",
         "Enable graph folding",
-        true
+        false
 );
 
 const Option<bool> CFLOpt::interDyck(

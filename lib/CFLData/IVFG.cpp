@@ -41,7 +41,7 @@ void IVFG::readGraph(std::string fname)
     std::string line;
     while (getline(gFile, line))
     {
-        std::vector<std::string> vec = CFLBase::split(line, '\t');
+        std::vector<std::string> vec = split(line, '\t');
         if (vec.empty())
             continue;
 
@@ -136,7 +136,6 @@ void IVFG::reTargetDstOfEdge(CFLEdge* edge, CFLNode* newDstNode)
     NodeID newDstNodeID = newDstNode->getId();
     NodeID srcId = edge->getSrcID();
 
-    // TODO
     addEdge(srcId, newDstNodeID, edge->getEdgeKind(), edge->getEdgeIdx());
     removeIVFGEdge(edge);
 }

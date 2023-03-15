@@ -11,9 +11,9 @@ using namespace SVF;
 
 static Option<bool> Default_VFA("std", "Standard valueflow analysis", false);
 static Option<bool> Pocr_VFA("pocr", "POCR valueflow analysis", false);
-static Option<bool> Gspan_VFA("gspan", "POCR valueflow analysis", false);
-static Option<bool> Gr_VFA("gr", "POCR valueflow analysis", false);
-static Option<bool> GrGspan_VFA("grgspan", "POCR valueflow analysis", false);
+static Option<bool> Gspan_VFA("gspan", "Graspan valueflow analysis", false);
+static Option<bool> Gr_VFA("gr", "Grammar rewritting valueflow analysis", false);
+static Option<bool> GrGspan_VFA("grgspan", "Grammar rewritting Graspan valueflow analysis", false);
 
 
 int main(int argc, char** argv)

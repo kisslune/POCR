@@ -44,7 +44,7 @@ void PEG::readGraph(std::string fname)
     std::string line;
     while (getline(gFile, line))
     {
-        std::vector<std::string> vec = CFLBase::split(line, '\t');
+        std::vector<std::string> vec = split(line, '\t');
         if (vec.empty())
             continue;
 
@@ -226,37 +226,6 @@ void PEG::mergeNodeToRep(NodeID nodeId, NodeID newRepId)
     /// set rep and sub relations
     updateNodeRepAndSubs(node->getId(), newRepId);
     removePEGNode(node);
-
-    /// vertical merges
-    // @{
-//    /// merge deref
-//    auto& derefEdgeSet = getPEGNode(newRepId)->getOutEdgeWithTy(PEG::Deref);
-//    if (!derefEdgeSet.empty()) {
-//        NodeID dRep = (*derefEdgeSet.begin())->getDstID();
-//        NodeSet subSet;
-//        for (auto edge: derefEdgeSet) {
-//            subSet.insert(edge->getDstID());
-//        }
-//        for (NodeID sub: subSet)
-//            mergeNodeToRep(sub, dRep);
-//    }
-//
-//    /// merge gep
-//    auto& gepEdgeSet = getPEGNode(newRepId)->getOutEdgeWithTy(PEG::Gep);
-//    if (!gepEdgeSet.empty()) {
-//        std::unordered_map<NodeID, NodeBS> indMap;
-//        for (auto edge: gepEdgeSet) {
-//            if (edge->getDstNode()->getInEdges().size() > 1)
-//                continue;
-//            indMap[edge->getEdgeIdx()].set(edge->getDstID());
-//        }
-//        for (auto& indIter: indMap) {
-//            NodeID fRep = indIter.second.find_first();
-//            for (NodeID sub: indIter.second)
-//                mergeNodeToRep(sub, fRep);
-//        }
-//    }
-    //@}
 }
 
 

@@ -3,6 +3,7 @@ file (GLOB SOURCES
         CFLSolver/*.cpp
         AA/*.cpp
         VFA/*.cpp
+        RSM/*.cpp
 )
 
 add_llvm_library(POCR_LIB STATIC ${SOURCES})

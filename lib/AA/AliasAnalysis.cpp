@@ -21,6 +21,8 @@ void AliasAnalysis::initialize()
     graph()->readGraph(graphName);  // read a uni-directed graph
 
     stat = new AAStat(this);
+    stat->setMemUsageBefore();
+
     /// Graph simplification
     simplifyGraph();
 }
@@ -42,6 +44,8 @@ void AliasAnalysis::dumpStat()
 
 void AliasAnalysis::finalize()
 {
+    stat->setMemUsageAfter();
+
     dumpStat();
     if (CFLOpt::writeGraph())
         graph()->writeGraph("peg");

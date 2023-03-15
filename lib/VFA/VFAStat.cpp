@@ -17,17 +17,13 @@ void VFAStat::printStat(std::string statname)
 {
     std::cout.flags(std::ios::left);
     unsigned field_width = 20;
-    for (NUMStatMap::iterator it = generalNumMap.begin(), eit = generalNumMap.end(); it != eit; ++it) {
-        // format out put with width 20 space
-        std::cout << std::setw(field_width) << it->first << it->second << "\n";
-    }
     for (TIMEStatMap::iterator it = timeStatMap.begin(), eit = timeStatMap.end(); it != eit; ++it) {
         // format out put with width 20 space
-        std::cout << std::setw(field_width) << it->first << it->second << "\n";
+        std::cout << it->first << "\t" << it->second << "\n";
     }
     for (NUMStatMap::iterator it = PTNumStatMap.begin(), eit = PTNumStatMap.end(); it != eit; ++it) {
         // format out put with width 20 space
-        std::cout << std::setw(field_width) << it->first << it->second << "\n";
+        std::cout << it->first << "\t" << it->second << "\n";
     }
 
     std::cout.flush();
@@ -43,19 +39,24 @@ void VFAStat::vfgStat()
 
     u32_t totalNodeNumber = 0;
     u32_t totalEdgeNumber = 0;
+    u32_t pEdgeNumber = 0;
 
     for (auto nodeIt = lg->begin(); nodeIt != lg->end(); nodeIt++) {
         totalNodeNumber++;
     }
 
     for (auto it: lg->getIVFGEdges()) {
+        if (it->getEdgeKind() == IVFG::CallVF || it->getEdgeKind() == IVFG::RetVF)
+            pEdgeNumber++;
         totalEdgeNumber++;
     }
 
     PTNumStatMap["#Nodes"] = totalNodeNumber;
     PTNumStatMap["#Edges"] = totalEdgeNumber;
+    PTNumStatMap["#PEdges"] = pEdgeNumber;
+    timeStatMap["GraphSimpTime"] = gsTime;
 
-    VFAStat::printStat("LG Stats");
+    VFAStat::printStat("VFG Stats");
 }
 
 
@@ -72,8 +73,27 @@ void VFAStat::performStat()
     ivf->countSumEdges();
 
     timeStatMap["AnalysisTime"] = ivf->timeOfSolving;
-    PTNumStatMap["#Checks"] = ivf->checks;
-    PTNumStatMap["#SumEdges"] = ivf->numOfSumEdges;
+    timeStatMap["VmrssInGB"] = (_vmrssUsageAfter - _vmrssUsageBefore) / 1024.0 / 1024.0;
+//    PTNumStatMap["#Checks"] = ivf->checks;
+//    PTNumStatMap["#SumEdges"] = ivf->numOfSumEdges;
 
     VFAStat::printStat("CFL-reachability analysis Stats");
+}
+
+
+void VFAStat::setMemUsageBefore()
+{
+    u32_t vmrss, vmsize;
+    SVFUtil::getMemoryUsageKB(&vmrss, &vmsize);
+    _vmrssUsageBefore = vmrss;
+    _vmsizeUsageBefore = vmsize;
+}
+
+
+void VFAStat::setMemUsageAfter()
+{
+    u32_t vmrss, vmsize;
+    SVFUtil::getMemoryUsageKB(&vmrss, &vmsize);
+    _vmrssUsageAfter = vmrss;
+    _vmsizeUsageAfter = vmsize;
 }

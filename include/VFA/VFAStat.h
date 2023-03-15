@@ -37,8 +37,7 @@ private:
     VFAnalysis* ivf;
 
 public:
-    VFAStat(VFAnalysis* p)
-            : ivf(p), startTime(0), endTime(0)
+    VFAStat(VFAnalysis* p) : ivf(p)
     {
         startClk();
     };
@@ -71,11 +70,19 @@ public:
     double sccTime;
     double gfTime;
     double interDyckTime;
+    double gsTime;
+
+    /// Memory usage, in KB
+    u32_t _vmrssUsageBefore;
+    u32_t _vmrssUsageAfter;
+    u32_t _vmsizeUsageBefore;
+    u32_t _vmsizeUsageAfter;
+
+    void setMemUsageBefore();
+    void setMemUsageAfter();
 
     virtual void performStat();
-
     void vfgStat();
-
     virtual void printStat(std::string str = "");
 };
 
