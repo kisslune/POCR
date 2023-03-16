@@ -52,7 +52,7 @@ void GspanAA::solve()
                 for (auto& tyIter2: cflData()->getSuccMap(oldDst1)) {
                     Label newTy = binarySumm(lty, tyIter2.first);
                     if (newTy.first) {
-                        checks += tyIter2.second.count();       // stat
+//                        checks += tyIter2.second.count();       // stat
                         resData.getSuccs(src, newTy) |= tyIter2.second;
                     }
                 }
@@ -65,14 +65,14 @@ void GspanAA::solve()
             Label newTy = unarySumm(lty);
             for (NodeID newDst1: tyIter.second) {
                 if (newTy.first) {
-                    checks++;       // stat
+//                    checks++;       // stat
                     resData.getSuccs(src, newTy).test_and_set(newDst1);
                 }
                 // old
                 for (auto& tyIter2: oldData()->getSuccMap(newDst1)) {
                     Label newTy = binarySumm(lty, tyIter2.first);
                     if (newTy.first) {
-                        checks += tyIter2.second.count();       // stat
+//                        checks += tyIter2.second.count();       // stat
                         resData.getSuccs(src, newTy) |= tyIter2.second;
                     }
                 }
@@ -80,7 +80,7 @@ void GspanAA::solve()
                 for (auto& tyIter2: cflData()->getSuccMap(newDst1)) {
                     Label newTy = binarySumm(lty, tyIter2.first);
                     if (newTy.first) {
-                        checks += tyIter2.second.count();       // stat
+//                        checks += tyIter2.second.count();       // stat
                         resData.getSuccs(src, newTy) |= tyIter2.second;
                     }
                 }
@@ -125,7 +125,6 @@ void GspanAA::countSumEdges()
         for (auto& iter2: iter1->second) {
             if (s1.find(iter2.first.first) != s1.end()) {
                 numOfTEdges += iter2.second.count() * 2;
-//                numOfSumEdges += iter2.second.count() * 2;
             }
         }
     }
