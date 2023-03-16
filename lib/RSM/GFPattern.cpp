@@ -166,21 +166,40 @@ bool GFPattern::check(const std::set<Label>* xLabels, const std::set<Label>* yLa
     auto lblYX = yLabels[1];
     auto lblYNX = yLabels[2];
 
+    set<Label> lblInX = lblNYX;
+    for (auto lbl : lblYX)
+        lblInX.insert(lbl);
+
+    set <Label> lblOutX = lblXNY;
+    for (auto lbl: lblXY)
+        lblOutX.insert(lbl);
+
+    set<GStateTy> NrInx = getTgtStatesOfLabels(lblInX);
     set<GStateTy> Nrnyx = getTgtStatesOfLabels(lblNYX);
-    set<GStateTy> Nryx = getTgtStatesOfLabels(lblYX);
 
     if (isxSrc)
     {
+        NrInx.insert(initState);
         Nrnyx.insert(initState);
-        Nryx.insert(initState);
     }
 
-    /// Construct Qx
+    /// Construct Qx and Qnyx
     set<GStateTy> Qx;
+    for (GStateTy nr: NrInx)
+    {
+        Qx.insert(nr);
+        if (!nr.first.empty())      // nr is reached by entering boxes
+            for (auto& boxItem1: intToBoxMap)
+                for (auto& boxItem2: intToBoxMap)
+                {
+                    nr.first.emplace_front(boxItem2.first, 0);  // temporarily set the idx of box as 0
+                    nr.first.emplace_front(boxItem1.first, 0);
+                    Qx.insert(nr);
+                }
+    }
     set<GStateTy> Qnyx;
     for (GStateTy nr: Nrnyx)
     {
-        Qx.insert(nr);
         Qnyx.insert(nr);
         if (!nr.first.empty())      // nr is reached by entering boxes
             for (auto& boxItem1: intToBoxMap)
@@ -188,31 +207,19 @@ bool GFPattern::check(const std::set<Label>* xLabels, const std::set<Label>* yLa
                 {
                     nr.first.emplace_front(boxItem2.first, 0);  // temporarily set the idx of box as 0
                     nr.first.emplace_front(boxItem1.first, 0);
-                    Qx.insert(nr);
                     Qnyx.insert(nr);
-                }
-    }
-    for (GStateTy nr: Nryx)
-    {
-        Qx.insert(nr);
-        if (!nr.first.empty())      // nr is reached by entering boxes
-            for (auto& boxItem1: intToBoxMap)
-                for (auto& boxItem2: intToBoxMap)
-                {
-                    nr.first.emplace_front(boxItem2.first, 0);  // temporarily set the idx of box as 0
-                    nr.first.emplace_front(boxItem1.first, 0);
-                    Qx.insert(nr);
                 }
     }
 
     for (auto sx: Qx)
         for (auto& xylbl: lblXY)
         {
+            bool isInQnyx = Qnyx.count(sx);
             if (!sx.first.empty())
                 sx.first.back().second = xylbl.second;    // set the box ID the same as xlbl
             GStateTy sy = transition(sx, xylbl);
 
-            if (Qnyx.count(sx))     // rule [x-y], only for Qnyx
+            if (isInQnyx)     // rule [x-y], only for Qnyx
                 if (!subsume(sx, sy, lblYNX) || !subsume(sy, sx, lblYNX))
                     return false;
 
@@ -225,7 +232,7 @@ bool GFPattern::check(const std::set<Label>* xLabels, const std::set<Label>* yLa
                     sy.first.back().second = yxlbl.second;   // set the box ID the same as ylbl
 
                 GStateTy sx1 = transition(sy, yxlbl);
-                if (sx1.second && !subsume(sx1, sx, lblXNY))   // rule [x-x]
+                if (sx1.second && !subsume(sx1, sx, lblOutX))   // rule [x-x]
                     return false;
             }
         }
