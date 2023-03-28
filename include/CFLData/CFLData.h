@@ -186,13 +186,6 @@ public:
         NodeID id;
         std::unordered_set<TreeNode*> children;
 
-        TreeNode(NodeID nId) : id(nId)
-        {}
-
-        ~TreeNode()
-        {
-        }
-
         inline bool operator==(const TreeNode& rhs) const
         {
             return id == rhs.id;
