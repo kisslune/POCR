@@ -13,6 +13,7 @@
 namespace SVF
 {
 typedef std::pair<char, u32_t> Label;
+
 /*!
  * Adjacency-list graph representation
  */
@@ -133,7 +134,8 @@ public:
     inline NodeBS addEdges(const NodeID src, const NodeBS& dstData, const Label ty)
     {
         NodeBS newDsts;
-        if (addSuccs(src, dstData, ty)) {
+        if (addSuccs(src, dstData, ty))
+        {
             for (const NodeID datum: dstData)
                 if (addPred(datum, src, ty))
                     newDsts.set(datum);
@@ -144,7 +146,8 @@ public:
     inline NodeBS addEdges(const NodeBS& srcData, const NodeID dst, const Label ty)
     {
         NodeBS newSrcs;
-        if (addPreds(dst, srcData, ty)) {
+        if (addPreds(dst, srcData, ty))
+        {
             for (const NodeID datum: srcData)
                 if (addSucc(datum, dst, ty))
                     newSrcs.set(datum);
@@ -186,6 +189,9 @@ public:
         NodeID id;
         std::unordered_set<TreeNode*> children;
 
+        TreeNode(NodeID nId) : id(nId)
+        {}
+
         inline bool operator==(const TreeNode& rhs) const
         {
             return id == rhs.id;
@@ -199,15 +205,17 @@ public:
 
 
 public:
-    Map<NodeID, std::unordered_map<NodeID, TreeNode*>> indMap;   // indMap[v][u] points to node v in tree(u)
+    Map <NodeID, std::unordered_map<NodeID, TreeNode*>> indMap;   // indMap[v][u] points to node v in tree(u)
 
     HybridData()
     {}
 
     ~HybridData()
     {
-        for (auto iter1: indMap) {
-            for (auto iter2: iter1.second) {
+        for (auto iter1: indMap)
+        {
+            for (auto iter2: iter1.second)
+            {
                 delete iter2.second;
                 iter2.second = NULL;
             }
@@ -245,8 +253,10 @@ public:
 
     void addArc(NodeID src, NodeID dst)
     {
-        if (!hasInd(src, dst)) {
-            for (auto iter: indMap[src]) {
+        if (!hasInd(src, dst))
+        {
+            for (auto iter: indMap[src])
+            {
                 meld(iter.first, getNode(iter.first, src), getNode(dst, dst));
             }
         }
@@ -259,7 +269,8 @@ public:
             return;
 
         insertEdge(uNode, newVNode);
-        for (TreeNode* vChild: vNode->children) {
+        for (TreeNode* vChild: vNode->children)
+        {
             meld(x, newVNode, vChild);
         }
     }
