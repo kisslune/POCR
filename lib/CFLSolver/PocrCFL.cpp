@@ -12,10 +12,15 @@ void PocrCFL::initSolver()
     StdCFL::initSolver();
 
     /// Init ptrees and strees for each node
-    for (auto lbl: grammar()->transitiveLabels) {
+    for (auto lbl: grammar()->transitiveLabels)
+    {
         ptrees[lbl] = new HybridData();
         strees[lbl] = new HybridData();
-        for (auto it = graph()->begin(); it != graph()->end(); ++it) {
+    }
+    for (auto it = graph()->begin(); it != graph()->end(); ++it)
+    {
+        for (auto lbl: grammar()->transitiveLabels)
+        {
             NodeID nId = it->first;
             ptrees[lbl]->addInd(nId, nId);
             strees[lbl]->addInd(nId, nId);
@@ -23,7 +28,8 @@ void PocrCFL::initSolver()
     }
     /// Remove transitive rules
     Map<std::pair<char, char>, char> rulesToRemove;
-    for (auto rule: grammar()->binaryRules) {
+    for (auto rule: grammar()->binaryRules)
+    {
         if (rule.first.first == rule.first.second && rule.first.first == rule.second)
             rulesToRemove.insert(rule);
     }
@@ -34,14 +40,17 @@ void PocrCFL::initSolver()
 
 void PocrCFL::solve()
 {
-    while (!isWorklistEmpty()) {
+    while (!isWorklistEmpty())
+    {
         CFLItem item = popFromWorklist();
 
-        if (grammar()->isTransitive(item.type().first) && isPrimary(item)) {
+        if (grammar()->isTransitive(item.type().first) && isPrimary(item))
+        {
             /// Process primary transitive items
             procPrimaryItem(item);
         }
-        else {
+        else
+        {
             /// Process other items by ordinary routine
             processCFLItem(item);
         }
@@ -51,6 +60,7 @@ void PocrCFL::solve()
 
 void PocrCFL::procPrimaryItem(CFLItem item)
 {
+    tmpPrimaryItem = item;
     char lbl = item.type().first;
     NodeID px = item.dst();
     NodeID sx = item.src();
@@ -59,7 +69,7 @@ void PocrCFL::procPrimaryItem(CFLItem item)
     /// sy is the root of stree(item.dst())
     TreeNode* sy = strees[lbl]->getNode(item.dst(), item.dst());
 
-    StdCFL::pushIntoWorklist(py->id, sy->id, std::make_pair(lbl, 0));
+//    StdCFL::pushIntoWorklist(py->id, sy->id, Label(lbl, 0));
     traverseStree(lbl, px, py, sx, sy);
 }
 
@@ -68,7 +78,8 @@ void PocrCFL::traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNo
 {
     updateTrEdge(lbl, px, py, sx, sy);
 
-    for (auto pz: py->children) {
+    for (auto pz: py->children)
+    {
         if (!ptrees[lbl]->hasInd(sy->id, pz->id))
             /// Only handle pz when pz -lbl->sy does not exist
             traversePtree(lbl, py->id, pz, sx, sy);
@@ -80,7 +91,8 @@ void PocrCFL::traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNo
 {
     traversePtree(lbl, px, py, sx, sy);
 
-    for (auto sz: sy->children) {
+    for (auto sz: sy->children)
+    {
         if (!strees[lbl]->hasInd(py->id, sz->id))
             /// Only handle sz when py -lbl-> sz does not exist
             traverseStree(lbl, px, py, sy->id, sz);
@@ -107,9 +119,10 @@ bool PocrCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNod
     /// strees[lbl]->getNode(py->id, sx) refers to the node sx in stree(py)
     strees[lbl]->insertEdge(strees[lbl]->getNode(py->id, sx), newSy);
     /// Update adjacency lists
-    cflData()->addEdge(py->id, sy->id, std::make_pair(lbl, 0));
+    cflData()->addEdge(py->id, sy->id, Label(lbl, 0));
     /// Push the new edge into worklist as a secondary edge
-    StdCFL::pushIntoWorklist(py->id, sy->id, std::make_pair(lbl, 0));
+    if (py->id == tmpPrimaryItem.src() || sy->id == tmpPrimaryItem.dst())
+        pushIntoWorklist(py->id, sy->id, Label(lbl, 0), false);
 
     return true;
 }
@@ -118,32 +131,38 @@ bool PocrCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNod
 /*!
  * All the transitive items generated during ordinary solving is regarded as primary
  */
-bool PocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
+bool PocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 {
-    if (grammar()->isTransitive(ty.first))
-        addPrimaryItem(src, dst, ty);
-
-    return StdCFL::pushIntoWorklist(src, dst, ty);
+    return CFLBase::pushIntoWorklist(src, dst, ty, isPrimary);
+//    CFLItem item = CFLItem(src, dst, ty);
+//    if (grammar()->isTransitive(ty.first))
+//        item.setPrimary(true);
+//
+//    return CFLBase::pushIntoWorklist(item);
 }
 
 
 void PocrCFL::processCFLItem(CFLItem item)
 {
     Label newTy = unarySumm(item.type());
-    if (addEdge(item.src(), item.dst(), newTy)) {
+    if (addEdge(item.src(), item.dst(), newTy))
+    {
         checks++;
         pushIntoWorklist(item.src(), item.dst(), newTy);
     }
 
-    for (auto& iter: cflData()->getSuccMap(item.dst())) {
+    for (auto& iter: cflData()->getSuccMap(item.dst()))
+    {
         Label rty = iter.first;
         newTy = binarySumm(item.type(), rty);
-        if (newTy == item.type() && grammar()->isTransitive(rty.first)) {
+        if (newTy == item.type() && grammar()->isTransitive(rty.first))
+        {
             /// X ::= X A
             TreeNode* dst = strees[rty.first]->getNode(item.dst(), item.dst());
             checkStree(newTy, item.src(), dst);
         }
-        else {
+        else
+        {
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
             checks += iter.second.count();
             for (NodeID diffDst: diffDsts)
@@ -151,15 +170,18 @@ void PocrCFL::processCFLItem(CFLItem item)
         }
     }
 
-    for (auto& iter: cflData()->getPredMap(item.src())) {
+    for (auto& iter: cflData()->getPredMap(item.src()))
+    {
         Label lty = iter.first;
         newTy = binarySumm(lty, item.type());
-        if (newTy == item.type() && grammar()->isTransitive(lty.first)) {
+        if (newTy == item.type() && grammar()->isTransitive(lty.first))
+        {
             /// X ::= A X
             TreeNode* src = ptrees[lty.first]->getNode(item.src(), item.src());
             checkPtree(newTy, src, item.dst());
         }
-        else {
+        else
+        {
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
             checks += iter.second.count();
             for (NodeID diffSrc: diffSrcs)
@@ -173,7 +195,8 @@ void PocrCFL::checkPtree(Label newLbl, TreeNode* src, NodeID dst)
 {
     checks++;
     for (auto child: src->children)
-        if (addEdge(child->id, dst, newLbl)) {
+        if (addEdge(child->id, dst, newLbl))
+        {
             pushIntoWorklist(child->id, dst, newLbl);
             checkPtree(newLbl, child, dst);
         }
@@ -184,7 +207,8 @@ void PocrCFL::checkStree(Label newLbl, NodeID src, TreeNode* dst)
 {
     checks++;
     for (auto child: dst->children)
-        if (addEdge(src, child->id, newLbl)) {
+        if (addEdge(src, child->id, newLbl))
+        {
             pushIntoWorklist(src, child->id, newLbl);
             checkStree(newLbl, src, child);
         }

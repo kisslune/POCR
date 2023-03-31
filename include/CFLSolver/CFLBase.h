@@ -30,16 +30,11 @@ public:
     NodeID _src;
     NodeID _dst;
     Label _type;
+    bool _isPrimary;
 
     //Constructor
-    CFLItem(NodeID e1, NodeID e2, Label e3) :
-            _src(e1), _dst(e2), _type(e3)
-    {
-    }
-
-
-    //Destructor
-    ~CFLItem()
+    CFLItem(NodeID e1, NodeID e2, Label e3, bool e4 = true) :
+            _src(e1), _dst(e2), _type(e3), _isPrimary(e4)
     {}
 
     /// Methods for binary tree comparison
@@ -60,30 +55,26 @@ public:
     }
     //@}
 
-    NodeID src()
-    {
-        return _src;
-    }
+    NodeID src() const
+    { return _src; }
 
-    NodeID dst()
-    {
-        return _dst;
-    }
+    NodeID dst() const
+    { return _dst; }
 
-    const NodeID src() const
-    {
-        return _src;
-    }
+//    const NodeID src() const
+//    { return _src; }
+//
+//    const NodeID dst() const
+//    { return _dst; }
 
-    const NodeID dst() const
-    {
-        return _dst;
-    }
+    Label type() const
+    { return _type; }
 
-    Label type()
-    {
-        return _type;
-    }
+    void setPrimary(bool v)
+    { _isPrimary = v; }
+
+    bool isPrimary() const
+    { return _isPrimary; }
 };
 
 
@@ -134,9 +125,9 @@ public:
         return worklist.push(item);
     }
 
-    virtual inline bool pushIntoWorklist(NodeID src, NodeID dst, Label ty)
+    virtual inline bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true)
     {
-        return pushIntoWorklist(CFLItem(src, dst, ty));
+        return pushIntoWorklist(CFLItem(src, dst, ty, isPrimary));
     }
 
     virtual inline bool isInWorklist(CFLItem item)
@@ -186,7 +177,8 @@ public:
 
     virtual void solve()
     {
-        while (!isWorklistEmpty()) {
+        while (!isWorklistEmpty())
+        {
             CFLItem item = popFromWorklist();
             processCFLItem(item);
         }
@@ -198,7 +190,8 @@ public:
         if (addEdge(item.src(), item.dst(), newTy))
             pushIntoWorklist(item.src(), item.dst(), newTy);
 
-        for (auto iter: cflData()->getSuccMap(item.dst())) {
+        for (auto iter: cflData()->getSuccMap(item.dst()))
+        {
             Label rty = iter.first;
             newTy = binarySumm(item.type(), rty);
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
@@ -206,7 +199,8 @@ public:
                 pushIntoWorklist(item.src(), diffDst, newTy);
         }
 
-        for (auto iter: cflData()->getPredMap(item.src())) {
+        for (auto iter: cflData()->getPredMap(item.src()))
+        {
             Label lty = iter.first;
             newTy = binarySumm(lty, item.type());
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
@@ -217,17 +211,20 @@ public:
 
     static void processArgs(int argc, char** argv, int& arg_num, char** arg_vec, std::vector<std::string>& inFileVec)
     {
-        for (int i = 0; i < argc; ++i) {
+        for (int i = 0; i < argc; ++i)
+        {
             std::ifstream f(argv[i]);
             if (i == 0)
             {
                 arg_vec[arg_num] = argv[i];
                 arg_num++;
             }
-            else if (f.good()) {
+            else if (f.good())
+            {
                 inFileVec.push_back(argv[i]);
             }
-            else {
+            else
+            {
                 arg_vec[arg_num] = argv[i];
                 arg_num++;
             }
@@ -239,12 +236,15 @@ public:
         std::vector<std::string> sVec;
         std::string::iterator it = str.begin();
         std::string subStr;
-        while (it != str.end()) {
-            if (*it == s && !subStr.empty()) {
+        while (it != str.end())
+        {
+            if (*it == s && !subStr.empty())
+            {
                 sVec.push_back(subStr);
                 subStr.clear();
             }
-            else {
+            else
+            {
                 subStr.push_back(*it);
             }
             it++;

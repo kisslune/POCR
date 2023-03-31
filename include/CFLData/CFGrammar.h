@@ -18,16 +18,16 @@ public:
     char numOfLabels;       // maximum 128 labels are allowed
 
     /// mapping string label to int
-    std::map<std::string, char> labelToIntMap;
-    std::map<char, std::string> intToLabelMap;
+    Map<std::string, char> labelToIntMap;
+    Map<char, std::string> intToLabelMap;
     /// the IDs of labels with variant subscript
-    std::set<char> variantLabels;
+    Set<char> variantLabels;
 
     /// Sets of rules
-    std::set<char> emptyRules;                           // X ::= epsilon
-    std::map<char, char> unaryRules;                     // X ::= Y
-    std::map<std::pair<char, char>, char> binaryRules;   // X ::= Y Z
-    std::set<char> transitiveLabels;                     // X ::= X X
+    Set<char> emptyRules;                           // X ::= epsilon
+    Map<char, char> unaryRules;                     // X ::= Y
+    Map<std::pair<char, char>, char> binaryRules;   // X ::= Y Z
+    Set<char> transitiveLabels;                     // X ::= X X
 
 public:
     CFGrammar() : numOfLabels(0)
@@ -72,7 +72,7 @@ public:
         return it->second;
     }
 
-    std::set<char>& getEmptyRules()
+    Set<char>& getEmptyRules()
     {
         return emptyRules;
     }

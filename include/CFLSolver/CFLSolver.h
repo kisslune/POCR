@@ -114,10 +114,12 @@ public:
 protected:
     TransitiveLblMap ptrees;
     TransitiveLblMap strees;
-    Set<CFLItem> primaryItems;
+    CFLItem tmpPrimaryItem;
+//    Set<CFLItem> primaryItems;
 
 public:
-    PocrCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
+    PocrCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName),
+                                                                  tmpPrimaryItem(0, 0, Label(0, 0))
     {}
 
     void initSolver();
@@ -126,20 +128,35 @@ public:
     void traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
     void traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
     bool updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
-    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
+    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true);
     virtual void processCFLItem(CFLItem item);
     void checkPtree(Label newLbl, TreeNode* src, NodeID dst);
     void checkStree(Label newLbl, NodeID src, TreeNode* dst);
 
     bool isPrimary(CFLItem& item)
     {
-        return primaryItems.find(item) != primaryItems.end();
+        return item.isPrimary();
+//        return primaryItems.find(item) != primaryItems.end();
     }
 
-    void addPrimaryItem(NodeID src, NodeID dst, Label ty)
-    {
-        primaryItems.insert(CFLItem(src, dst, ty));
-    }
+//    void addPrimaryItem(NodeID src, NodeID dst, Label ty)
+//    {
+//        primaryItems.insert(CFLItem(src, dst, ty));
+//    }
+};
+
+
+/*!
+ * Hierarchical POCR
+ */
+class HPocrCFL : public PocrCFL
+{
+private:
+    WorkList primaryList;
+
+public:
+    virtual void solve();
+
 };
 
 
