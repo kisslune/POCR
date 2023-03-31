@@ -155,8 +155,11 @@ private:
     WorkList primaryList;
 
 public:
-    virtual void solve();
+    HPocrCFL(std::string& _grammarName, std::string& _graphName) : PocrCFL(_grammarName, _graphName)
+    {}
 
+    virtual void solve();
+    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true);
 };
 
 

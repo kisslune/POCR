@@ -69,21 +69,7 @@ void PocrCFL::procPrimaryItem(CFLItem item)
     /// sy is the root of stree(item.dst())
     TreeNode* sy = strees[lbl]->getNode(item.dst(), item.dst());
 
-//    StdCFL::pushIntoWorklist(py->id, sy->id, Label(lbl, 0));
     traverseStree(lbl, px, py, sx, sy);
-}
-
-
-void PocrCFL::traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
-{
-    updateTrEdge(lbl, px, py, sx, sy);
-
-    for (auto pz: py->children)
-    {
-        if (!ptrees[lbl]->hasInd(sy->id, pz->id))
-            /// Only handle pz when pz -lbl->sy does not exist
-            traversePtree(lbl, py->id, pz, sx, sy);
-    }
 }
 
 
@@ -96,6 +82,19 @@ void PocrCFL::traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNo
         if (!strees[lbl]->hasInd(py->id, sz->id))
             /// Only handle sz when py -lbl-> sz does not exist
             traverseStree(lbl, px, py, sy->id, sz);
+    }
+}
+
+
+void PocrCFL::traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
+{
+    updateTrEdge(lbl, px, py, sx, sy);
+
+    for (auto pz: py->children)
+    {
+        if (!ptrees[lbl]->hasInd(sy->id, pz->id))
+            /// Only handle pz when pz -lbl->sy does not exist
+            traversePtree(lbl, py->id, pz, sx, sy);
     }
 }
 

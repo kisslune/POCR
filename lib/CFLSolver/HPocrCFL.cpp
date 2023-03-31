@@ -16,5 +16,22 @@ void HPocrCFL::solve()
         procPrimaryItem(item);
     }
 
+    while (!isWorklistEmpty())
+    {
+        CFLItem item = popFromWorklist();
+        processCFLItem(item);
+    }
+}
 
+
+bool HPocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
+{
+    CFLItem item = CFLItem(src, dst, ty, isPrimary);
+    if (isPrimary && grammar()->isTransitive(ty.first))
+    {
+        primaryList.push(item);
+        reanalyze = true;
+    }
+
+    return CFLBase::pushIntoWorklist(item);
 }
