@@ -15,19 +15,22 @@ namespace SVF
 class CFGrammar
 {
 public:
-    char numOfLabels;       // maximum 128 labels are allowed
+    typedef u32_t LabelIDTy;
+
+public:
+    LabelIDTy numOfLabels;       // maximum 128 labels are allowed
 
     /// mapping string label to int
-    Map<std::string, char> labelToIntMap;
-    Map<char, std::string> intToLabelMap;
+    Map<std::string, LabelIDTy> labelToIntMap;
+    Map<LabelIDTy, std::string> intToLabelMap;
     /// the IDs of labels with variant subscript
-    Set<char> variantLabels;
+    Set<LabelIDTy> variantLabels;
 
     /// Sets of rules
-    Set<char> emptyRules;                           // X ::= epsilon
-    Map<char, char> unaryRules;                     // X ::= Y
-    Map<std::pair<char, char>, char> binaryRules;   // X ::= Y Z
-    Set<char> transitiveLabels;                     // X ::= X X
+    Set<LabelIDTy> emptyRules;                           // X ::= epsilon
+    Map<LabelIDTy, LabelIDTy> unaryRules;                     // X ::= Y
+    Map<std::pair<LabelIDTy, LabelIDTy>, LabelIDTy> binaryRules;   // X ::= Y Z
+    Set<LabelIDTy> transitiveLabels;                     // X ::= X X
 
 public:
     CFGrammar() : numOfLabels(0)
@@ -40,23 +43,23 @@ public:
 
     void addLabel(std::string& s);
 
-    char getLabelId(std::string& s)
+    LabelIDTy getLabelId(std::string& s)
     {
         assert(hasLabel(s) && "Attempting to access a non-existing label!!");
         return labelToIntMap[s];
     }
 
-    std::string getLabelString(char c)
+    std::string getLabelString(LabelIDTy c)
     {
         return intToLabelMap[c];
     }
 
-    bool isaVariantLabel(char c)
+    bool isaVariantLabel(LabelIDTy c)
     {
         return variantLabels.find(c) != variantLabels.end();
     }
 
-    char getLhs(char rhs)
+    LabelIDTy getLhs(LabelIDTy rhs)
     {
         auto it = unaryRules.find(rhs);
         if (it == unaryRules.end())
@@ -64,7 +67,7 @@ public:
         return it->second;
     }
 
-    char getLhs(std::pair<char, char> rhs)
+    LabelIDTy getLhs(std::pair<LabelIDTy, LabelIDTy> rhs)
     {
         auto it = binaryRules.find(rhs);
         if (it == binaryRules.end())
@@ -72,12 +75,12 @@ public:
         return it->second;
     }
 
-    Set<char>& getEmptyRules()
+    Set<LabelIDTy>& getEmptyRules()
     {
         return emptyRules;
     }
 
-    bool isTransitive(char c)
+    bool isTransitive(LabelIDTy c)
     {
         return transitiveLabels.find(c) != transitiveLabels.end();
     }

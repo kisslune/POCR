@@ -120,7 +120,7 @@ bool PocrCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNod
     /// Update adjacency lists
     cflData()->addEdge(py->id, sy->id, Label(lbl, 0));
     /// Push the new edge into worklist as a secondary edge
-    if (py->id == tmpPrimaryItem.src() || sy->id == tmpPrimaryItem.dst())
+//    if (py->id == tmpPrimaryItem.src() || sy->id == tmpPrimaryItem.dst())
         pushIntoWorklist(py->id, sy->id, Label(lbl, 0), false);
 
     return true;
