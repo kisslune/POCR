@@ -27,14 +27,15 @@ void PocrCFL::initSolver()
         }
     }
     /// Remove transitive rules
-    Map<std::pair<char, char>, char> rulesToRemove;
+    Set<CFG::LabelIDTy> transitiveSymbols;
     for (auto rule: grammar()->binaryRules)
     {
-        if (rule.first.first == rule.first.second && rule.first.first == rule.second)
-            rulesToRemove.insert(rule);
+        for (auto lhs: rule.second)
+            if (lhs == rule.first.first && lhs == rule.first.second)
+                transitiveSymbols.insert(lhs);
     }
-    for (auto rule: rulesToRemove)
-        grammar()->binaryRules.erase(rule.first);
+    for (auto lbl: transitiveSymbols)
+        grammar()->binaryRules[std::make_pair(lbl, lbl)].erase(lbl);
 }
 
 
@@ -121,7 +122,7 @@ bool PocrCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNod
     cflData()->addEdge(py->id, sy->id, Label(lbl, 0));
     /// Push the new edge into worklist as a secondary edge
 //    if (py->id == tmpPrimaryItem.src() || sy->id == tmpPrimaryItem.dst())
-        pushIntoWorklist(py->id, sy->id, Label(lbl, 0), false);
+    pushIntoWorklist(py->id, sy->id, Label(lbl, 0), false);
 
     return true;
 }
@@ -133,59 +134,57 @@ bool PocrCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNod
 bool PocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 {
     return CFLBase::pushIntoWorklist(src, dst, ty, isPrimary);
-//    CFLItem item = CFLItem(src, dst, ty);
-//    if (grammar()->isTransitive(ty.first))
-//        item.setPrimary(true);
-//
-//    return CFLBase::pushIntoWorklist(item);
 }
 
 
 void PocrCFL::processCFLItem(CFLItem item)
 {
-    Label newTy = unarySumm(item.type());
-    if (addEdge(item.src(), item.dst(), newTy))
-    {
-        checks++;
-        pushIntoWorklist(item.src(), item.dst(), newTy);
-    }
+    auto newTySet = cflUnarySumm(item.type());
+    for (Label newTy: newTySet)
+        if (addEdge(item.src(), item.dst(), newTy))
+        {
+            checks++;
+            pushIntoWorklist(item.src(), item.dst(), newTy);
+        }
 
     for (auto& iter: cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        newTy = binarySumm(item.type(), rty);
-        if (newTy == item.type() && grammar()->isTransitive(rty.first))
-        {
-            /// X ::= X A
-            TreeNode* dst = strees[rty.first]->getNode(item.dst(), item.dst());
-            checkStree(newTy, item.src(), dst);
-        }
-        else
-        {
-            NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-            checks += iter.second.count();
-            for (NodeID diffDst: diffDsts)
-                pushIntoWorklist(item.src(), diffDst, newTy);
-        }
+        auto newTySet = cflBinarySumm(item.type(), rty);
+        for (Label newTy: newTySet)
+            if (newTy == item.type() && grammar()->isTransitive(rty.first))
+            {
+                /// X ::= X A
+                TreeNode* dst = strees[rty.first]->getNode(item.dst(), item.dst());
+                checkStree(newTy, item.src(), dst);
+            }
+            else
+            {
+                NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
+                checks += iter.second.count();
+                for (NodeID diffDst: diffDsts)
+                    pushIntoWorklist(item.src(), diffDst, newTy);
+            }
     }
 
     for (auto& iter: cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        newTy = binarySumm(lty, item.type());
-        if (newTy == item.type() && grammar()->isTransitive(lty.first))
-        {
-            /// X ::= A X
-            TreeNode* src = ptrees[lty.first]->getNode(item.src(), item.src());
-            checkPtree(newTy, src, item.dst());
-        }
-        else
-        {
-            NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-            checks += iter.second.count();
-            for (NodeID diffSrc: diffSrcs)
-                pushIntoWorklist(diffSrc, item.dst(), newTy);
-        }
+        auto newTySet = cflBinarySumm(lty, item.type());
+        for (Label newTy: newTySet)
+            if (newTy == item.type() && grammar()->isTransitive(lty.first))
+            {
+                /// X ::= A X
+                TreeNode* src = ptrees[lty.first]->getNode(item.src(), item.src());
+                checkPtree(newTy, src, item.dst());
+            }
+            else
+            {
+                NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
+                checks += iter.second.count();
+                for (NodeID diffSrc: diffSrcs)
+                    pushIntoWorklist(diffSrc, item.dst(), newTy);
+            }
     }
 }
 

@@ -32,7 +32,7 @@ protected:
     bool reanalyze;
     std::string grammarName;
     std::string graphName;
-    CFGrammar* _grammar;
+    CFG* _grammar;
     CFLGraph* _graph;
 
 public:
@@ -59,7 +59,7 @@ public:
 
     /// Grammar
     //@{
-    virtual CFGrammar* grammar()
+    virtual CFG* grammar()
     {
         return _grammar;
     }
@@ -94,8 +94,14 @@ public:
 
     /// rules
     //@{
-    virtual Label binarySumm(Label lty, Label rty);
-    virtual Label unarySumm(Label lty);
+    virtual Label binarySumm(Label lty, Label rty)
+    { return Label(0, 0); }
+
+    virtual Label unarySumm(Label lty)
+    { return Label(0, 0); }
+
+    virtual Set<Label> cflBinarySumm(Label lty, Label rty);
+    virtual Set<Label> cflUnarySumm(Label lty);
     //@}
     virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
     virtual void processCFLItem(CFLItem item);

@@ -2,8 +2,8 @@
 // Created by kisslune on 7/5/22.
 //
 
-#ifndef POCR_SVF_CFGRAMMAR_H
-#define POCR_SVF_CFGRAMMAR_H
+#ifndef POCR_SVF_CFG_H
+#define POCR_SVF_CFG_H
 
 #include "SVF-LLVM/BasicTypes.h"
 
@@ -12,7 +12,7 @@ namespace SVF
 /*!
  * Context-free grammar container
  */
-class CFGrammar
+class CFG
 {
 public:
     typedef u32_t LabelIDTy;
@@ -28,12 +28,14 @@ public:
 
     /// Sets of rules
     Set<LabelIDTy> emptyRules;                           // X ::= epsilon
-    Map<LabelIDTy, LabelIDTy> unaryRules;                     // X ::= Y
-    Map<std::pair<LabelIDTy, LabelIDTy>, LabelIDTy> binaryRules;   // X ::= Y Z
+    Map<LabelIDTy, Set<LabelIDTy>> unaryRules;                     // X ::= Y
+    Map<std::pair<LabelIDTy, LabelIDTy>, Set<LabelIDTy>> binaryRules;   // X ::= Y Z
     Set<LabelIDTy> transitiveLabels;                     // X ::= X X
 
+    const Set<LabelIDTy> emptySet;
+
 public:
-    CFGrammar() : numOfLabels(0)
+    CFG() : numOfLabels(0)
     {}
 
     bool hasLabel(std::string& s)
@@ -59,19 +61,19 @@ public:
         return variantLabels.find(c) != variantLabels.end();
     }
 
-    LabelIDTy getLhs(LabelIDTy rhs)
+    const Set<LabelIDTy>& getLhs(LabelIDTy rhs) const
     {
         auto it = unaryRules.find(rhs);
         if (it == unaryRules.end())
-            return 0;
+            return emptySet;
         return it->second;
     }
 
-    LabelIDTy getLhs(std::pair<LabelIDTy, LabelIDTy> rhs)
+    const Set<LabelIDTy>& getLhs(std::pair<LabelIDTy, LabelIDTy> rhs) const
     {
         auto it = binaryRules.find(rhs);
         if (it == binaryRules.end())
-            return 0;
+            return emptySet;
         return it->second;
     }
 
@@ -93,4 +95,4 @@ public:
 
 }
 
-#endif //POCR_SVF_CFGRAMMAR_H
+#endif //POCR_SVF_CFG_H
