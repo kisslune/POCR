@@ -88,6 +88,7 @@ public:
     void parseGrammar(std::string fname);
     void readGrammarFile(std::string fname);
     void detectTransitiveLabel();
+    void printCFGStat();
 };
 
 }

@@ -14,6 +14,7 @@ void CFGrammar::parseGrammar(std::string fname)
 {
     readGrammarFile(fname);
     detectTransitiveLabel();
+    printCFGStat();
 }
 
 
@@ -81,4 +82,20 @@ void CFGrammar::addLabel(std::string& s)
     /// check whether the label has an index
     if (s.find("_i") == s.size() - 2 && s.find("_i") != -1)
         variantLabels.insert(numOfLabels);
+}
+
+
+void CFGrammar::printCFGStat()
+{
+    u32_t numOfSymbols = 0;
+    u32_t numOfRules = 0;
+    u32_t numOfVariantSymbols = 0;
+
+    numOfSymbols = intToLabelMap.size();
+    numOfVariantSymbols = variantLabels.size();
+    numOfRules = emptyRules.size() + unaryRules.size() + binaryRules.size();
+
+    std::cout << "#Symbol = " << numOfSymbols << std::endl;
+    std::cout << "#VariantSymbol = " << numOfVariantSymbols << std::endl;
+    std::cout << "#Rule = " << numOfRules << std::endl;
 }
