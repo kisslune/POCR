@@ -51,7 +51,7 @@ public:
 
     inline bool operator==(const CFLItem& rhs) const
     {
-        return (_src == rhs._src) && (_dst == rhs._dst) && (_type == rhs._type);
+        return (_src == rhs._src) && (_dst == rhs._dst) && (_type == rhs._type) && (_isPrimary == rhs._isPrimary);
     }
     //@}
 
@@ -60,12 +60,6 @@ public:
 
     NodeID dst() const
     { return _dst; }
-
-//    const NodeID src() const
-//    { return _src; }
-//
-//    const NodeID dst() const
-//    { return _dst; }
 
     Label type() const
     { return _type; }

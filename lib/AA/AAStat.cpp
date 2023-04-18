@@ -77,8 +77,8 @@ void AAStat::performStat()
     aa->countSumEdges();
     timeStatMap["AnalysisTime"] = aa->timeOfSolving;
     timeStatMap["VmrssInGB"] = (_vmrssUsageAfter - _vmrssUsageBefore) / 1024.0 / 1024.0;
-//    PTNumStatMap["#Checks"] = aa->checks;
-//    PTNumStatMap["#SumEdges"] = aa->numOfSumEdges;
+    PTNumStatMap["#Checks"] = aa->checks;
+    PTNumStatMap["#SumEdges"] = aa->numOfSumEdges;
 
     printStat("CFL-reachability analysis Stats");
 }

@@ -7,7 +7,7 @@
 
 #include "CFLEdge.h"
 #include "CFLNode.h"
-#include "CFGrammar.h"
+#include "CFG.h"
 
 namespace SVF
 {
@@ -27,11 +27,11 @@ protected:
     CFLEdge::CFLEdgeSetTy pegEdgeSet;
     u32_t maxNodeID;
 
-    CFGrammar* grammar;
+    CFG* grammar;
 
 public:
     /// Constructor
-    CFLGraph(CFGrammar* _grammar) : maxNodeID(0), grammar(_grammar)
+    CFLGraph(CFG* _grammar) : maxNodeID(0), grammar(_grammar)
     {
     }
 
