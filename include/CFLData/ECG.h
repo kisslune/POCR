@@ -6,28 +6,145 @@
 #ifndef POCR_SVF_ECG_H
 #define POCR_SVF_ECG_H
 
-#include "CFLEdge.h"
-#include "CFLNode.h"
+#include "CFLData.h"
 
 namespace SVF
 {
-class ECG : public GenericGraph<CFLNode, CFLEdge>
+class ECG
 {
 public:
     enum ECGEdgeTy
     {
-        Forward = 0,
-        Backward        // backward edges for tracking cycles
+        Forth = 0,
+        Back        // backward edges for tracking cycles
     };
 
+    struct ECGNode
+    {
+        NodeID id;
+        std::unordered_map<ECGNode*, ECGEdgeTy> successors;
+        std::unordered_map<ECGNode*, ECGEdgeTy> predecessors;
+
+        ECGNode(NodeID i) : id(i)
+        {}
+
+        inline bool operator==(const ECGNode& rhs) const
+        {
+            return id == rhs.id;
+        }
+
+        inline bool operator<(const ECGNode& rhs) const
+        {
+            return id < rhs.id;
+        }
+    };
+
+    typedef std::pair<ECGNode*, ECGNode*> ECGEdge;   // first: src, second: dst
+
 protected:
-    Map<NodeID,NodeID> nodeToRepMap;
+    std::unordered_map<NodeID, NodeID> nodeToRepMap;
+    std::unordered_map<NodeID, ECGNode*> idToNodeMap;
+    std::unordered_map<NodeID, NodeBS> succMap;
+
+    ECGNode* backSrc;
+    ECGNode* backDst;
 
 public:
     /// constructor
-    ECG();      // should be initialized with no edges
+    ECG() : backSrc(nullptr), backDst(nullptr)   // initialized with no edges
+    {};
 
+    /// node methods
+    //@{
+    bool addNode(NodeID id)
+    {
+        if (idToNodeMap.find(id) != idToNodeMap.end())
+            return false;
 
+        idToNodeMap[id] = new ECGNode(id);
+        setReachable(id,id);
+        return true;
+    }
+
+    inline NodeID repNodeID(NodeID id) const
+    {
+        auto it = nodeToRepMap.find(id);
+        if (it == nodeToRepMap.end())
+            return id;
+        return it->second;
+    }
+    //@}
+
+    /// edge methods
+    //@{
+    inline ECGNode* getNode(NodeID id)
+    {
+        auto it = idToNodeMap.find(repNodeID(id));
+        assert(it != idToNodeMap.end() && "Node not found!");
+        return it->second;
+    }
+
+    inline bool hasEdge(NodeID src, NodeID dst)
+    {
+        ECGNode* srcNode = getNode(src);
+        return srcNode->successors.find(getNode(dst)) != srcNode->successors.end();
+    }
+
+    void addEdge(NodeID src, NodeID dst, ECGEdgeTy ty)
+    {
+//        if (hasEdge(src, dst))
+//            return false;
+
+        ECGNode* srcNode = getNode(src);
+        ECGNode* dstNode = getNode(dst);
+        addEdge(srcNode, dstNode, ty);
+    }
+
+    inline static void addEdge(ECGNode* src, ECGNode* dst, ECGEdgeTy ty)
+    {
+        src->successors[dst] = ty;
+        dst->predecessors[src] = ty;
+    }
+
+    void removeEdge(NodeID src, NodeID dst)
+    {
+        ECGNode* vSrc = getNode(src);
+        ECGNode* vDst = getNode(dst);
+        removeEdge(vSrc, vDst);
+    }
+
+    static void removeEdge(ECGEdge edge)
+    {
+        ECGNode* vSrc = edge.first;
+        ECGNode* vDst = edge.second;
+        removeEdge(vSrc, vDst);
+    }
+
+    inline static void removeEdge(ECGNode* src, ECGNode* dst)
+    {
+        src->successors.erase(dst);
+        dst->predecessors.erase(src);
+    }
+    //@}
+
+    /// adjacency list methods
+    //@{
+    inline bool isReachable(NodeID n, NodeID tgt)
+    { return succMap[n].test(tgt); }
+
+    inline void setReachable(NodeID n, NodeID tgt)
+    { succMap[n].set(tgt); }
+    //@}
+
+    /// graph methods
+    void insertForthEdge(NodeID i, NodeID j);
+    void insertBackEdge(NodeID i, NodeID j);
+    void searchForth(ECGNode* vi, ECGNode* vj);
+    void searchBack(ECGNode* vi, ECGNode* vj);
+
+    void searchForthInCycle(ECGNode* vj);  // no use vi
+    void searchBackInCycle(ECGNode* vi);   // no use vj
+    void resetBackEdge(ECGNode* vi, ECGNode* vj);
 };
 
 }
