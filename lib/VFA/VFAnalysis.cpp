@@ -13,6 +13,8 @@ using namespace SVF;
 using namespace SVFUtil;
 
 
+/// ------------------- VFA Base Methods -----------------------
+
 void VFAnalysis::initialize()
 {
     setGraph(new IVFG());
@@ -23,6 +25,8 @@ void VFAnalysis::initialize()
 
     /// Graph simplification
     simplifyGraph();
+    /// initialize online solver
+    initSolver();
 }
 
 
@@ -35,15 +39,16 @@ void VFAnalysis::analyze()
     // Start solving
     double propHorStart = stat->getClk();
 
-    do {
-        numOfIteration++;
+    do
+    {
+        stat->numOfIteration++;
         reanalyze = false;
         if (CFLOpt::solveCFL())
             solve();
     } while (reanalyze);
 
     double propHorEnd = stat->getClk();
-    timeOfSolving += (propHorEnd - propHorStart) / TIMEINTERVAL;
+    stat->timeOfSolving += (propHorEnd - propHorStart) / TIMEINTERVAL;
 
     // Finalize the analysis
     finalize();
@@ -63,6 +68,16 @@ void VFAnalysis::finalize()
 }
 
 
+bool VFAnalysis::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
+{
+    if (ty.first == fault)
+        return false;
+
+    return CFLBase::pushIntoWorklist(src, dst, ty);
+}
+
+
+/// ------------------- Std VFA Methods ----------------------
 
 Label StdVFA::binarySumm(Label lty, Label rty)
 {
@@ -94,35 +109,33 @@ Label StdVFA::unarySumm(Label lty)
 }
 
 
-void StdVFA::initialize()
-{
-    VFAnalysis::initialize();
-    initSolver();
-}
-
-
 void StdVFA::initSolver()
 {
-    for (CFLEdge* edge: graph()->getIVFGEdges()) {
+    for (CFLEdge* edge: graph()->getIVFGEdges())
+    {
         NodeID srcId = edge->getSrcID();
         NodeID dstId = edge->getDstID();
 
-        if (edge->getEdgeKind() == IVFG::DirectVF) {
+        if (edge->getEdgeKind() == IVFG::DirectVF)
+        {
             addEdge(srcId, dstId, std::make_pair(a, 0));
             pushIntoWorklist(srcId, dstId, std::make_pair(a, 0));
         }
-        if (edge->getEdgeKind() == IVFG::CallVF) {
+        if (edge->getEdgeKind() == IVFG::CallVF)
+        {
             addEdge(srcId, dstId, std::make_pair(call, edge->getEdgeIdx()));
             pushIntoWorklist(srcId, dstId, std::make_pair(call, edge->getEdgeIdx()));
         }
-        if (edge->getEdgeKind() == IVFG::RetVF) {
+        if (edge->getEdgeKind() == IVFG::RetVF)
+        {
             addEdge(srcId, dstId, std::make_pair(ret, edge->getEdgeIdx()));
             pushIntoWorklist(srcId, dstId, std::make_pair(ret, edge->getEdgeIdx()));
         }
     }
 
     /// A ::= epsilon
-    for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter) {
+    for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter)
+    {
         NodeID nodeId = nIter->first;
         addEdge(nodeId, nodeId, std::make_pair(A, 0));
         pushIntoWorklist(nodeId, nodeId, std::make_pair(A, 0));
@@ -130,37 +143,31 @@ void StdVFA::initSolver()
 }
 
 
-bool StdVFA::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
-{
-    if (ty.first == fault)
-        return false;
-
-    return VFAnalysis::pushIntoWorklist(src, dst, ty);
-}
-
-
 void StdVFA::processCFLItem(CFLItem item)
 {
     Label newTy = unarySumm(item.type());
-    if (addEdge(item.src(), item.dst(), newTy)) {
-        checks++;
+    if (addEdge(item.src(), item.dst(), newTy))
+    {
+        stat->checks++;
         pushIntoWorklist(item.src(), item.dst(), newTy);
     }
 
-    for (auto iter: cflData()->getSuccMap(item.dst())) {
+    for (auto iter: cflData()->getSuccMap(item.dst()))
+    {
         Label rty = iter.first;
         newTy = binarySumm(item.type(), rty);
         NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-        checks += iter.second.count();
+        stat->checks += iter.second.count();
         for (NodeID diffDst: diffDsts)
             pushIntoWorklist(item.src(), diffDst, newTy);
     }
 
-    for (auto iter: cflData()->getPredMap(item.src())) {
+    for (auto iter: cflData()->getPredMap(item.src()))
+    {
         Label lty = iter.first;
         newTy = binarySumm(lty, item.type());
         NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-        checks += iter.second.count();
+        stat->checks += iter.second.count();
         for (NodeID diffSrc: diffSrcs)
             pushIntoWorklist(diffSrc, item.dst(), newTy);
     }
@@ -169,13 +176,15 @@ void StdVFA::processCFLItem(CFLItem item)
 
 void StdVFA::countSumEdges()
 {
-    numOfSumEdges = 0;
-    std::set<u32_t> s = {A,Cl};
+    stat->numOfSumEdges = 0;
+    std::set<u32_t> s = {A, Cl};
 
-    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1) {
-        for (auto& iter2: iter1->second) {
+    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
+    {
+        for (auto& iter2: iter1->second)
+        {
             if (s.find(iter2.first.first) != s.end())
-                numOfSumEdges += iter2.second.count();
+                stat->numOfSumEdges += iter2.second.count();
         }
     }
 }

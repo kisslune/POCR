@@ -49,7 +49,7 @@ void PocrVFA::addArc(NodeID src, NodeID dst)
 
 void PocrVFA::meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
 {
-    checks++;
+    stat->checks++;
 
     TreeNode* newVNode = treeData.addInd(x, vNode->id);
     addEdge(x, vNode->id, std::make_pair(A, 0));
@@ -84,8 +84,8 @@ void PocrVFA::matchCallRet(NodeID u, NodeID v)
         if (retChildIt != retIt->second.end()) {
             for (NodeID callP: callParentIt.second)
                 for (NodeID retC: retChildIt->second) {
-                    checks++;
-                    StdVFA::pushIntoWorklist(callP, retC, std::make_pair(A, 0));
+                    stat->checks++;
+                    pushIntoWorklist(callP, retC, std::make_pair(A, 0));
                 }
         }
     }
@@ -94,7 +94,7 @@ void PocrVFA::matchCallRet(NodeID u, NodeID v)
 
 bool PocrVFA::hasA(NodeID src, NodeID dst)
 {
-    checks++;
+    stat->checks++;
     return treeData.hasInd(src, dst);
 }
 
@@ -119,14 +119,14 @@ void PocrVFA::countSumEdges()
         }
     }
 
-    numOfSumEdges = 0;
+    stat->numOfSumEdges = 0;
 
     for (auto& iter: treeData.indMap) {
-        numOfSumEdges += iter.second.size();
+        stat->numOfSumEdges += iter.second.size();
     }
     for (auto& iter: clChildren) {
         for (auto& iter2: iter.second) {
-            numOfSumEdges += iter2.second.size();
+            stat->numOfSumEdges += iter2.second.size();
         }
     }
 }

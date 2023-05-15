@@ -182,8 +182,8 @@ void TRVFA::matchCallRet(NodeID u, NodeID v)
             for (NodeID callP: callParentIt.second)
                 for (NodeID retC: retChildIt->second)
                 {
-                    checks++;
-                    StdVFA::pushIntoWorklist(callP, retC, std::make_pair(A, 0));
+                    stat->checks++;
+                    pushIntoWorklist(callP, retC, std::make_pair(A, 0));
                 }
         }
     }
@@ -212,10 +212,10 @@ void TRVFA::countSumEdges()
         }
     }
 
-    numOfSumEdges = 0;
-    numOfSumEdges += ecg.countReachablePairs();
+    stat->numOfSumEdges = 0;
+    stat->numOfSumEdges += ecg.countReachablePairs();
 
     for (auto& iter: clChildren)
         for (auto& iter2: iter.second)
-            numOfSumEdges += iter2.second.size();
+            stat->numOfSumEdges += iter2.second.size();
 }
