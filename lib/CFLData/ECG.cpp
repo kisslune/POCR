@@ -125,3 +125,11 @@ void ECG::searchBackInCycle(ECGNode* vi)
 }
 
 
+u32_t ECG::countReachablePairs()
+{
+    u32_t retVal = 0;
+    for (auto& iter: succMap) {
+        retVal += iter.second.count();
+    }
+    return retVal;
+}

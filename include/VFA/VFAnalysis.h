@@ -13,6 +13,7 @@
 #include "VFAStat.h"
 #include "IVFGFold.h"
 #include "IVFGInterDyck.h"
+#include "CFLData/ECG.h"
 
 namespace SVF
 {
@@ -190,6 +191,54 @@ public:
     bool hasA(NodeID src, NodeID dst);
     virtual void matchCallRet(NodeID u, NodeID v);
     void addCl(NodeID u, u32_t idx, TreeNode* vNode);
+
+    void countSumEdges();
+};
+
+
+/*!
+ * VFA with transitive reduction
+ */
+class TRVFA : public StdVFA
+{
+public:
+    typedef ECG::ECGNode ECGNode;
+    typedef ECG::ECGEdge ECGEdge;
+    typedef ECG::ECGEdgeTy ECGEdgeTy;
+    typedef std::unordered_map<NodeID, std::unordered_map<u32_t, std::unordered_set<NodeID>>> CallRetMap;
+    typedef std::unordered_map<NodeID, std::unordered_set<NodeID>> ChildrenMap;
+
+protected:
+    ECG ecg;
+    CallRetMap callParents;
+    CallRetMap retChildren;
+    ChildrenMap sChildren;
+    CallRetMap clChildren;
+
+public:
+    TRVFA(std::string gName) : StdVFA(gName)
+    {}
+
+    void initSolver();
+    virtual void solve();
+
+    virtual void addArc(NodeID src, NodeID dst);
+    virtual void matchCallRet(NodeID u, NodeID v);
+    void addCl(NodeID u, u32_t idx, ECGNode* vNode);
+
+    void insertForthEdge(NodeID i, NodeID j);
+    void insertBackEdge(NodeID i, NodeID j);
+    void searchForth(ECGNode* vi, ECGNode* vj);
+    void searchBack(ECGNode* vi, ECGNode* vj);
+
+    void searchForthInCycle(ECGNode* vj);  // no use vi
+    void searchBackInCycle(ECGNode* vi);   // no use vj
+
+    inline bool isReachable(NodeID src, NodeID dst)
+    {
+        checks++;
+        return ecg.isReachable(src,dst);
+    }
 
     void countSumEdges();
 };

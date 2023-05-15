@@ -78,10 +78,10 @@ public:
         return it->second;
     }
 
-    inline const ECGNode* backSrc() const
+    inline ECGNode* backSrc() const
     { return _backSrc; }
 
-    inline const ECGNode* backDst() const
+    inline ECGNode* backDst() const
     { return _backDst; }
 
     inline void resetBackSrc(ECGNode* v)
@@ -143,10 +143,7 @@ public:
     /// adjacency list methods
     //@{
     inline bool isReachable(NodeID n, NodeID tgt)
-    {
-        checks++;
-        return succMap[n].test(tgt);
-    }
+    { return succMap[n].test(tgt); }
 
     inline void setReachable(NodeID n, NodeID tgt)
     { succMap[n].set(tgt); }
@@ -161,6 +158,9 @@ public:
     void searchForthInCycle(ECGNode* vj);  // no use vi
     void searchBackInCycle(ECGNode* vi);   // no use vj
     void resetBackEdge(ECGNode* vi, ECGNode* vj);
+
+    /// calculator
+    u32_t countReachablePairs();
 };
 
 }
