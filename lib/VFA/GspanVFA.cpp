@@ -32,7 +32,6 @@ void GspanVFA::initSolver()
 
 void GspanVFA::solve()
 {
-    numOfIteration++;
     reanalyze = false;
     CFLData resData;
 
