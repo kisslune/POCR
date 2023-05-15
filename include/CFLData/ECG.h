@@ -19,6 +19,9 @@ public:
         Back        // backward edges for tracking cycles
     };
 
+    /// calculators
+    u32_t checks;
+
     struct ECGNode
     {
         NodeID id;
@@ -46,24 +49,25 @@ protected:
     std::unordered_map<NodeID, ECGNode*> idToNodeMap;
     std::unordered_map<NodeID, NodeBS> succMap;
 
-    ECGNode* backSrc;
-    ECGNode* backDst;
+    ECGNode* _backSrc;
+    ECGNode* _backDst;
 
 public:
     /// constructor
-    ECG() : backSrc(nullptr), backDst(nullptr)   // initialized with no edges
+    ECG() : _backSrc(nullptr),
+            _backDst(nullptr),
+            checks(0)
     {};
 
     /// node methods
     //@{
-    bool addNode(NodeID id)
+    inline void addNode(NodeID id)
     {
-        if (idToNodeMap.find(id) != idToNodeMap.end())
-            return false;
-
+//        if (idToNodeMap.find(id) != idToNodeMap.end())
+//            return false;
         idToNodeMap[id] = new ECGNode(id);
-        setReachable(id,id);
-        return true;
+        setReachable(id, id);
+//        return true;
     }
 
     inline NodeID repNodeID(NodeID id) const
@@ -73,6 +77,18 @@ public:
             return id;
         return it->second;
     }
+
+    inline const ECGNode* backSrc() const
+    { return _backSrc; }
+
+    inline const ECGNode* backDst() const
+    { return _backDst; }
+
+    inline void resetBackSrc(ECGNode* v)
+    { _backSrc = v; }
+
+    inline void resetBackDst(ECGNode* v)
+    { _backDst = v; }
     //@}
 
     /// edge methods
@@ -92,9 +108,6 @@ public:
 
     void addEdge(NodeID src, NodeID dst, ECGEdgeTy ty)
     {
-//        if (hasEdge(src, dst))
-//            return false;
-
         ECGNode* srcNode = getNode(src);
         ECGNode* dstNode = getNode(dst);
         addEdge(srcNode, dstNode, ty);
@@ -130,7 +143,10 @@ public:
     /// adjacency list methods
     //@{
     inline bool isReachable(NodeID n, NodeID tgt)
-    { return succMap[n].test(tgt); }
+    {
+        checks++;
+        return succMap[n].test(tgt);
+    }
 
     inline void setReachable(NodeID n, NodeID tgt)
     { succMap[n].set(tgt); }

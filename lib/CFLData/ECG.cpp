@@ -62,8 +62,8 @@ void ECG::insertBackEdge(NodeID i, NodeID j)
     addEdge(i, j, Back);
     ECGNode* vi = getNode(i);
     ECGNode* vj = getNode(j);
-    backSrc = vi;
-    backDst = vj;
+    _backSrc = vi;
+    _backDst = vj;
 
     searchForthInCycle(vj);
     searchBackInCycle(vi);
@@ -72,31 +72,31 @@ void ECG::insertBackEdge(NodeID i, NodeID j)
 
 void ECG::resetBackEdge(ECGNode* vi, ECGNode* vj)
 {
-    removeEdge(backSrc, backDst);
+    removeEdge(_backSrc, _backDst);
     addEdge(vi, vj, Back);
-    backSrc = vi;
-    backDst = vj;
+    _backSrc = vi;
+    _backDst = vj;
 }
 
 
 void ECG::searchForthInCycle(ECGNode* vj)
 {
-    setReachable(backSrc->id, vj->id);
+    setReachable(_backSrc->id, vj->id);
 
     std::unordered_map<ECGNode*, ECGEdgeTy> vjSuccs = vj->successors;   // copy successors to traverse
     for (auto succ: vjSuccs)
     {
         ECGNode* vSucc = succ.first;
-        if (succ.second == Back && isReachable(vj->id, backSrc->id))
+        if (succ.second == Back && isReachable(vj->id, _backSrc->id))
         {
             removeEdge(vj, vSucc);
-            if (!isReachable(backSrc->id, vSucc->id))
+            if (!isReachable(_backSrc->id, vSucc->id))
             {
-                resetBackEdge(backSrc, vSucc);
+                resetBackEdge(_backSrc, vSucc);
                 searchForthInCycle(vSucc);
             }
         }
-        else if (!isReachable(backSrc->id, vSucc->id))
+        else if (!isReachable(_backSrc->id, vSucc->id))
             searchForthInCycle(vSucc);
     }
 }
@@ -104,22 +104,22 @@ void ECG::searchForthInCycle(ECGNode* vj)
 
 void ECG::searchBackInCycle(ECGNode* vi)
 {
-    searchForth(vi, backDst);
+    searchForth(vi, _backDst);
 
     std::unordered_map<ECGNode*, ECGEdgeTy> viPreds = vi->predecessors;   // copy predecessors to traverse
     for (auto pred: viPreds)
     {
         ECGNode* vPred = pred.first;
-        if (pred.second == Back && isReachable(backDst->id, vi->id))
+        if (pred.second == Back && isReachable(_backDst->id, vi->id))
         {
             removeEdge(vPred, vi);
-            if (!isReachable(vPred->id, backDst->id))
+            if (!isReachable(vPred->id, _backDst->id))
             {
-                resetBackEdge(vPred, backDst);
+                resetBackEdge(vPred, _backDst);
                 searchBackInCycle(vPred);
             }
         }
-        else if (!isReachable(vPred->id, backDst->id))
+        else if (!isReachable(vPred->id, _backDst->id))
             searchBackInCycle(vPred);
     }
 }
