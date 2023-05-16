@@ -86,6 +86,9 @@ public:
     virtual void finalize();
     virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
 
+    Label binarySumm(Label lty, Label rty) override
+    { return {0,0}; }
+
     /// Print statistics results
     inline void dumpStat()
     {

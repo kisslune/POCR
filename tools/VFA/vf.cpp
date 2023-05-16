@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     CFLBase::processArgs(argc, argv, arg_num, arg_vec, inFileVec);
     OptionBase::parseOptions(arg_num, arg_vec, "Valueflow analysis\n", "[options] <input>");
 
-    StdVFA* vfa;
+    VFAnalysis* vfa;
     if (Default_VFA()) {
         vfa = new StdVFA(inFileVec[0]);
         vfa->analyze();
