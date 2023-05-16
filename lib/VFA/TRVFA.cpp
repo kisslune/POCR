@@ -203,19 +203,19 @@ void TRVFA::addCl(NodeID u, u32_t idx, ECGNode* vNode)
 
 void TRVFA::countSumEdges()
 {
-    for (auto& iter: callParents)
-    {
-        for (auto& iter2: iter.second)
-        {
-            for (auto src: iter2.second)
-                addCl(src, iter2.first, ecg.getNode(iter.first));
-        }
-    }
+//    for (auto& iter: callParents)
+//    {
+//        for (auto& iter2: iter.second)
+//        {
+//            for (auto src: iter2.second)
+//                addCl(src, iter2.first, ecg.getNode(iter.first));
+//        }
+//    }
 
     stat->numOfSumEdges = 0;
     stat->numOfSumEdges += ecg.countReachablePairs();
 
-    for (auto& iter: clChildren)
-        for (auto& iter2: iter.second)
-            stat->numOfSumEdges += iter2.second.size();
+//    for (auto& iter: clChildren)
+//        for (auto& iter2: iter.second)
+//            stat->numOfSumEdges += iter2.second.size();
 }
