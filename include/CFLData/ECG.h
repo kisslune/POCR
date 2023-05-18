@@ -51,6 +51,7 @@ protected:
 
     ECGNode* _backSrc;
     ECGNode* _backDst;
+    std::stack<ECGEdge> redBackEdges;
 
 public:
     /// constructor
@@ -155,9 +156,12 @@ public:
     void searchForth(ECGNode* vi, ECGNode* vj);
     void searchBack(ECGNode* vi, ECGNode* vj);
 
-    void searchForthInCycle(ECGNode* vj);  // no use vi
-    void searchBackInCycle(ECGNode* vi);   // no use vj
-    void resetBackEdge(ECGNode* vi, ECGNode* vj);
+//    void searchForthInCycle(ECGNode* vi, ECGNode* vj);  // no use vi
+    void searchBackInCycle(ECGNode* vi, ECGNode* vj);   // no use vj
+
+//    void searchForthInCycle(ECGNode* vj);  // no use vi
+//    void searchBackInCycle(ECGNode* vi);   // no use vj
+//    void resetBackEdge(ECGNode* vi, ECGNode* vj);
 
     /// calculator
     u32_t countReachablePairs();

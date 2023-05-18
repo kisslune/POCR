@@ -48,8 +48,8 @@ void TRVFA::addArc(NodeID src, NodeID dst)
     if (ecg.isReachable(src,dst))
         return;
 
-//    if (ecg.isReachable(dst, src))   // src --> dst is a back edge
-//        return ecg.insertBackEdge(src, dst);
+    if (ecg.isReachable(dst, src))   // src --> dst is a back edge
+        return ecg.insertBackEdge(src, dst);
 
     ecg.insertForthEdge(src, dst);      // src --> dst is a forth edge
 }
