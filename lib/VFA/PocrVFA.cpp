@@ -71,24 +71,24 @@ void PocrVFA::meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
 void PocrVFA::matchCallRet(NodeID u, NodeID v)
 {
     // vertical handling of matched parentheses
-    auto callIt = callParents.find(u);
-    if (callIt == callParents.end())
-        return;
-
-    auto retIt = retChildren.find(v);
-    if (retIt == retChildren.end())
-        return;
-
-    for (auto& callParentIt: callIt->second) {
-        auto retChildIt = retIt->second.find(callParentIt.first);
-        if (retChildIt != retIt->second.end()) {
-            for (NodeID callP: callParentIt.second)
-                for (NodeID retC: retChildIt->second) {
-                    stat->checks++;
-                    pushIntoWorklist(callP, retC, std::make_pair(A, 0));
-                }
-        }
-    }
+//    auto callIt = callParents.find(u);
+//    if (callIt == callParents.end())
+//        return;
+//
+//    auto retIt = retChildren.find(v);
+//    if (retIt == retChildren.end())
+//        return;
+//
+//    for (auto& callParentIt: callIt->second) {
+//        auto retChildIt = retIt->second.find(callParentIt.first);
+//        if (retChildIt != retIt->second.end()) {
+//            for (NodeID callP: callParentIt.second)
+//                for (NodeID retC: retChildIt->second) {
+//                    stat->checks++;
+//                    pushIntoWorklist(callP, retC, std::make_pair(A, 0));
+//                }
+//        }
+//    }
 }
 
 

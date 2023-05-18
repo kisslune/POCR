@@ -205,16 +205,16 @@ public:
     void solve() override;
 
     virtual void addArc(NodeID src, NodeID dst);
-    virtual void matchCallRet(NodeID u, NodeID v);
-    void addCl(NodeID u, u32_t idx, ECGNode* vNode);
+//    virtual void matchCallRet(NodeID u, NodeID v);
+//    void addCl(NodeID u, u32_t idx, ECGNode* vNode);
 
-    void insertForthEdge(NodeID i, NodeID j);
-    void insertBackEdge(NodeID i, NodeID j);
-    void searchForth(ECGNode* vi, ECGNode* vj);
-    void searchBack(ECGNode* vi, ECGNode* vj);
-
-    void searchForthInCycle(ECGNode* vj);  // no use vi
-    void searchBackInCycle(ECGNode* vi);   // no use vj
+//    void insertForthEdge(NodeID i, NodeID j);
+//    void insertBackEdge(NodeID i, NodeID j);
+//    void searchForth(ECGNode* vi, ECGNode* vj);
+//    void searchBack(ECGNode* vi, ECGNode* vj);
+//
+//    void searchForthInCycle(ECGNode* vj);  // no use vi
+//    void searchBackInCycle(ECGNode* vi);   // no use vj
 
     inline bool isReachable(NodeID src, NodeID dst)
     {

@@ -161,6 +161,7 @@ public:
 
     /// calculator
     u32_t countReachablePairs();
+    void countECGEdges();
 };
 
 }
