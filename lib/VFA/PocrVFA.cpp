@@ -71,24 +71,24 @@ void PocrVFA::meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
 void PocrVFA::matchCallRet(NodeID u, NodeID v)
 {
     // vertical handling of matched parentheses
-//    auto callIt = callParents.find(u);
-//    if (callIt == callParents.end())
-//        return;
-//
-//    auto retIt = retChildren.find(v);
-//    if (retIt == retChildren.end())
-//        return;
-//
-//    for (auto& callParentIt: callIt->second) {
-//        auto retChildIt = retIt->second.find(callParentIt.first);
-//        if (retChildIt != retIt->second.end()) {
-//            for (NodeID callP: callParentIt.second)
-//                for (NodeID retC: retChildIt->second) {
-//                    stat->checks++;
-//                    pushIntoWorklist(callP, retC, std::make_pair(A, 0));
-//                }
-//        }
-//    }
+    auto callIt = callParents.find(u);
+    if (callIt == callParents.end())
+        return;
+
+    auto retIt = retChildren.find(v);
+    if (retIt == retChildren.end())
+        return;
+
+    for (auto& callParentIt: callIt->second) {
+        auto retChildIt = retIt->second.find(callParentIt.first);
+        if (retChildIt != retIt->second.end()) {
+            for (NodeID callP: callParentIt.second)
+                for (NodeID retC: retChildIt->second) {
+                    stat->checks++;
+                    pushIntoWorklist(callP, retC, std::make_pair(A, 0));
+                }
+        }
+    }
 }
 
 
@@ -112,23 +112,23 @@ void PocrVFA::addCl(NodeID u, u32_t idx, TreeNode* vNode)
 
 void PocrVFA::countSumEdges()
 {
-//    for (auto& iter: callParents) {
-//        for (auto& iter2: iter.second) {
-//            for (auto src: iter2.second)
-//                addCl(src, iter2.first, treeData.getNode(iter.first, iter.first));
-//        }
-//    }
+    for (auto& iter: callParents) {
+        for (auto& iter2: iter.second) {
+            for (auto src: iter2.second)
+                addCl(src, iter2.first, treeData.getNode(iter.first, iter.first));
+        }
+    }
 
     stat->numOfSumEdges = 0;
 
     for (auto& iter: treeData.indMap) {
         stat->numOfSumEdges += iter.second.size();
     }
-//    for (auto& iter: clChildren) {
-//        for (auto& iter2: iter.second) {
-//            stat->numOfSumEdges += iter2.second.size();
-//        }
-//    }
+    for (auto& iter: clChildren) {
+        for (auto& iter2: iter.second) {
+            stat->numOfSumEdges += iter2.second.size();
+        }
+    }
 }
 
 

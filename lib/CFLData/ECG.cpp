@@ -14,7 +14,7 @@ void ECG::insertForthEdge(NodeID i, NodeID j)
     ECGNode* vj = getNode(j);
     searchBack(vi, vj);
 
-    addEdge(i, j, Forth);
+    addEdge(vi, vj, Forth);
 }
 
 
@@ -57,7 +57,7 @@ void ECG::searchForth(ECGNode* vi, ECGNode* vj)
 }
 
 
-// TODO: incorrect
+// TODO: already correct, need to handle cycle
 void ECG::insertBackEdge(NodeID i, NodeID j)
 {
     /// Set a back edge, backSrc and backDst will change during the following two-way search
