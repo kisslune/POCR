@@ -19,7 +19,9 @@ cd SVF
 source ./build.sh
 ```
 
-### 3. Add An Environment Parameter `export SVF_DIR=<your SVF directory>`
+### 3. Add the Environment Parameter 
+
+```export SVF_DIR=<your SVF directory>```
 
 ### 4. Build POCR
 
