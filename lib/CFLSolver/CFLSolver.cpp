@@ -80,7 +80,7 @@ Set<Label> StdCFL::cflBinarySumm(Label lty, Label rty)
         else if (grammar()->isaVariantLabel(rty.first))
         {
             if (grammar()->isaVariantLabel(lhs))
-                retVal.insert(Label(lhs, lty.second));
+                retVal.insert(Label(lhs, rty.second));
             else
                 retVal.insert(Label(lhs, 0));
         }
@@ -171,12 +171,13 @@ void StdCFL::initSolver()
 void StdCFL::processCFLItem(CFLItem item)
 {
     auto newTySet = cflUnarySumm(item.type());
-    for (Label newTy: newTySet)
+    for (Label newTy: newTySet){
         if (addEdge(item.src(), item.dst(), newTy))
         {
             checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
         }
+    }
 
     for (auto& iter: cflData()->getSuccMap(item.dst()))
     {
