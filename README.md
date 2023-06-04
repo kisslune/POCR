@@ -11,20 +11,27 @@
 sudo apt install cmake gcc g++ libtinfo-dev libz-dev zip wget npm
 ```
 
-### 2. Clone repository
+### 2. Install SVF
+
+```
+git clone https://github.com/kisslune/SVF.git
+cd SVF
+source ./build.sh
+```
+
+### 3. Add the Environment Parameter 
+
+```export SVF_DIR=<your SVF directory>```
+
+### 4. Build POCR
 
 ```
 git clone https://github.com/kisslune/POCR.git
-```
-
-### 3. Build POCR
-
-```
 cd POCR
 source ./build.sh
 ```
 
-### 4. Setup environment
+### 5. Setup environment
 
 
 ```
