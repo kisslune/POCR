@@ -135,10 +135,3 @@ cfl -std aa.cfg art.peg
 cfl -std vf.cfg art.vfg
 ```
 
-
-
-## Plan
-
-- Merge our work to the upstream [SVF](https://github.com/SVF-tools/SVF).
-
-- Implement the *POCR* algorithm for more clients.
