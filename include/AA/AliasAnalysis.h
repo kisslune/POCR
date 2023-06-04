@@ -190,7 +190,7 @@ public:
 
 protected:
     HybridData hybridData;
-    std::unordered_map<NodeID, NodeID> dChildren;
+    ChildrenMap dChildren;
     ChildrenMap aParents;
     CallRetMap fChildren;
     ChildrenMap vChildren;
