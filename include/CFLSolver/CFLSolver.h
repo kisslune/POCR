@@ -94,14 +94,8 @@ public:
 
     /// rules
     //@{
-    virtual Label binarySumm(Label lty, Label rty)
-    { return Label(0, 0); }
-
-    virtual Label unarySumm(Label lty)
-    { return Label(0, 0); }
-
-    virtual Set<Label> cflBinarySumm(Label lty, Label rty);
-    virtual Set<Label> cflUnarySumm(Label lty);
+    Set<Label> unarySumm(Label lty) override;
+    Set<Label> binarySumm(Label lty, Label rty) override;
     //@}
     virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
     virtual void processCFLItem(CFLItem item);

@@ -139,8 +139,7 @@ bool PocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 
 void PocrCFL::processCFLItem(CFLItem item)
 {
-    auto newTySet = cflUnarySumm(item.type());
-    for (Label newTy: newTySet)
+    for (Label newTy: unarySumm(item.type()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
             checks++;
@@ -150,8 +149,7 @@ void PocrCFL::processCFLItem(CFLItem item)
     for (auto& iter: cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        auto newTySet = cflBinarySumm(item.type(), rty);
-        for (Label newTy: newTySet)
+        for (Label newTy: binarySumm(item.type(), rty))
             if (newTy == item.type() && grammar()->isTransitive(rty.first))
             {
                 /// X ::= X A
@@ -170,8 +168,7 @@ void PocrCFL::processCFLItem(CFLItem item)
     for (auto& iter: cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        auto newTySet = cflBinarySumm(lty, item.type());
-        for (Label newTy: newTySet)
+        for (Label newTy: binarySumm(lty, item.type()))
             if (newTy == item.type() && grammar()->isTransitive(lty.first))
             {
                 /// X ::= A X

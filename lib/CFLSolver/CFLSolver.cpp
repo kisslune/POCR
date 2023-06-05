@@ -56,7 +56,27 @@ void StdCFL::analyze()
 }
 
 
-Set<Label> StdCFL::cflBinarySumm(Label lty, Label rty)
+Set<Label> StdCFL::unarySumm(Label lty)
+{
+    Set<Label> retVal;
+    auto& lhsSet = grammar()->getLhs(lty.first);
+
+    for (auto lhs: lhsSet)
+    {
+        if (!lhs)
+            continue;
+
+        if (grammar()->isaVariantLabel(lhs) && grammar()->isaVariantLabel(lty.first))
+            retVal.insert(Label(lhs, lty.second));
+        else
+            retVal.insert(Label(lhs, 0));
+    }
+
+    return retVal;
+}
+
+
+Set<Label> StdCFL::binarySumm(Label lty, Label rty)
 {
     Set<Label> retVal;
     auto lhsSet = grammar()->getLhs(std::make_pair(lty.first, rty.first));
@@ -92,26 +112,6 @@ Set<Label> StdCFL::cflBinarySumm(Label lty, Label rty)
 }
 
 
-Set<Label> StdCFL::cflUnarySumm(Label lty)
-{
-    Set<Label> retVal;
-    auto& lhsSet = grammar()->getLhs(lty.first);
-
-    for (auto lhs: lhsSet)
-    {
-        if (!lhs)
-            continue;
-
-        if (grammar()->isaVariantLabel(lhs) && grammar()->isaVariantLabel(lty.first))
-            retVal.insert(Label(lhs, lty.second));
-        else
-            retVal.insert(Label(lhs, 0));
-    }
-
-    return retVal;
-}
-
-
 void StdCFL::initSolver()
 {
     /// add all edges into adjacency list and worklist
@@ -136,20 +136,20 @@ void StdCFL::initSolver()
 
 void StdCFL::processCFLItem(CFLItem item)
 {
-    auto newTySet = cflUnarySumm(item.type());
-    for (Label newTy: newTySet){
+    /// Derive edges via unary production rules
+    for (Label newTy: unarySumm(item.type()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
             checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
         }
-    }
 
+    /// Derive edges via binary production rules
+    //@{
     for (auto& iter: cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        auto newTySet = cflBinarySumm(item.type(), rty);
-        for (Label newTy: newTySet)
+        for (Label newTy : binarySumm(item.type(), rty))
         {
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
             checks += iter.second.count();
@@ -161,8 +161,7 @@ void StdCFL::processCFLItem(CFLItem item)
     for (auto& iter: cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        auto newTySet = cflBinarySumm(lty, item.type());
-        for (Label newTy: newTySet)
+        for (Label newTy : binarySumm(lty, item.type()))
         {
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
             checks += iter.second.count();
@@ -170,6 +169,7 @@ void StdCFL::processCFLItem(CFLItem item)
                 pushIntoWorklist(diffSrc, item.dst(), newTy);
         }
     }
+    //@}
 }
 
 

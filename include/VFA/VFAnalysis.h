@@ -86,8 +86,11 @@ public:
     virtual void finalize();
     virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
 
-    Label binarySumm(Label lty, Label rty) override
-    { return {0,0}; }
+    Set<Label> unarySumm(Label lty) override
+    { return {}; }
+
+    Set<Label> binarySumm(Label lty, Label rty) override
+    { return {}; }
 
     /// Print statistics results
     inline void dumpStat()
@@ -135,8 +138,8 @@ public:
     // CFLItem operations
     //@{
     // Get a new edge kind from CFL grammar
-    Label binarySumm(Label lty, Label rty) override;
-    Label unarySumm(Label lty) override;
+    Set<Label> binarySumm(Label lty, Label rty) override;
+    Set<Label> unarySumm(Label lty) override;
     void processCFLItem(CFLItem item) override;
     //@}
 
@@ -261,8 +264,8 @@ public:
     GRVFA(std::string gName) : StdVFA(gName)
     {}
 
-    Label binarySumm(Label lty, Label rty) override;
-    Label unarySumm(Label lty) override;
+    Set<Label> binarySumm(Label lty, Label rty) override;
+    Set<Label> unarySumm(Label lty) override;
 };
 
 
@@ -275,8 +278,8 @@ public:
     GRGspanVFA(std::string gName) : GspanVFA(gName)
     {}
 
-    Label binarySumm(Label lty, Label rty) override;
-    Label unarySumm(Label lty) override;
+    Set<Label> binarySumm(Label lty, Label rty) override;
+    Set<Label> unarySumm(Label lty) override;
 };
 
 }

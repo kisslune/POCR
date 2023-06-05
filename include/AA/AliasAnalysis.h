@@ -167,8 +167,8 @@ public:
 
     // Alias data operations
     //@{
-    virtual Label binarySumm(Label lty, Label rty);
-    virtual Label unarySumm(Label lty);
+    virtual Set<Label> binarySumm(Label lty, Label rty);
+    virtual Set<Label> unarySumm(Label lty);
     //@}
 
     virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
@@ -271,7 +271,7 @@ public:
     GRAA(std::string gName) : StdAA(gName)
     {};
 
-    Label binarySumm(Label lty, Label rty);
+    Set<Label> binarySumm(Label lty, Label rty);
 };
 
 
@@ -284,7 +284,7 @@ public:
     GRGspanAA(std::string gName) : GspanAA(gName)
     {}
 
-    Label binarySumm(Label lty, Label rty);
+    Set<Label> binarySumm(Label lty, Label rty);
 };
 
 }

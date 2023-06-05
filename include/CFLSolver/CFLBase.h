@@ -126,10 +126,8 @@ public:
 
     //CFL data operations
     //@{
-    virtual Label unarySumm(Label lty)
-    { return std::make_pair(0, 0); }
-
-    virtual Label binarySumm(Label lty, Label rty) = 0;
+    virtual Set<Label> unarySumm(Label lty) = 0;
+    virtual Set<Label> binarySumm(Label lty, Label rty) = 0;
 
     virtual bool addEdge(const NodeID srcId, const NodeID dstId, const Label ty)
     {
@@ -164,27 +162,35 @@ public:
 
     virtual void processCFLItem(CFLItem item)
     {
-        Label newTy = unarySumm(item.type());
-        if (addEdge(item.src(), item.dst(), newTy))
-            pushIntoWorklist(item.src(), item.dst(), newTy);
+        /// Derive edges via unary production rules
+        for (Label newTy: unarySumm(item.type()))
+            if (addEdge(item.src(), item.dst(), newTy))
+                pushIntoWorklist(item.src(), item.dst(), newTy);
 
-        for (auto iter: cflData()->getSuccMap(item.dst()))
+        /// Derive edges via binary production rules
+        //@{
+        for (auto& iter: cflData()->getSuccMap(item.dst()))
         {
             Label rty = iter.first;
-            newTy = binarySumm(item.type(), rty);
-            NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-            for (NodeID diffDst: diffDsts)
-                pushIntoWorklist(item.src(), diffDst, newTy);
+            for (Label newTy : binarySumm(item.type(), rty))
+            {
+                NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
+                for (NodeID diffDst: diffDsts)
+                    pushIntoWorklist(item.src(), diffDst, newTy);
+            }
         }
 
-        for (auto iter: cflData()->getPredMap(item.src()))
+        for (auto& iter: cflData()->getPredMap(item.src()))
         {
             Label lty = iter.first;
-            newTy = binarySumm(lty, item.type());
-            NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-            for (NodeID diffSrc: diffSrcs)
-                pushIntoWorklist(diffSrc, item.dst(), newTy);
+            for (Label newTy : binarySumm(lty, item.type()))
+            {
+                NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
+                for (NodeID diffSrc: diffSrcs)
+                    pushIntoWorklist(diffSrc, item.dst(), newTy);
+            }
         }
+        //@}
     };
 };
 

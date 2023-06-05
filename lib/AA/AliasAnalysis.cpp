@@ -81,46 +81,47 @@ void AliasAnalysis::analyze()
 }
 
 
-Label StdAA::binarySumm(Label lty, Label rty)
+Set<Label> StdAA::binarySumm(Label lty, Label rty)
 {
     char lWord = lty.first;
     char rWord = rty.first;
 
     if (lWord == A && rWord == A)
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
     if (lWord == Abar && rWord == Abar)
-        return std::make_pair(Abar, 0);
+        return {std::make_pair(Abar, 0)};
     if (lWord == a && rWord == M)
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
     if (lWord == M && rWord == abar)
-        return std::make_pair(Abar, 0);
+        return {std::make_pair(Abar, 0)};
     if (lWord == Abar && rWord == V)
-        return std::make_pair(V, 0);
+        return {std::make_pair(V, 0)};
     if (lWord == V && rWord == A)
-        return std::make_pair(V, 0);
+        return {std::make_pair(V, 0)};
     if (lWord == dbar && rWord == V)
-        return std::make_pair(DV, 0);
+        return {std::make_pair(DV, 0)};
     if (lWord == DV && rWord == d)
-        return std::make_pair(M, 0);
+        return {std::make_pair(M, 0)};
     if (lWord == fbar && rWord == V)
-        return std::make_pair(FV, lty.second);
+        return {std::make_pair(FV, lty.second)};
     if (lWord == FV && rWord == f && lty.second == rty.second)
-        return std::make_pair(V, 0);
+        return {std::make_pair(V, 0)};
 
-    return std::make_pair(fault, 0);
+    return {std::make_pair(fault, 0)};
 }
 
 
-Label StdAA::unarySumm(Label lty)
+Set<Label> StdAA::unarySumm(Label lty)
 {
     char lWord = lty.first;
     if (lWord == M)
-        return std::make_pair(V, 0);
+        return {std::make_pair(V, 0)};
     if (lWord == a)
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
     if (lWord == abar)
-        return std::make_pair(Abar, 0);
-    return std::make_pair(fault, 0);
+        return {std::make_pair(Abar, 0)};
+
+    return {std::make_pair(fault, 0)};
 }
 
 
@@ -187,33 +188,41 @@ bool StdAA::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
 
 void StdAA::processCFLItem(CFLItem item)
 {
-    Label newTy = unarySumm(item.type());
-    if (addEdge(item.src(), item.dst(), newTy))
-    {
-        checks++;
-        pushIntoWorklist(item.src(), item.dst(), newTy);
-    }
+    /// Derive edges via unary production rules
+    for (Label newTy: unarySumm(item.type()))
+        if (addEdge(item.src(), item.dst(), newTy))
+        {
+            checks++;
+            pushIntoWorklist(item.src(), item.dst(), newTy);
+        }
 
+    /// Derive edges via binary production rules
+    //@{
     for (auto& iter: cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        newTy = binarySumm(item.type(), rty);
-        NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-        checks += iter.second.count();
-        for (NodeID diffDst: diffDsts)
-            pushIntoWorklist(item.src(), diffDst, newTy);
+        for (Label newTy : binarySumm(item.type(), rty))
+        {
+            NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
+            checks += iter.second.count();
+            for (NodeID diffDst: diffDsts)
+                pushIntoWorklist(item.src(), diffDst, newTy);
+        }
     }
 
     for (auto& iter: cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        newTy = binarySumm(lty, item.type());
-        NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-        checks += iter.second.count();
-        for (NodeID diffSrc: diffSrcs)
-            pushIntoWorklist(diffSrc, item.dst(), newTy);
+        for (Label newTy : binarySumm(lty, item.type()))
+        {
+            NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
+            checks += iter.second.count();
+            for (NodeID diffSrc: diffSrcs)
+                pushIntoWorklist(diffSrc, item.dst(), newTy);
+        }
     }
-}
+    //@}
+};
 
 
 void StdAA::dumpAlias()
@@ -256,7 +265,6 @@ void StdAA::countSumEdges()
             if (s1.find(iter2.first.first) != s1.end())
             {
                 numOfTEdges += iter2.second.count() * 2;
-//                numOfSumEdges += iter2.second.count() * 2;
             }
         }
     }

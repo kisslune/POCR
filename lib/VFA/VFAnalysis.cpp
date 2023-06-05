@@ -79,7 +79,7 @@ bool VFAnalysis::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
 
 /// ------------------- Std VFA Methods ----------------------
 
-Label StdVFA::binarySumm(Label lty, Label rty)
+Set<Label> StdVFA::binarySumm(Label lty, Label rty)
 {
     char lWord = lty.first;
     char rWord = rty.first;
@@ -88,24 +88,25 @@ Label StdVFA::binarySumm(Label lty, Label rty)
     u32_t rInd = rty.second;
 
     if (lWord == A && rWord == A)
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
 
     if (lWord == call && rWord == A)
-        return std::make_pair(Cl, lInd);
+        return {std::make_pair(Cl, lInd)};
 
     if (lWord == Cl && rWord == ret && lInd == rInd)
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
 
-    return std::make_pair(fault, 0);
+    return {std::make_pair(fault, 0)};
 }
 
 
-Label StdVFA::unarySumm(Label lty)
+Set<Label> StdVFA::unarySumm(Label lty)
 {
     char lWord = lty.first;
     if (lWord == a)
-        return std::make_pair(A, 0);
-    return std::make_pair(fault, 0);
+        return {std::make_pair(A, 0)};
+
+    return {std::make_pair(fault, 0)};
 }
 
 
@@ -145,32 +146,40 @@ void StdVFA::initSolver()
 
 void StdVFA::processCFLItem(CFLItem item)
 {
-    Label newTy = unarySumm(item.type());
-    if (addEdge(item.src(), item.dst(), newTy))
-    {
-        stat->checks++;
-        pushIntoWorklist(item.src(), item.dst(), newTy);
-    }
+    /// Derive edges via unary production rules
+    for (Label newTy: unarySumm(item.type()))
+        if (addEdge(item.src(), item.dst(), newTy))
+        {
+            stat->checks++;
+            pushIntoWorklist(item.src(), item.dst(), newTy);
+        }
 
-    for (auto iter: cflData()->getSuccMap(item.dst()))
+    /// Derive edges via binary production rules
+    //@{
+    for (auto& iter: cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        newTy = binarySumm(item.type(), rty);
-        NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-        stat->checks += iter.second.count();
-        for (NodeID diffDst: diffDsts)
-            pushIntoWorklist(item.src(), diffDst, newTy);
+        for (Label newTy : binarySumm(item.type(), rty))
+        {
+            NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
+            stat->checks += iter.second.count();
+            for (NodeID diffDst: diffDsts)
+                pushIntoWorklist(item.src(), diffDst, newTy);
+        }
     }
 
-    for (auto iter: cflData()->getPredMap(item.src()))
+    for (auto& iter: cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        newTy = binarySumm(lty, item.type());
-        NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-        stat->checks += iter.second.count();
-        for (NodeID diffSrc: diffSrcs)
-            pushIntoWorklist(diffSrc, item.dst(), newTy);
+        for (Label newTy : binarySumm(lty, item.type()))
+        {
+            NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
+            stat->checks += iter.second.count();
+            for (NodeID diffSrc: diffSrcs)
+                pushIntoWorklist(diffSrc, item.dst(), newTy);
+        }
     }
+    //@}
 }
 
 

@@ -53,9 +53,9 @@ void GspanVFA::solve()
                 // new
                 for (auto& tyIter2: cflData()->getSuccMap(oldDst1))
                 {
-                    Label newTy = binarySumm(lty, tyIter2.first);
-                    if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
-                        stat->checks += tyIter2.second.count();       // stat
+                    for (Label newTy: binarySumm(lty, tyIter2.first))
+                        if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
+                            stat->checks += tyIter2.second.count();       // stat
                 }
             }
         }
@@ -64,26 +64,26 @@ void GspanVFA::solve()
         for (auto tyIter: cflData()->getSuccMap(src))
         {
             Label lty = tyIter.first;
-            Label newTy = unarySumm(lty);
-            for (NodeID newDst1: tyIter.second)
-            {
-                if (newTy.first && resData.getSuccs(src, newTy).test_and_set(newDst1))
-                    stat->checks++;       // stat
-                // old
-                for (auto& tyIter2: oldData()->getSuccMap(newDst1))
+            for (Label newTy: unarySumm(lty))
+                for (NodeID newDst1: tyIter.second)
                 {
-                    Label newTy = binarySumm(lty, tyIter2.first);
-                    if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
-                        stat->checks += tyIter2.second.count();       // stat
+                    if (newTy.first && resData.getSuccs(src, newTy).test_and_set(newDst1))
+                        stat->checks++;       // stat
+                    // old
+                    for (auto& tyIter2: oldData()->getSuccMap(newDst1))
+                    {
+                        for (Label newTy: binarySumm(lty, tyIter2.first))
+                            if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
+                                stat->checks += tyIter2.second.count();       // stat
+                    }
+                    // new
+                    for (auto& tyIter2: cflData()->getSuccMap(newDst1))
+                    {
+                        for (Label newTy: binarySumm(lty, tyIter2.first))
+                            if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
+                                stat->checks += tyIter2.second.count();       // stat
+                    }
                 }
-                // new
-                for (auto& tyIter2: cflData()->getSuccMap(newDst1))
-                {
-                    Label newTy = binarySumm(lty, tyIter2.first);
-                    if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
-                        stat->checks += tyIter2.second.count();       // stat
-                }
-            }
         }
 
         // update old and new
