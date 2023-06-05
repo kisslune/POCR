@@ -61,7 +61,7 @@ Set<Label> StdCFL::unarySumm(Label lty)
     Set<Label> retVal;
     auto& lhsSet = grammar()->getLhs(lty.first);
 
-    for (auto lhs: lhsSet)
+    for (auto lhs : lhsSet)
     {
         if (!lhs)
             continue;
@@ -81,7 +81,7 @@ Set<Label> StdCFL::binarySumm(Label lty, Label rty)
     Set<Label> retVal;
     auto lhsSet = grammar()->getLhs(std::make_pair(lty.first, rty.first));
 
-    for (auto lhs: lhsSet)
+    for (auto lhs : lhsSet)
     {
         if (!lhs)       // a fault label
             continue;
@@ -115,7 +115,7 @@ Set<Label> StdCFL::binarySumm(Label lty, Label rty)
 void StdCFL::initSolver()
 {
     /// add all edges into adjacency list and worklist
-    for (auto edge: graph()->getCFLEdges())
+    for (auto edge : graph()->getCFLEdges())
     {
         addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(edge->getEdgeKind(), edge->getEdgeIdx()));
         pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(edge->getEdgeKind(), edge->getEdgeIdx()));
@@ -125,7 +125,7 @@ void StdCFL::initSolver()
     for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter)
     {
         NodeID nodeId = nIter->first;
-        for (auto lhs: grammar()->getEmptyRules())
+        for (auto lhs : grammar()->getEmptyRules())
         {
             addEdge(nodeId, nodeId, std::make_pair(lhs, 0));
             pushIntoWorklist(nodeId, nodeId, std::make_pair(lhs, 0));
@@ -137,7 +137,7 @@ void StdCFL::initSolver()
 void StdCFL::processCFLItem(CFLItem item)
 {
     /// Derive edges via unary production rules
-    for (Label newTy: unarySumm(item.type()))
+    for (Label newTy : unarySumm(item.type()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
             checks++;
@@ -146,26 +146,26 @@ void StdCFL::processCFLItem(CFLItem item)
 
     /// Derive edges via binary production rules
     //@{
-    for (auto& iter: cflData()->getSuccMap(item.dst()))
+    for (auto& iter : cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
         for (Label newTy : binarySumm(item.type(), rty))
         {
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
             checks += iter.second.count();
-            for (NodeID diffDst: diffDsts)
+            for (NodeID diffDst : diffDsts)
                 pushIntoWorklist(item.src(), diffDst, newTy);
         }
     }
 
-    for (auto& iter: cflData()->getPredMap(item.src()))
+    for (auto& iter : cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
         for (Label newTy : binarySumm(lty, item.type()))
         {
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
             checks += iter.second.count();
-            for (NodeID diffSrc: diffSrcs)
+            for (NodeID diffSrc : diffSrcs)
                 pushIntoWorklist(diffSrc, item.dst(), newTy);
         }
     }
@@ -195,7 +195,7 @@ void StdCFL::countSumEdges()
 
     for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
     {
-        for (auto& iter2: iter1->second)
+        for (auto& iter2 : iter1->second)
         {
             numOfSumEdges += iter2.second.count();
         }

@@ -163,30 +163,30 @@ public:
     virtual void processCFLItem(CFLItem item)
     {
         /// Derive edges via unary production rules
-        for (Label newTy: unarySumm(item.type()))
+        for (Label newTy : unarySumm(item.type()))
             if (addEdge(item.src(), item.dst(), newTy))
                 pushIntoWorklist(item.src(), item.dst(), newTy);
 
         /// Derive edges via binary production rules
         //@{
-        for (auto& iter: cflData()->getSuccMap(item.dst()))
+        for (auto& iter : cflData()->getSuccMap(item.dst()))
         {
             Label rty = iter.first;
             for (Label newTy : binarySumm(item.type(), rty))
             {
                 NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-                for (NodeID diffDst: diffDsts)
+                for (NodeID diffDst : diffDsts)
                     pushIntoWorklist(item.src(), diffDst, newTy);
             }
         }
 
-        for (auto& iter: cflData()->getPredMap(item.src()))
+        for (auto& iter : cflData()->getPredMap(item.src()))
         {
             Label lty = iter.first;
             for (Label newTy : binarySumm(lty, item.type()))
             {
                 NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-                for (NodeID diffSrc: diffSrcs)
+                for (NodeID diffSrc : diffSrcs)
                     pushIntoWorklist(diffSrc, item.dst(), newTy);
             }
         }

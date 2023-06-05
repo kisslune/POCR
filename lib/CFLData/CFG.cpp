@@ -62,11 +62,11 @@ void CFG::readGrammarFile(std::string fname)
 
 void CFG::detectTransitiveLabel()
 {
-    for (auto& rule: binaryRules)
+    for (auto& rule : binaryRules)
     {
         for (auto lhs : rule.second)
-        if (lhs == rule.first.first && lhs == rule.first.second)
-            transitiveLabels.insert(lhs);
+            if (lhs == rule.first.first && lhs == rule.first.second)
+                transitiveLabels.insert(lhs);
     }
 }
 
@@ -103,7 +103,7 @@ void CFG::printCFGStat()
         numOfRules += rule.second.size();
 
     std::cout << "#Symbol = " << numOfSymbols << std::endl;
-    for (auto it: intToLabelMap)
+    for (auto it : intToLabelMap)
         std::cout << it.second << ", ";
     std::cout << std::endl << std::endl;
 

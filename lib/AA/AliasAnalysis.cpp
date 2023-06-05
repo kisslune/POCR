@@ -140,7 +140,7 @@ void StdAA::finalize()
 
 void StdAA::initSolver()
 {
-    for (CFLEdge* edge: graph()->getPEGEdges())
+    for (CFLEdge* edge : graph()->getPEGEdges())
     {
         if (edge->getEdgeKind() == PEG::Asgn)
         {
@@ -189,7 +189,7 @@ bool StdAA::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
 void StdAA::processCFLItem(CFLItem item)
 {
     /// Derive edges via unary production rules
-    for (Label newTy: unarySumm(item.type()))
+    for (Label newTy : unarySumm(item.type()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
             checks++;
@@ -198,26 +198,26 @@ void StdAA::processCFLItem(CFLItem item)
 
     /// Derive edges via binary production rules
     //@{
-    for (auto& iter: cflData()->getSuccMap(item.dst()))
+    for (auto& iter : cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
         for (Label newTy : binarySumm(item.type(), rty))
         {
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
             checks += iter.second.count();
-            for (NodeID diffDst: diffDsts)
+            for (NodeID diffDst : diffDsts)
                 pushIntoWorklist(item.src(), diffDst, newTy);
         }
     }
 
-    for (auto& iter: cflData()->getPredMap(item.src()))
+    for (auto& iter : cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
         for (Label newTy : binarySumm(lty, item.type()))
         {
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
             checks += iter.second.count();
-            for (NodeID diffSrc: diffSrcs)
+            for (NodeID diffSrc : diffSrcs)
                 pushIntoWorklist(diffSrc, item.dst(), newTy);
         }
     }
@@ -227,12 +227,12 @@ void StdAA::processCFLItem(CFLItem item)
 
 void StdAA::dumpAlias()
 {
-    for (auto& it: valAlias)
+    for (auto& it : valAlias)
     {
         NodeID nId1 = it.first;
         outs() << "\nNode " << nId1 << " ";
         outs() << "  mayAlias with: { ";
-        for (NodeID nId2: it.second)
+        for (NodeID nId2 : it.second)
             outs() << nId2 << " ";
         outs() << "}\n\n";
     }
@@ -246,7 +246,7 @@ void StdAA::countSumEdges()
 
     for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
     {
-        for (auto& iter2: iter1->second)
+        for (auto& iter2 : iter1->second)
         {
             if (s.find(iter2.first.first) != s.end())
                 numOfSumEdges += iter2.second.count();
@@ -260,7 +260,7 @@ void StdAA::countSumEdges()
     }
     for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
     {
-        for (auto& iter2: iter1->second)
+        for (auto& iter2 : iter1->second)
         {
             if (s1.find(iter2.first.first) != s1.end())
             {
