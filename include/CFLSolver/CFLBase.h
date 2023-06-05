@@ -98,46 +98,30 @@ public:
 
     /// Destructor
     virtual ~CFLBase()
-    {
-        delete _cflData;
-    }
+    { delete _cflData; }
 
     CFLData* cflData()
-    {
-        return _cflData;
-    }
+    { return _cflData; }
 
     // worklist operations
     //@{
     virtual inline CFLItem popFromWorklist()
-    {
-        return worklist.pop();
-    }
+    { return worklist.pop(); }
 
     virtual inline bool pushIntoWorklist(CFLItem item)
-    {
-        return worklist.push(item);
-    }
+    { return worklist.push(item); }
 
     virtual inline bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true)
-    {
-        return pushIntoWorklist(CFLItem(src, dst, ty, isPrimary));
-    }
+    { return pushIntoWorklist(CFLItem(src, dst, ty, isPrimary)); }
 
     virtual inline bool isInWorklist(CFLItem item)
-    {
-        return worklist.find(item);
-    }
+    { return worklist.find(item); }
 
     virtual inline bool isInWorklist(NodeID src, NodeID dst, Label ty)
-    {
-        return isInWorklist(CFLItem(src, dst, ty));
-    }
+    { return isInWorklist(CFLItem(src, dst, ty)); }
 
     virtual inline bool isWorklistEmpty()
-    {
-        return worklist.empty();
-    }
+    { return worklist.empty(); }
     //@}
 
     //CFL data operations
@@ -202,53 +186,7 @@ public:
                 pushIntoWorklist(diffSrc, item.dst(), newTy);
         }
     };
-
-    static void processArgs(int argc, char** argv, int& arg_num, char** arg_vec, std::vector<std::string>& inFileVec)
-    {
-        for (int i = 0; i < argc; ++i)
-        {
-            std::ifstream f(argv[i]);
-            if (i == 0)
-            {
-                arg_vec[arg_num] = argv[i];
-                arg_num++;
-            }
-            else if (f.good())
-            {
-                inFileVec.push_back(argv[i]);
-            }
-            else
-            {
-                arg_vec[arg_num] = argv[i];
-                arg_num++;
-            }
-        }
-    }
-
-//    static std::vector<std::string> split(std::string str, char s)
-//    {
-//        std::vector<std::string> sVec;
-//        std::string::iterator it = str.begin();
-//        std::string subStr;
-//        while (it != str.end())
-//        {
-//            if (*it == s && !subStr.empty())
-//            {
-//                sVec.push_back(subStr);
-//                subStr.clear();
-//            }
-//            else
-//            {
-//                subStr.push_back(*it);
-//            }
-//            it++;
-//        }
-//        if (!subStr.empty())
-//            sVec.push_back(subStr);
-//        return sVec;
-//    }
 };
-
 
 }   // end namespace SVF
 

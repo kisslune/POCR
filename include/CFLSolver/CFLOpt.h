@@ -7,7 +7,6 @@
 
 namespace SVF
 {
-
 /// Carries around command line options.
 class CFLOpt
 {
@@ -25,6 +24,9 @@ public:
     static const Option<bool> gf;
     static const Option<bool> interDyck;
 };
+
+void processArgs(int argc, char** argv, int& arg_num, char** arg_vec, std::vector<std::string>& inFileVec);
+
 }  // namespace SVF
 
 #endif
