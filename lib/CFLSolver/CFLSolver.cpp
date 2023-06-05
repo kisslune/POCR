@@ -137,20 +137,13 @@ void StdCFL::initSolver()
 void StdCFL::processCFLItem(CFLItem item)
 {
     auto newTySet = cflUnarySumm(item.type());
-<<<<<<< HEAD
-    for (Label newTy: newTySet)
-=======
     for (Label newTy: newTySet){
->>>>>>> 5c2448419cd1b32260e8727abb16fe32366ab92e
         if (addEdge(item.src(), item.dst(), newTy))
         {
             checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
         }
-<<<<<<< HEAD
-=======
     }
->>>>>>> 5c2448419cd1b32260e8727abb16fe32366ab92e
 
     for (auto& iter: cflData()->getSuccMap(item.dst()))
     {

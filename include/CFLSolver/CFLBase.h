@@ -225,28 +225,28 @@ public:
         }
     }
 
-    static std::vector<std::string> split(std::string str, char s)
-    {
-        std::vector<std::string> sVec;
-        std::string::iterator it = str.begin();
-        std::string subStr;
-        while (it != str.end())
-        {
-            if (*it == s && !subStr.empty())
-            {
-                sVec.push_back(subStr);
-                subStr.clear();
-            }
-            else
-            {
-                subStr.push_back(*it);
-            }
-            it++;
-        }
-        if (!subStr.empty())
-            sVec.push_back(subStr);
-        return sVec;
-    }
+//    static std::vector<std::string> split(std::string str, char s)
+//    {
+//        std::vector<std::string> sVec;
+//        std::string::iterator it = str.begin();
+//        std::string subStr;
+//        while (it != str.end())
+//        {
+//            if (*it == s && !subStr.empty())
+//            {
+//                sVec.push_back(subStr);
+//                subStr.clear();
+//            }
+//            else
+//            {
+//                subStr.push_back(*it);
+//            }
+//            it++;
+//        }
+//        if (!subStr.empty())
+//            sVec.push_back(subStr);
+//        return sVec;
+//    }
 };
 
 

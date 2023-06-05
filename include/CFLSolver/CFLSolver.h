@@ -142,13 +142,7 @@ public:
     bool isPrimary(CFLItem& item)
     {
         return item.isPrimary();
-//        return primaryItems.find(item) != primaryItems.end();
     }
-
-//    void addPrimaryItem(NodeID src, NodeID dst, Label ty)
-//    {
-//        primaryItems.insert(CFLItem(src, dst, ty));
-//    }
 };
 
 
@@ -168,6 +162,14 @@ public:
     virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true);
 };
 
+
+/*!
+ * Unidirectional CFL-reachability
+ */
+//class UCFL : public CFLBase
+//{
+//
+//};
 
 }
 

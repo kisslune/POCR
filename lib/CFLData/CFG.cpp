@@ -31,7 +31,7 @@ void CFG::readGrammarFile(std::string fname)
     std::string line;
     while (getline(gFile, line))
     {
-        std::vector<std::string> vec = CFLBase::split(line, '\t');
+        std::vector<std::string> vec = split(line, '\t');
 
         if (vec.empty())
             continue;
