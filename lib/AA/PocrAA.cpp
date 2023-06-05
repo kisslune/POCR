@@ -9,22 +9,25 @@ using namespace SVF;
 void PocrAA::initSolver()
 {
     // init graph edges
-    for (CFLEdge* edge: graph()->getPEGEdges()) {
+    for (CFLEdge* edge: graph()->getPEGEdges())
+    {
         NodeID srcId = edge->getSrcID();
         NodeID dstId = edge->getDstID();
 
-        if (edge->getEdgeKind() == PEG::Asgn) {
+        if (edge->getEdgeKind() == PEG::Asgn)
+        {
             aParents[dstId].insert(srcId);
             pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
         }
         if (edge->getEdgeKind() == PEG::Deref)
-            dChildren[srcId] = dstId;
+            dChildren[srcId].insert(dstId);
         if (edge->getEdgeKind() == PEG::Gep)
             fChildren[srcId][edge->getEdgeIdx()].insert(dstId);
     }
 
     // init dataset
-    for (PEG::iterator it = graph()->begin(); it != graph()->end(); ++it) {
+    for (auto it = graph()->begin(); it != graph()->end(); ++it)
+    {
         NodeID nId = it->first;
         hybridData.addInd(nId, nId);
         setV(nId, nId);
@@ -34,7 +37,8 @@ void PocrAA::initSolver()
 
 void PocrAA::solve()
 {
-    while (!isWorklistEmpty()) {
+    while (!isWorklistEmpty())
+    {
         CFLItem item = popFromWorklist();
         Label type = item.type();
         NodeID src = item.src();
@@ -42,7 +46,8 @@ void PocrAA::solve()
 
         if (type.first == a)
             addArc(src, dst);
-        else if (type.first == M) {
+        else if (type.first == M)
+        {
             setM(src, dst);
             addV(hybridData.getNode(src, src), hybridData.getNode(dst, dst));
         }
@@ -57,7 +62,8 @@ void PocrAA::addArc(NodeID src, NodeID dst)
     if (hasA(src, dst))
         return;
 
-    for (auto& iter: hybridData.indMap[src]) {
+    for (auto& iter: hybridData.indMap[src])
+    {
         meld(iter.first, hybridData.getNode(iter.first, src), hybridData.getNode(dst, dst));
     }
 
@@ -75,7 +81,8 @@ void PocrAA::meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
         return;
 
     hybridData.insertEdge(uNode, newVNode);
-    for (TreeNode* vChild: vNode->children) {
+    for (TreeNode* vChild: vNode->children)
+    {
         meld(x, newVNode, vChild);
     }
 }
@@ -94,11 +101,13 @@ void PocrAA::addV(TreeNode* u, TreeNode* v)
     if (!setV(u->id, v->id))
         return;
 
-    for (TreeNode* vChild: v->children) {
+    for (TreeNode* vChild: v->children)
+    {
         addV(u, vChild);
     }
 
-    for (TreeNode* uChild: u->children) {
+    for (TreeNode* uChild: u->children)
+    {
         addV(uChild, v);
     }
 }
@@ -156,18 +165,20 @@ void PocrAA::checkdEdges(NodeID src, NodeID dst)
     if (dstD == dChildren.end())
         return;
 
-    NodeID srcChild = srcD->second;
-    NodeID dstChild = dstD->second;
-
-    if (!hasM(srcChild, dstChild)) {
-        pushIntoWorklist(srcChild, dstChild, std::make_pair(M, 0));
-        for (NodeID srcP: aParents[srcChild]) {
-            pushIntoWorklist(srcP, dstChild, std::make_pair(a, 0));
-        }
-        for (NodeID dstP: aParents[dstChild]) {
-            pushIntoWorklist(dstP, srcChild, std::make_pair(a, 0));
-        }
-    }
+    for (auto srcChild: srcD->second)
+        for (auto dstChild: dstD->second)
+            if (!hasM(srcChild, dstChild))
+            {
+                pushIntoWorklist(srcChild, dstChild, std::make_pair(M, 0));
+                for (NodeID srcP: aParents[srcChild])
+                {
+                    pushIntoWorklist(srcP, dstChild, std::make_pair(a, 0));
+                }
+                for (NodeID dstP: aParents[dstChild])
+                {
+                    pushIntoWorklist(dstP, srcChild, std::make_pair(a, 0));
+                }
+            }
 }
 
 
@@ -184,11 +195,15 @@ void PocrAA::checkfEdges(NodeID src, NodeID dst)
     if (dstD == fChildren.end())
         return;
 
-    for (auto& srcChildIt: srcD->second) {
+    for (auto& srcChildIt: srcD->second)
+    {
         auto dstChildIt = dstD->second.find(srcChildIt.first);
-        if (dstChildIt != dstD->second.end()) {
-            for (NodeID srcChild: srcChildIt.second) {
-                for (NodeID dstChild: dstChildIt->second) {
+        if (dstChildIt != dstD->second.end())
+        {
+            for (NodeID srcChild: srcChildIt.second)
+            {
+                for (NodeID dstChild: dstChildIt->second)
+                {
                     checks++;
                     pushIntoWorklist(srcChild, dstChild, std::make_pair(V, 0));
                 }
@@ -200,17 +215,20 @@ void PocrAA::checkfEdges(NodeID src, NodeID dst)
 
 void PocrAA::countSumEdges()
 {
-    for (auto& iter: dChildren) {
-        setM(iter.second, iter.second);
-        /// dv
-        for (auto dst: vChildren[iter.first]) {
-            dvChildren[iter.second].insert(dst);
+    for (auto& iter: dChildren)
+        for (auto dTgt: iter.second)
+        {
+            setM(dTgt, dTgt);
+            /// dv
+            for (auto dst: vChildren[iter.first])
+                dvChildren[dTgt].insert(dst);
         }
-    }
 
     /// fv
-    for (auto& iter: fChildren) {
-        for (auto& iter2: iter.second) {
+    for (auto& iter: fChildren)
+    {
+        for (auto& iter2: iter.second)
+        {
             for (auto& src: iter2.second)
                 for (auto& dst: vChildren[iter.first])
                     fvChildren[src][iter2.first].insert(dst);
@@ -220,20 +238,26 @@ void PocrAA::countSumEdges()
     numOfSumEdges = 0;
     numOfTEdges = 0;
 
-    for (auto& iter: hybridData.indMap) {
+    for (auto& iter: hybridData.indMap)
+    {
         numOfSumEdges += iter.second.size() * 2;
     }
-    for (auto& iter: vChildren) {
+    for (auto& iter: vChildren)
+    {
         numOfSumEdges += iter.second.size();
     }
-    for (auto& iter: mChildren) {
+    for (auto& iter: mChildren)
+    {
         numOfSumEdges += iter.second.size();
     }
-    for (auto& iter: dvChildren) {
+    for (auto& iter: dvChildren)
+    {
         numOfSumEdges += iter.second.size();
     }
-    for (auto& iter: fvChildren) {
-        for (auto& iter2: iter.second) {
+    for (auto& iter: fvChildren)
+    {
+        for (auto& iter2: iter.second)
+        {
             numOfSumEdges += iter2.second.size();
         }
     }

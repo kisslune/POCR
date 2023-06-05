@@ -86,40 +86,6 @@ Set<Label> StdCFL::cflBinarySumm(Label lty, Label rty)
         }
         else
             retVal.insert(Label(lhs, 0));
-
-//        if (grammar()->isaVariantLabel(lty.first) &&
-//            grammar()->isaVariantLabel(rty.first) &&
-//            lty.second == rty.second)
-//        {
-//            if (grammar()->isaVariantLabel(lhs))
-//                retVal.insert(Label(lhs, lty.second));
-//            else
-//                retVal.insert(Label(lhs, 0));
-//        }
-//
-//        if (grammar()->isaVariantLabel(lty.first) &&
-//            !grammar()->isaVariantLabel(rty.first))
-//        {
-//            if (grammar()->isaVariantLabel(lhs))
-//                retVal.insert(Label(lhs, lty.second));
-//            else
-//                retVal.insert(Label(lhs, 0));
-//        }
-//
-//        if (!grammar()->isaVariantLabel(lty.first) &&
-//            grammar()->isaVariantLabel(rty.first))
-//        {
-//            if (grammar()->isaVariantLabel(lhs))
-//                retVal.insert(Label(lhs, rty.second));
-//            else
-//                retVal.insert(Label(lhs, 0));
-//        }
-//
-//        if (!grammar()->isaVariantLabel(lty.first) &&
-//            !grammar()->isaVariantLabel(rty.first))
-//        {
-//            retVal.insert(Label(lhs, 0));
-//        }
     }
 
     return retVal;
