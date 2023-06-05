@@ -103,6 +103,10 @@ void CFG::printCFGStat()
         numOfRules += rule.second.size();
 
     std::cout << "#Symbol = " << numOfSymbols << std::endl;
+    for (auto it: intToLabelMap)
+        std::cout << it.second << ", ";
+    std::cout << std::endl << std::endl;
+
     std::cout << "#VariantSymbol = " << numOfVariantSymbols << std::endl;
     std::cout << "#Rule = " << numOfRules << std::endl;
 }
