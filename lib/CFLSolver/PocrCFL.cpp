@@ -106,7 +106,7 @@ void PocrCFL::traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNo
  */
 bool PocrCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
 {
-    checks++;
+    stat->checks++;
 
     TreeNode* newPy = ptrees[lbl]->addInd(sy->id, py->id);
     if (!newPy)
@@ -142,7 +142,7 @@ void PocrCFL::processCFLItem(CFLItem item)
     for (Label newTy: unarySumm(item.type()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
-            checks++;
+            stat->checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
         }
 
@@ -159,7 +159,7 @@ void PocrCFL::processCFLItem(CFLItem item)
             else
             {
                 NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-                checks += iter.second.count();
+                stat->checks += iter.second.count();
                 for (NodeID diffDst: diffDsts)
                     pushIntoWorklist(item.src(), diffDst, newTy);
             }
@@ -178,7 +178,7 @@ void PocrCFL::processCFLItem(CFLItem item)
             else
             {
                 NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-                checks += iter.second.count();
+                stat->checks += iter.second.count();
                 for (NodeID diffSrc: diffSrcs)
                     pushIntoWorklist(diffSrc, item.dst(), newTy);
             }
@@ -188,7 +188,7 @@ void PocrCFL::processCFLItem(CFLItem item)
 
 void PocrCFL::checkPtree(Label newLbl, TreeNode* src, NodeID dst)
 {
-    checks++;
+    stat->checks++;
     for (auto child: src->children)
         if (addEdge(child->id, dst, newLbl))
         {
@@ -200,7 +200,7 @@ void PocrCFL::checkPtree(Label newLbl, TreeNode* src, NodeID dst)
 
 void PocrCFL::checkStree(Label newLbl, NodeID src, TreeNode* dst)
 {
-    checks++;
+    stat->checks++;
     for (auto child: dst->children)
         if (addEdge(src, child->id, newLbl))
         {

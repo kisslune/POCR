@@ -19,14 +19,7 @@ class StdCFL : public CFLBase
 {
 public:
     /// Statistics
-    //@{
     CFLStat* stat;
-
-    u32_t numOfIteration;
-    u32_t checks;
-    u32_t numOfSumEdges;
-    double timeOfSolving;
-    //@}
 
 protected:
     bool reanalyze;
@@ -36,17 +29,12 @@ protected:
     CFLGraph* _graph;
 
 public:
-    StdCFL(std::string& _grammarName, std::string& _graphName) :
-            stat(nullptr),
-            numOfIteration(0),
-            checks(0),
-            numOfSumEdges(0),
-            timeOfSolving(0),
-            reanalyze(false),
-            grammarName(_grammarName),
-            graphName(_graphName),
-            _grammar(nullptr),
-            _graph(nullptr)
+    StdCFL(std::string& _grammarName, std::string& _graphName) : stat(nullptr),
+                                                                 reanalyze(false),
+                                                                 grammarName(_grammarName),
+                                                                 graphName(_graphName),
+                                                                 _grammar(nullptr),
+                                                                 _graph(nullptr)
     {}
 
     virtual ~StdCFL()
@@ -115,7 +103,6 @@ protected:
     TransitiveLblMap ptrees;
     TransitiveLblMap strees;
     CFLItem tmpPrimaryItem;
-//    Set<CFLItem> primaryItems;
 
 public:
     PocrCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName),

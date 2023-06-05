@@ -74,7 +74,7 @@ void PocrAA::addArc(NodeID src, NodeID dst)
 
 void PocrAA::meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
 {
-    checks++;
+    stat->checks++;
 
     TreeNode* newVNode = hybridData.addInd(x, vNode->id);
     if (!newVNode)
@@ -90,7 +90,7 @@ void PocrAA::meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
 
 bool PocrAA::hasA(NodeID u, NodeID v)
 {
-    checks++;
+    stat->checks++;
 
     return hybridData.hasInd(u, v);
 }
@@ -115,12 +115,12 @@ void PocrAA::addV(TreeNode* u, TreeNode* v)
 
 bool PocrAA::setV(NodeID src, NodeID dst)
 {
-    checks++;
+    stat->checks++;
 
     if (!vChildren[src].insert(dst).second)
         return false;
     vChildren[dst].insert(src);
-    checks++;
+    stat->checks++;
 
     // solve the parentheses of d and dealloc edges
     checkdEdges(src, dst);
@@ -131,7 +131,7 @@ bool PocrAA::setV(NodeID src, NodeID dst)
 
 bool PocrAA::hasM(NodeID src, NodeID dst)
 {
-    checks++;
+    stat->checks++;
 
     if (src == dst)
         return true;
@@ -204,7 +204,7 @@ void PocrAA::checkfEdges(NodeID src, NodeID dst)
             {
                 for (NodeID dstChild: dstChildIt->second)
                 {
-                    checks++;
+                    stat->checks++;
                     pushIntoWorklist(srcChild, dstChild, std::make_pair(V, 0));
                 }
             }
@@ -235,30 +235,29 @@ void PocrAA::countSumEdges()
         }
     }
 
-    numOfSumEdges = 0;
-    numOfTEdges = 0;
+    stat->numOfSumEdges = 0;
 
     for (auto& iter: hybridData.indMap)
     {
-        numOfSumEdges += iter.second.size() * 2;
+        stat->numOfSumEdges += iter.second.size() * 2;
     }
     for (auto& iter: vChildren)
     {
-        numOfSumEdges += iter.second.size();
+        stat->numOfSumEdges += iter.second.size();
     }
     for (auto& iter: mChildren)
     {
-        numOfSumEdges += iter.second.size();
+        stat->numOfSumEdges += iter.second.size();
     }
     for (auto& iter: dvChildren)
     {
-        numOfSumEdges += iter.second.size();
+        stat->numOfSumEdges += iter.second.size();
     }
     for (auto& iter: fvChildren)
     {
         for (auto& iter2: iter.second)
         {
-            numOfSumEdges += iter2.second.size();
+            stat->numOfSumEdges += iter2.second.size();
         }
     }
 }

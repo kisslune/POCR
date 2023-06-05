@@ -42,7 +42,7 @@ void GspanAA::initSolver()
 
 void GspanAA::solve()
 {
-    numOfIteration++;
+    stat->numOfIteration++;
     reanalyze = false;
 
     for (auto& srcIter: cflData()->getSuccMap())
@@ -61,7 +61,7 @@ void GspanAA::solve()
                 {
                     for (Label newTy: binarySumm(lty, tyIter2.first))
                         if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
-                            checks += tyIter2.second.count();       // stat
+                            stat->checks += tyIter2.second.count();       // stat
                 }
             }
         }
@@ -74,20 +74,20 @@ void GspanAA::solve()
                 for (NodeID newDst1: tyIter.second)
                 {
                     if (newTy.first && (resData.getSuccs(src, newTy).test_and_set(newDst1)))
-                        checks++;       // stat
+                        stat->checks++;       // stat
                     // old
                     for (auto& tyIter2: oldData()->getSuccMap(newDst1))
                     {
                         for (Label newTy: binarySumm(lty, tyIter2.first))
                             if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
-                                checks += tyIter2.second.count();       // stat
+                                stat->checks += tyIter2.second.count();       // stat
                     }
                     // new
                     for (auto& tyIter2: cflData()->getSuccMap(newDst1))
                     {
                         for (Label newTy: binarySumm(lty, tyIter2.first))
                             if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
-                                checks += tyIter2.second.count();       // stat
+                                stat->checks += tyIter2.second.count();       // stat
                     }
                 }
         }
@@ -114,7 +114,7 @@ void GspanAA::solve()
  */
 void GspanAA::countSumEdges()
 {
-    numOfSumEdges = 0;
+    stat->numOfSumEdges = 0;
     std::set<int> s = {M, V, DV, FV, A, Abar};
 
     for (auto iter1 = oldData()->begin(); iter1 != oldData()->end(); ++iter1)
@@ -122,7 +122,7 @@ void GspanAA::countSumEdges()
         for (auto& iter2: iter1->second)
         {
             if (s.find(iter2.first.first) != s.end())
-                numOfSumEdges += iter2.second.count();
+                stat->numOfSumEdges += iter2.second.count();
         }
     }
 
@@ -130,15 +130,5 @@ void GspanAA::countSumEdges()
     for (auto it = oldData()->begin(); it != oldData()->end(); ++it)
     {
         oldData()->addEdge(it->first, it->first, std::make_pair(A, 0));
-    }
-    for (auto iter1 = oldData()->begin(); iter1 != oldData()->end(); ++iter1)
-    {
-        for (auto& iter2: iter1->second)
-        {
-            if (s1.find(iter2.first.first) != s1.end())
-            {
-                numOfTEdges += iter2.second.count() * 2;
-            }
-        }
     }
 }

@@ -33,16 +33,28 @@ public:
     typedef llvm::DenseMap<const char*, u64_t> NUMStatMap;
     typedef llvm::DenseMap<const char*, double> TIMEStatMap;
 
-    /// calculators
+    /// num counters
     u32_t numOfIteration;
     u32_t checks;
     u32_t numOfTEdges;
     u32_t numOfSumEdges;
     u32_t numOfAdd;
+
+    /// time counters
     double timeOfSolving;
+    double startTime;
+    double endTime;
+    double sccTime;
+    double gfTime;
+    double interDyckTime;
+    double gsTime;
 
 private:
     VFAnalysis* ivf;
+
+    NUMStatMap generalNumMap;
+    NUMStatMap PTNumStatMap;
+    TIMEStatMap timeStatMap;
 
 public:
     VFAStat(VFAnalysis* p) : ivf(p),
@@ -74,17 +86,6 @@ public:
     {
         return CLOCK_IN_MS();
     }
-
-    NUMStatMap generalNumMap;
-    NUMStatMap PTNumStatMap;
-    TIMEStatMap timeStatMap;
-
-    double startTime;
-    double endTime;
-    double sccTime;
-    double gfTime;
-    double interDyckTime;
-    double gsTime;
 
     /// Memory usage, in KB
     u32_t _vmrssUsageBefore;

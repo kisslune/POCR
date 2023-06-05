@@ -63,14 +63,14 @@ void AliasAnalysis::analyze()
 
     do
     {
-        numOfIteration++;
+        stat->numOfIteration++;
         reanalyze = false;
         if (CFLOpt::solveCFL())
             solve();
     } while (reanalyze);
 
     double propEnd = stat->getClk();
-    timeOfSolving += (propEnd - propStart) / TIMEINTERVAL;
+    stat->timeOfSolving += (propEnd - propStart) / TIMEINTERVAL;
 
 
     // Finalize the analysis
@@ -192,7 +192,7 @@ void StdAA::processCFLItem(CFLItem item)
     for (Label newTy : unarySumm(item.type()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
-            checks++;
+            stat->checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
         }
 
@@ -204,7 +204,7 @@ void StdAA::processCFLItem(CFLItem item)
         for (Label newTy : binarySumm(item.type(), rty))
         {
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-            checks += iter.second.count();
+            stat->checks += iter.second.count();
             for (NodeID diffDst : diffDsts)
                 pushIntoWorklist(item.src(), diffDst, newTy);
         }
@@ -216,7 +216,7 @@ void StdAA::processCFLItem(CFLItem item)
         for (Label newTy : binarySumm(lty, item.type()))
         {
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-            checks += iter.second.count();
+            stat->checks += iter.second.count();
             for (NodeID diffSrc : diffSrcs)
                 pushIntoWorklist(diffSrc, item.dst(), newTy);
         }
@@ -241,7 +241,7 @@ void StdAA::dumpAlias()
 
 void StdAA::countSumEdges()
 {
-    numOfSumEdges = 0;
+    stat->numOfSumEdges = 0;
     std::set<int> s = {M, V, DV, FV, A, Abar};
 
     for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
@@ -249,7 +249,7 @@ void StdAA::countSumEdges()
         for (auto& iter2 : iter1->second)
         {
             if (s.find(iter2.first.first) != s.end())
-                numOfSumEdges += iter2.second.count();
+                stat->numOfSumEdges += iter2.second.count();
         }
     }
 
@@ -257,15 +257,5 @@ void StdAA::countSumEdges()
     for (auto it = cflData()->begin(); it != cflData()->end(); ++it)
     {
         cflData()->addEdge(it->first, it->first, std::make_pair(A, 0));
-    }
-    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
-    {
-        for (auto& iter2 : iter1->second)
-        {
-            if (s1.find(iter2.first.first) != s1.end())
-            {
-                numOfTEdges += iter2.second.count() * 2;
-            }
-        }
     }
 }

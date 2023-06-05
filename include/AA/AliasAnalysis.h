@@ -45,16 +45,7 @@ public:
         FV
     };
     /// Statistics
-    //@{
     AAStat* stat;
-
-    u32_t numOfIteration;
-    u32_t checks;
-    u32_t numOfTEdges;
-    u32_t numOfSumEdges;
-    u32_t numOfAdd;
-    double timeOfSolving;
-    //@}
 
 protected:
     /// Reanalyze flag
@@ -70,12 +61,6 @@ protected:
 
 public:
     AliasAnalysis(std::string& gName) : stat(nullptr),
-                                        numOfIteration(0),
-                                        checks(0),
-                                        numOfTEdges(0),
-                                        numOfSumEdges(0),
-                                        numOfAdd(0),
-                                        timeOfSolving(0),
                                         reanalyze(false),
                                         _graph(nullptr),
                                         graphName(gName),
@@ -219,16 +204,6 @@ public:
     bool setV(NodeID src, NodeID dst);
     bool hasM(NodeID src, NodeID dst);
     void setM(NodeID src, NodeID dst);
-
-    u32_t getNumOfAdd()
-    {
-        return numOfAdd;
-    };
-
-    double getAnalysisTime()
-    {
-        return timeOfSolving;
-    };
 
     void countSumEdges();
 };
