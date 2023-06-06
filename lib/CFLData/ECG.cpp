@@ -20,6 +20,9 @@ void ECG::insertForthEdge(NodeID i, NodeID j)
 
 void ECG::searchBack(ECGNode* vi, ECGNode* vj)
 {
+    /// When adding a new forth edge vi --> vj, we should remove all the edges vi' --> vj' such that
+    /// vi' in pred(vi) and vj' in succ(vj).
+    //@{
     std::stack<ECGEdge> edgesToRemove;
     for (auto succ: vi->successors)
     {
@@ -33,6 +36,7 @@ void ECG::searchBack(ECGNode* vi, ECGNode* vj)
         edgesToRemove.pop();
         removeEdge(edge);
     }
+    //@}
 
     searchForth(vi, vj);
 
