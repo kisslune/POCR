@@ -16,50 +16,44 @@ namespace SVF
 class CFG
 {
 public:
-    LabelSymbTy numOfLabels;       // maximum 128 labels are allowed
+    CFGSymbTy numOfSymbols;
 
-    /// mapping string label to int
-    Map<std::string, LabelSymbTy> labelToIntMap;
-    Map<LabelSymbTy, std::string> intToLabelMap;
-    /// the IDs of labels with variant subscript
-    Set<LabelSymbTy> variantLabels;
+    /// mapping string symbol to int
+    Map <std::string, CFGSymbTy> symbToIntMap;
+    Map <CFGSymbTy, std::string> intToSymbMap;
+    /// the IDs of symbols with variant subscript
+    Set <CFGSymbTy> variableSymbols;
+    Set <CFGSymbTy> transitiveSymbols;                     // X ::= X X
 
     /// Sets of rules
-    Set<LabelSymbTy> emptyRules;                           // X ::= epsilon
-    Map<LabelSymbTy, Set<LabelSymbTy>> unaryRules;                     // X ::= Y
-    Map<std::pair<LabelSymbTy, LabelSymbTy>, Set<LabelSymbTy>> binaryRules;   // X ::= Y Z
-    Set<LabelSymbTy> transitiveLabels;                     // X ::= X X
+    Set <CFGSymbTy> emptyRules;                                          // X ::= epsilon
+    Map <CFGSymbTy, Set<CFGSymbTy>> unaryRules;                          // X ::= Y
+    Map <std::pair<CFGSymbTy, CFGSymbTy>, Set<CFGSymbTy>> binaryRules;   // X ::= Y Z
 
-    const Set<LabelSymbTy> emptySet;
+    const Set <CFGSymbTy> emptySet;
 
 public:
-    CFG() : numOfLabels(0)
+    CFG() : numOfSymbols(0)
     {}
 
-    bool hasLabel(std::string& s)
+    bool hasSymbol(std::string& s)
+    { return symbToIntMap.find(s) != symbToIntMap.end(); }
+
+    void addSymbol(std::string& s);
+
+    CFGSymbTy getSymbolId(std::string& s)
     {
-        return labelToIntMap.find(s) != labelToIntMap.end();
+        assert(hasSymbol(s) && "Attempting to access a non-existing symbol!!");
+        return symbToIntMap[s];
     }
 
-    void addLabel(std::string& s);
+    std::string getSymbolString(CFGSymbTy c)
+    { return intToSymbMap[c]; }
 
-    LabelSymbTy getLabelId(std::string& s)
-    {
-        assert(hasLabel(s) && "Attempting to access a non-existing label!!");
-        return labelToIntMap[s];
-    }
+    bool isaVariantSymbol(CFGSymbTy c)
+    { return variableSymbols.find(c) != variableSymbols.end(); }
 
-    std::string getLabelString(LabelSymbTy c)
-    {
-        return intToLabelMap[c];
-    }
-
-    bool isaVariantLabel(LabelSymbTy c)
-    {
-        return variantLabels.find(c) != variantLabels.end();
-    }
-
-    const Set<LabelSymbTy>& getLhs(LabelSymbTy rhs) const
+    const Set <CFGSymbTy>& getLhs(CFGSymbTy rhs) const
     {
         auto it = unaryRules.find(rhs);
         if (it == unaryRules.end())
@@ -67,7 +61,7 @@ public:
         return it->second;
     }
 
-    const Set<LabelSymbTy>& getLhs(std::pair<LabelSymbTy, LabelSymbTy> rhs) const
+    const Set <CFGSymbTy>& getLhs(std::pair<CFGSymbTy, CFGSymbTy> rhs) const
     {
         auto it = binaryRules.find(rhs);
         if (it == binaryRules.end())
@@ -75,19 +69,15 @@ public:
         return it->second;
     }
 
-    Set<LabelSymbTy>& getEmptyRules()
-    {
-        return emptyRules;
-    }
+    Set <CFGSymbTy>& getEmptyRules()
+    { return emptyRules; }
 
-    bool isTransitive(LabelSymbTy c)
-    {
-        return transitiveLabels.find(c) != transitiveLabels.end();
-    }
+    bool isTransitive(CFGSymbTy c)
+    { return transitiveSymbols.find(c) != transitiveSymbols.end(); }
 
     void parseGrammar(std::string fname);
     void readGrammarFile(std::string fname);
-    void detectTransitiveLabel();
+    void detectTransitiveSymbol();
     void printCFGStat();
 };
 

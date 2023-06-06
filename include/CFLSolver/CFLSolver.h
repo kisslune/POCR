@@ -121,10 +121,8 @@ public:
     void checkPtree(Label newLbl, TreeNode* src, NodeID dst);
     void checkStree(Label newLbl, NodeID src, TreeNode* dst);
 
-    bool isPrimary(CFLItem& item)
-    {
-        return item.isPrimary();
-    }
+    static bool isPrimary(CFLItem& item)
+    { return item.isPrimary(); }
 };
 
 
@@ -151,34 +149,26 @@ public:
 class UCFL : public StdCFL
 {
 public:
-    typedef HybridData::TreeNode TreeNode;
-    typedef Map<char, HybridData*> TransitiveLblMap;
-
     typedef ECG::ECGNode ECGNode;
+    typedef Map<CFGSymbTy, ECG*> ECGMap;
 
 protected:
-    ECG ecg;
-    TransitiveLblMap ptrees;
-    TransitiveLblMap strees;
+    ECGMap ecgs;
 
 public:
     UCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
     {}
 
-    void initSolver();
+    /// UCFL methods
+    void initSolver() override;
     void procPrimaryItem(CFLItem item);
-    void traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
-    void traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
-    bool updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
-    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true);
-    virtual void processCFLItem(CFLItem item);
-    void checkPtree(Label newLbl, TreeNode* src, NodeID dst);
-    void checkStree(Label newLbl, NodeID src, TreeNode* dst);
+    bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true) override;
+    void processCFLItem(CFLItem item) override;
+    void checkPreds(Label newLbl, ECGNode* src, NodeID dst);
+    void checkSuccs(Label newLbl, NodeID src, ECGNode* dst);
 
-    bool isPrimary(CFLItem& item)
-    {
-        return item.isPrimary();
-    }
+    static bool isPrimary(CFLItem& item)
+    { return item.isPrimary(); }
 };
 
 }

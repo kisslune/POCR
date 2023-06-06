@@ -13,7 +13,7 @@ using namespace SVFUtil;
 void CFG::parseGrammar(std::string fname)
 {
     readGrammarFile(fname);
-    detectTransitiveLabel();
+    detectTransitiveSymbol();
 //    printCFGStat();
 }
 
@@ -38,21 +38,21 @@ void CFG::readGrammarFile(std::string fname)
 
         if (vec.size() == 1)
         {
-            addLabel(vec[0]);
-            emptyRules.insert(getLabelId(vec[0]));
+            addSymbol(vec[0]);
+            emptyRules.insert(getSymbolId(vec[0]));
         }
         else if (vec.size() == 2)
         {
-            addLabel(vec[0]);
-            addLabel(vec[1]);
-            unaryRules[getLabelId(vec[1])].insert(getLabelId(vec[0]));
+            addSymbol(vec[0]);
+            addSymbol(vec[1]);
+            unaryRules[getSymbolId(vec[1])].insert(getSymbolId(vec[0]));
         }
         else if (vec.size() == 3)
         {
-            addLabel(vec[0]);
-            addLabel(vec[1]);
-            addLabel(vec[2]);
-            binaryRules[std::make_pair(getLabelId(vec[1]), getLabelId(vec[2]))].insert(getLabelId(vec[0]));
+            addSymbol(vec[0]);
+            addSymbol(vec[1]);
+            addSymbol(vec[2]);
+            binaryRules[std::make_pair(getSymbolId(vec[1]), getSymbolId(vec[2]))].insert(getSymbolId(vec[0]));
         }
     }
 
@@ -60,29 +60,29 @@ void CFG::readGrammarFile(std::string fname)
 }
 
 
-void CFG::detectTransitiveLabel()
+void CFG::detectTransitiveSymbol()
 {
     for (auto& rule : binaryRules)
     {
         for (auto lhs : rule.second)
             if (lhs == rule.first.first && lhs == rule.first.second)
-                transitiveLabels.insert(lhs);
+                transitiveSymbols.insert(lhs);
     }
 }
 
 
-void CFG::addLabel(std::string& s)
+void CFG::addSymbol(std::string& s)
 {
-    if (hasLabel(s))
+    if (hasSymbol(s))
         return;
 
-    numOfLabels++;
-    labelToIntMap[s] = numOfLabels;
-    intToLabelMap[numOfLabels] = s;
+    numOfSymbols++;
+    symbToIntMap[s] = numOfSymbols;
+    intToSymbMap[numOfSymbols] = s;
 
     /// check whether the label has an index
     if (s.find("_i") == s.size() - 2 && s.find("_i") != -1)
-        variantLabels.insert(numOfLabels);
+        variableSymbols.insert(numOfSymbols);
 }
 
 
@@ -92,8 +92,8 @@ void CFG::printCFGStat()
     u32_t numOfRules = 0;
     u32_t numOfVariantSymbols = 0;
 
-    numOfSymbols = intToLabelMap.size();
-    numOfVariantSymbols = variantLabels.size();
+    numOfSymbols = intToSymbMap.size();
+    numOfVariantSymbols = variableSymbols.size();
 
     numOfRules += emptyRules.size();
     for (auto rule : unaryRules)
@@ -103,7 +103,7 @@ void CFG::printCFGStat()
         numOfRules += rule.second.size();
 
     std::cout << "#Symbol = " << numOfSymbols << std::endl;
-    for (auto it : intToLabelMap)
+    for (auto it : intToSymbMap)
         std::cout << it.second << ", ";
     std::cout << std::endl << std::endl;
 

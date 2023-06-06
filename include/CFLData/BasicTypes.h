@@ -7,8 +7,8 @@
 
 namespace SVF
 {
-typedef u32_t LabelSymbTy;
-typedef std::pair<LabelSymbTy, u32_t> Label;
+typedef u32_t CFGSymbTy;
+typedef std::pair<CFGSymbTy, u32_t> Label;
 }
 
 #endif //POCR_SVF_CFLBASICTYPES_H

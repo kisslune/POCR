@@ -12,14 +12,14 @@ void PocrCFL::initSolver()
     StdCFL::initSolver();
 
     /// Init ptrees and strees for each node
-    for (auto lbl: grammar()->transitiveLabels)
+    for (auto lbl: grammar()->transitiveSymbols)
     {
         ptrees[lbl] = new HybridData();
         strees[lbl] = new HybridData();
     }
     for (auto it = graph()->begin(); it != graph()->end(); ++it)
     {
-        for (auto lbl: grammar()->transitiveLabels)
+        for (auto lbl: grammar()->transitiveSymbols)
         {
             NodeID nId = it->first;
             ptrees[lbl]->addInd(nId, nId);
@@ -27,7 +27,7 @@ void PocrCFL::initSolver()
         }
     }
     /// Remove transitive rules
-    Set<LabelSymbTy> transitiveSymbols;
+    Set<CFGSymbTy> transitiveSymbols;
     for (auto rule: grammar()->binaryRules)
     {
         for (auto lhs: rule.second)
@@ -45,7 +45,7 @@ void PocrCFL::solve()
     {
         CFLItem item = popFromWorklist();
 
-        if (grammar()->isTransitive(item.type().first) && isPrimary(item))
+        if (grammar()->isTransitive(item.label().first) && isPrimary(item))
         {
             /// Process primary transitive items
             procPrimaryItem(item);
@@ -62,7 +62,7 @@ void PocrCFL::solve()
 void PocrCFL::procPrimaryItem(CFLItem item)
 {
     tmpPrimaryItem = item;
-    char lbl = item.type().first;
+    char lbl = item.label().first;
     NodeID px = item.dst();
     NodeID sx = item.src();
     /// py is the root of ptree(item.src())
@@ -139,7 +139,7 @@ bool PocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 
 void PocrCFL::processCFLItem(CFLItem item)
 {
-    for (Label newTy: unarySumm(item.type()))
+    for (Label newTy: unarySumm(item.label()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
             stat->checks++;
@@ -149,8 +149,8 @@ void PocrCFL::processCFLItem(CFLItem item)
     for (auto& iter: cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        for (Label newTy: binarySumm(item.type(), rty))
-            if (newTy == item.type() && grammar()->isTransitive(rty.first))
+        for (Label newTy: binarySumm(item.label(), rty))
+            if (newTy == item.label() && grammar()->isTransitive(rty.first))
             {
                 /// X ::= X A
                 TreeNode* dst = strees[rty.first]->getNode(item.dst(), item.dst());
@@ -168,8 +168,8 @@ void PocrCFL::processCFLItem(CFLItem item)
     for (auto& iter: cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        for (Label newTy: binarySumm(lty, item.type()))
-            if (newTy == item.type() && grammar()->isTransitive(lty.first))
+        for (Label newTy: binarySumm(lty, item.label()))
+            if (newTy == item.label() && grammar()->isTransitive(lty.first))
             {
                 /// X ::= A X
                 TreeNode* src = ptrees[lty.first]->getNode(item.src(), item.src());

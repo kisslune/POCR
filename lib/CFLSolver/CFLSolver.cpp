@@ -66,7 +66,7 @@ Set<Label> StdCFL::unarySumm(Label lty)
         if (!lhs)
             continue;
 
-        if (grammar()->isaVariantLabel(lhs) && grammar()->isaVariantLabel(lty.first))
+        if (grammar()->isaVariantSymbol(lhs) && grammar()->isaVariantSymbol(lty.first))
             retVal.insert(Label(lhs, lty.second));
         else
             retVal.insert(Label(lhs, 0));
@@ -86,20 +86,20 @@ Set<Label> StdCFL::binarySumm(Label lty, Label rty)
         if (!lhs)       // a fault label
             continue;
 
-        if (grammar()->isaVariantLabel(lty.first))
+        if (grammar()->isaVariantSymbol(lty.first))
         {
-            if ((grammar()->isaVariantLabel(rty.first) && lty.second == rty.second)
-                || !grammar()->isaVariantLabel(rty.first))
+            if ((grammar()->isaVariantSymbol(rty.first) && lty.second == rty.second)
+                || !grammar()->isaVariantSymbol(rty.first))
             {
-                if (grammar()->isaVariantLabel(lhs))
+                if (grammar()->isaVariantSymbol(lhs))
                     retVal.insert(Label(lhs, lty.second));
                 else
                     retVal.insert(Label(lhs, 0));
             }
         }
-        else if (grammar()->isaVariantLabel(rty.first))
+        else if (grammar()->isaVariantSymbol(rty.first))
         {
-            if (grammar()->isaVariantLabel(lhs))
+            if (grammar()->isaVariantSymbol(lhs))
                 retVal.insert(Label(lhs, rty.second));
             else
                 retVal.insert(Label(lhs, 0));
@@ -137,7 +137,7 @@ void StdCFL::initSolver()
 void StdCFL::processCFLItem(CFLItem item)
 {
     /// Derive edges via unary production rules
-    for (Label newTy : unarySumm(item.type()))
+    for (Label newTy : unarySumm(item.label()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
             stat->checks++;
@@ -149,7 +149,7 @@ void StdCFL::processCFLItem(CFLItem item)
     for (auto& iter : cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        for (Label newTy : binarySumm(item.type(), rty))
+        for (Label newTy : binarySumm(item.label(), rty))
         {
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
             stat->checks += iter.second.count();
@@ -161,7 +161,7 @@ void StdCFL::processCFLItem(CFLItem item)
     for (auto& iter : cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        for (Label newTy : binarySumm(lty, item.type()))
+        for (Label newTy : binarySumm(lty, item.label()))
         {
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
             stat->checks += iter.second.count();

@@ -121,7 +121,7 @@ public:
 
     ///Add a PAG edge into Edge map
     //@{
-    /// Add terminal edge with specified type
+    /// Add terminal edge with specified label
     bool addEdge(NodeID srcId, NodeID dstId, CFLEdge::GEdgeKind k, u32_t idx = 0);
     bool addEdge(CFLNode* src, CFLNode* dst, CFLEdge::GEdgeKind k, u32_t idx = 0);
     //@}

@@ -40,7 +40,7 @@ void PocrAA::solve()
     while (!isWorklistEmpty())
     {
         CFLItem item = popFromWorklist();
-        Label type = item.type();
+        Label type = item.label();
         NodeID src = item.src();
         NodeID dst = item.dst();
 

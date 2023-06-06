@@ -29,12 +29,12 @@ class CFLItem
 public:
     NodeID _src;
     NodeID _dst;
-    Label _type;
+    Label _lbl;
     bool _isPrimary;
 
     //Constructor
     CFLItem(NodeID e1, NodeID e2, Label e3, bool e4 = true) :
-            _src(e1), _dst(e2), _type(e3), _isPrimary(e4)
+            _src(e1), _dst(e2), _lbl(e3), _isPrimary(e4)
     {}
 
     /// Methods for binary tree comparison
@@ -46,12 +46,12 @@ public:
         else if (_dst != rhs._dst)
             return _dst < rhs._dst;
         else
-            return _type < rhs._type;
+            return _lbl < rhs._lbl;
     }
 
     inline bool operator==(const CFLItem& rhs) const
     {
-        return (_src == rhs._src) && (_dst == rhs._dst) && (_type == rhs._type) && (_isPrimary == rhs._isPrimary);
+        return (_src == rhs._src) && (_dst == rhs._dst) && (_lbl == rhs._lbl) && (_isPrimary == rhs._isPrimary);
     }
     //@}
 
@@ -61,8 +61,8 @@ public:
     NodeID dst() const
     { return _dst; }
 
-    Label type() const
-    { return _type; }
+    Label label() const
+    { return _lbl; }
 
     void setPrimary(bool v)
     { _isPrimary = v; }
@@ -163,7 +163,7 @@ public:
     virtual void processCFLItem(CFLItem item)
     {
         /// Derive edges via unary production rules
-        for (Label newTy : unarySumm(item.type()))
+        for (Label newTy : unarySumm(item.label()))
             if (addEdge(item.src(), item.dst(), newTy))
                 pushIntoWorklist(item.src(), item.dst(), newTy);
 
@@ -172,7 +172,7 @@ public:
         for (auto& iter : cflData()->getSuccMap(item.dst()))
         {
             Label rty = iter.first;
-            for (Label newTy : binarySumm(item.type(), rty))
+            for (Label newTy : binarySumm(item.label(), rty))
             {
                 NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
                 for (NodeID diffDst : diffDsts)
@@ -183,7 +183,7 @@ public:
         for (auto& iter : cflData()->getPredMap(item.src()))
         {
             Label lty = iter.first;
-            for (Label newTy : binarySumm(lty, item.type()))
+            for (Label newTy : binarySumm(lty, item.label()))
             {
                 NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
                 for (NodeID diffSrc : diffSrcs)

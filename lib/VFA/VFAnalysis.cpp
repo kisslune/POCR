@@ -147,7 +147,7 @@ void StdVFA::initSolver()
 void StdVFA::processCFLItem(CFLItem item)
 {
     /// Derive edges via unary production rules
-    for (Label newTy: unarySumm(item.type()))
+    for (Label newTy: unarySumm(item.label()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
             stat->checks++;
@@ -159,7 +159,7 @@ void StdVFA::processCFLItem(CFLItem item)
     for (auto& iter: cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        for (Label newTy : binarySumm(item.type(), rty))
+        for (Label newTy : binarySumm(item.label(), rty))
         {
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
             stat->checks += iter.second.count();
@@ -171,7 +171,7 @@ void StdVFA::processCFLItem(CFLItem item)
     for (auto& iter: cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        for (Label newTy : binarySumm(lty, item.type()))
+        for (Label newTy : binarySumm(lty, item.label()))
         {
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
             stat->checks += iter.second.count();
