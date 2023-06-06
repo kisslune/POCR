@@ -9,6 +9,7 @@
 #include "CFLBase.h"
 #include "CFLData/CFLGraph.h"
 #include "CFLStat.h"
+#include "CFLData/ECG.h"
 
 namespace SVF
 {
@@ -147,10 +148,38 @@ public:
 /*!
  * Unidirectional CFL-reachability
  */
-//class UCFL : public CFLBase
-//{
-//
-//};
+class UCFL : public StdCFL
+{
+public:
+    typedef HybridData::TreeNode TreeNode;
+    typedef Map<char, HybridData*> TransitiveLblMap;
+
+    typedef ECG::ECGNode ECGNode;
+
+protected:
+    ECG ecg;
+    TransitiveLblMap ptrees;
+    TransitiveLblMap strees;
+
+public:
+    UCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
+    {}
+
+    void initSolver();
+    void procPrimaryItem(CFLItem item);
+    void traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
+    void traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
+    bool updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
+    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true);
+    virtual void processCFLItem(CFLItem item);
+    void checkPtree(Label newLbl, TreeNode* src, NodeID dst);
+    void checkStree(Label newLbl, NodeID src, TreeNode* dst);
+
+    bool isPrimary(CFLItem& item)
+    {
+        return item.isPrimary();
+    }
+};
 
 }
 

@@ -6,6 +6,7 @@
 #define POCR_SVF_CFG_H
 
 #include "SVF-LLVM/BasicTypes.h"
+#include "BasicTypes.h"
 
 namespace SVF
 {
@@ -15,24 +16,21 @@ namespace SVF
 class CFG
 {
 public:
-    typedef u32_t LabelIDTy;
-
-public:
-    LabelIDTy numOfLabels;       // maximum 128 labels are allowed
+    LabelSymbTy numOfLabels;       // maximum 128 labels are allowed
 
     /// mapping string label to int
-    Map<std::string, LabelIDTy> labelToIntMap;
-    Map<LabelIDTy, std::string> intToLabelMap;
+    Map<std::string, LabelSymbTy> labelToIntMap;
+    Map<LabelSymbTy, std::string> intToLabelMap;
     /// the IDs of labels with variant subscript
-    Set<LabelIDTy> variantLabels;
+    Set<LabelSymbTy> variantLabels;
 
     /// Sets of rules
-    Set<LabelIDTy> emptyRules;                           // X ::= epsilon
-    Map<LabelIDTy, Set<LabelIDTy>> unaryRules;                     // X ::= Y
-    Map<std::pair<LabelIDTy, LabelIDTy>, Set<LabelIDTy>> binaryRules;   // X ::= Y Z
-    Set<LabelIDTy> transitiveLabels;                     // X ::= X X
+    Set<LabelSymbTy> emptyRules;                           // X ::= epsilon
+    Map<LabelSymbTy, Set<LabelSymbTy>> unaryRules;                     // X ::= Y
+    Map<std::pair<LabelSymbTy, LabelSymbTy>, Set<LabelSymbTy>> binaryRules;   // X ::= Y Z
+    Set<LabelSymbTy> transitiveLabels;                     // X ::= X X
 
-    const Set<LabelIDTy> emptySet;
+    const Set<LabelSymbTy> emptySet;
 
 public:
     CFG() : numOfLabels(0)
@@ -45,23 +43,23 @@ public:
 
     void addLabel(std::string& s);
 
-    LabelIDTy getLabelId(std::string& s)
+    LabelSymbTy getLabelId(std::string& s)
     {
         assert(hasLabel(s) && "Attempting to access a non-existing label!!");
         return labelToIntMap[s];
     }
 
-    std::string getLabelString(LabelIDTy c)
+    std::string getLabelString(LabelSymbTy c)
     {
         return intToLabelMap[c];
     }
 
-    bool isaVariantLabel(LabelIDTy c)
+    bool isaVariantLabel(LabelSymbTy c)
     {
         return variantLabels.find(c) != variantLabels.end();
     }
 
-    const Set<LabelIDTy>& getLhs(LabelIDTy rhs) const
+    const Set<LabelSymbTy>& getLhs(LabelSymbTy rhs) const
     {
         auto it = unaryRules.find(rhs);
         if (it == unaryRules.end())
@@ -69,7 +67,7 @@ public:
         return it->second;
     }
 
-    const Set<LabelIDTy>& getLhs(std::pair<LabelIDTy, LabelIDTy> rhs) const
+    const Set<LabelSymbTy>& getLhs(std::pair<LabelSymbTy, LabelSymbTy> rhs) const
     {
         auto it = binaryRules.find(rhs);
         if (it == binaryRules.end())
@@ -77,12 +75,12 @@ public:
         return it->second;
     }
 
-    Set<LabelIDTy>& getEmptyRules()
+    Set<LabelSymbTy>& getEmptyRules()
     {
         return emptyRules;
     }
 
-    bool isTransitive(LabelIDTy c)
+    bool isTransitive(LabelSymbTy c)
     {
         return transitiveLabels.find(c) != transitiveLabels.end();
     }

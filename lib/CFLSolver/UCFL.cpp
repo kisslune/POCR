@@ -1,5 +1,5 @@
 //
-// Created by kisslune on 6/6/22.
+// Created by kisslune on 30/5/23.
 //
 
 #include "CFLSolver/CFLSolver.h"
@@ -7,7 +7,7 @@
 using namespace SVF;
 
 
-void PocrCFL::initSolver()
+void UCFL::initSolver()
 {
     StdCFL::initSolver();
 
@@ -22,11 +22,10 @@ void PocrCFL::initSolver()
         for (auto lbl: grammar()->transitiveLabels)
         {
             NodeID nId = it->first;
-            ptrees[lbl]->addInd(nId, nId);
-            strees[lbl]->addInd(nId, nId);
+            ecg.addNode(nId);
         }
     }
-    /// Remove transitive rules
+    /// Remove transitive rules from binary-summarization list
     Set<LabelSymbTy> transitiveSymbols;
     for (auto rule: grammar()->binaryRules)
     {
@@ -39,106 +38,15 @@ void PocrCFL::initSolver()
 }
 
 
-void PocrCFL::solve()
+void UCFL::processCFLItem(CFLItem item)
 {
-    while (!isWorklistEmpty())
-    {
-        CFLItem item = popFromWorklist();
-
-        if (grammar()->isTransitive(item.type().first) && isPrimary(item))
-        {
-            /// Process primary transitive items
-            procPrimaryItem(item);
-        }
-        else
-        {
-            /// Process other items by ordinary routine
-            processCFLItem(item);
-        }
+    /// Process primary transitive items
+    if (grammar()->isTransitive(item.type().first) && isPrimary(item)){
+        procPrimaryItem(item);
+        return;
     }
-}
 
-
-void PocrCFL::procPrimaryItem(CFLItem item)
-{
-    tmpPrimaryItem = item;
-    char lbl = item.type().first;
-    NodeID px = item.dst();
-    NodeID sx = item.src();
-    /// py is the root of ptree(item.src())
-    TreeNode* py = ptrees[lbl]->getNode(item.src(), item.src());
-    /// sy is the root of stree(item.dst())
-    TreeNode* sy = strees[lbl]->getNode(item.dst(), item.dst());
-
-    traverseStree(lbl, px, py, sx, sy);
-}
-
-
-void PocrCFL::traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
-{
-    traversePtree(lbl, px, py, sx, sy);
-
-    for (auto sz: sy->children)
-    {
-        if (!strees[lbl]->hasInd(py->id, sz->id))
-            /// Only handle sz when py -lbl-> sz does not exist
-            traverseStree(lbl, px, py, sy->id, sz);
-    }
-}
-
-
-void PocrCFL::traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
-{
-    updateTrEdge(lbl, px, py, sx, sy);
-
-    for (auto pz: py->children)
-    {
-        if (!ptrees[lbl]->hasInd(sy->id, pz->id))
-            /// Only handle pz when pz -lbl->sy does not exist
-            traversePtree(lbl, py->id, pz, sx, sy);
-    }
-}
-
-
-/*!
- * Add a node py to ptree(sy) as a child of px; \n
- * add a node sy to stree(py) as a child of sx.
- */
-bool PocrCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
-{
-    stat->checks++;
-
-    TreeNode* newPy = ptrees[lbl]->addInd(sy->id, py->id);
-    if (!newPy)
-        return false;   // the node py is already in ptree(sy)
-
-    /// ptrees[lbl]->getNode(sy->id, px) refers to the node px in ptree(sy)
-    ptrees[lbl]->insertEdge(ptrees[lbl]->getNode(sy->id, px), newPy);
-
-    TreeNode* newSy = strees[lbl]->addInd(py->id, sy->id);
-    /// strees[lbl]->getNode(py->id, sx) refers to the node sx in stree(py)
-    strees[lbl]->insertEdge(strees[lbl]->getNode(py->id, sx), newSy);
-    /// Update adjacency lists
-    cflData()->addEdge(py->id, sy->id, Label(lbl, 0));
-    /// Push the new edge into worklist as a secondary edge
-//    if (py->id == tmpPrimaryItem.src() || sy->id == tmpPrimaryItem.dst())
-    pushIntoWorklist(py->id, sy->id, Label(lbl, 0), false);
-
-    return true;
-}
-
-
-/*!
- * All the transitive items generated during ordinary solving is regarded as primary
- */
-bool PocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
-{
-    return CFLBase::pushIntoWorklist(src, dst, ty, isPrimary);
-}
-
-
-void PocrCFL::processCFLItem(CFLItem item)
-{
+    /// Process other items
     for (Label newTy: unarySumm(item.type()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
@@ -186,7 +94,84 @@ void PocrCFL::processCFLItem(CFLItem item)
 }
 
 
-void PocrCFL::checkPtree(Label newLbl, TreeNode* src, NodeID dst)
+void UCFL::procPrimaryItem(CFLItem item)
+{
+    char lbl = item.type().first;
+    NodeID px = item.dst();
+    NodeID sx = item.src();
+    /// py is the root of ptree(item.src())
+    TreeNode* py = ptrees[lbl]->getNode(item.src(), item.src());
+    /// sy is the root of stree(item.dst())
+    TreeNode* sy = strees[lbl]->getNode(item.dst(), item.dst());
+
+    traverseStree(lbl, px, py, sx, sy);
+}
+
+
+void UCFL::traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
+{
+    traversePtree(lbl, px, py, sx, sy);
+
+    for (auto sz: sy->children)
+    {
+        if (!strees[lbl]->hasInd(py->id, sz->id))
+            /// Only handle sz when py -lbl-> sz does not exist
+            traverseStree(lbl, px, py, sy->id, sz);
+    }
+}
+
+
+void UCFL::traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
+{
+    updateTrEdge(lbl, px, py, sx, sy);
+
+    for (auto pz: py->children)
+    {
+        if (!ptrees[lbl]->hasInd(sy->id, pz->id))
+            /// Only handle pz when pz -lbl->sy does not exist
+            traversePtree(lbl, py->id, pz, sx, sy);
+    }
+}
+
+
+/*!
+ * Add a node py to ptree(sy) as a child of px; \n
+ * add a node sy to stree(py) as a child of sx.
+ */
+bool UCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy)
+{
+    stat->checks++;
+
+    TreeNode* newPy = ptrees[lbl]->addInd(sy->id, py->id);
+    if (!newPy)
+        return false;   // the node py is already in ptree(sy)
+
+    /// ptrees[lbl]->getNode(sy->id, px) refers to the node px in ptree(sy)
+    ptrees[lbl]->insertEdge(ptrees[lbl]->getNode(sy->id, px), newPy);
+
+    TreeNode* newSy = strees[lbl]->addInd(py->id, sy->id);
+    /// strees[lbl]->getNode(py->id, sx) refers to the node sx in stree(py)
+    strees[lbl]->insertEdge(strees[lbl]->getNode(py->id, sx), newSy);
+    /// Update adjacency lists
+    cflData()->addEdge(py->id, sy->id, Label(lbl, 0));
+    /// Push the new edge into worklist as a secondary edge
+//    if (py->id == tmpPrimaryItem.src() || sy->id == tmpPrimaryItem.dst())
+    pushIntoWorklist(py->id, sy->id, Label(lbl, 0), false);
+
+    return true;
+}
+
+
+/*!
+ * All the transitive items generated during ordinary solving is regarded as primary
+ */
+bool UCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
+{
+    return CFLBase::pushIntoWorklist(src, dst, ty, isPrimary);
+}
+
+
+void UCFL::checkPtree(Label newLbl, TreeNode* src, NodeID dst)
 {
     stat->checks++;
     for (auto child: src->children)
@@ -198,7 +183,7 @@ void PocrCFL::checkPtree(Label newLbl, TreeNode* src, NodeID dst)
 }
 
 
-void PocrCFL::checkStree(Label newLbl, NodeID src, TreeNode* dst)
+void UCFL::checkStree(Label newLbl, NodeID src, TreeNode* dst)
 {
     stat->checks++;
     for (auto child: dst->children)

@@ -9,11 +9,10 @@
 #define CFGDATA_H_
 
 #include "Util/WorkList.h"
+#include "BasicTypes.h"
 
 namespace SVF
 {
-typedef std::pair<u32_t, u32_t> Label;
-
 /*!
  * Adjacency-list graph representation
  */
