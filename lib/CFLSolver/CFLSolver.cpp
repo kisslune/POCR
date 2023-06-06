@@ -16,6 +16,7 @@ void StdCFL::initialize()
     _graph->readGraph(graphName);
 
     stat = new CFLStat(this);
+    stat->setMemUsageBefore();
 
     initSolver();
 }
@@ -23,6 +24,8 @@ void StdCFL::initialize()
 
 void StdCFL::finalize()
 {
+    stat->setMemUsageAfter();
+
     dumpStat();
     if (CFLOpt::writeGraph())
         graph()->writeGraph("cflg");

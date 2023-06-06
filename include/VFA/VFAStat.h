@@ -56,6 +56,12 @@ private:
     NUMStatMap PTNumStatMap;
     TIMEStatMap timeStatMap;
 
+    /// Memory usage, in KB
+    u32_t _vmrssUsageBefore;
+    u32_t _vmrssUsageAfter;
+    u32_t _vmsizeUsageBefore;
+    u32_t _vmsizeUsageAfter;
+
 public:
     VFAStat(VFAnalysis* p) : ivf(p),
                              numOfIteration(0),
@@ -86,12 +92,6 @@ public:
     {
         return CLOCK_IN_MS();
     }
-
-    /// Memory usage, in KB
-    u32_t _vmrssUsageBefore;
-    u32_t _vmrssUsageAfter;
-    u32_t _vmsizeUsageBefore;
-    u32_t _vmsizeUsageAfter;
 
     void setMemUsageBefore();
     void setMemUsageAfter();

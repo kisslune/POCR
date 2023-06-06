@@ -86,9 +86,11 @@ void UCFL::processCFLItem(CFLItem item)
 }
 
 
+/*!
+ * Transitive items generated in this methods are marked as secondary
+ */
 void UCFL::procPrimaryItem(CFLItem item)
 {
-    // TODO: edges not added to CFLData
     CFGSymbTy symb = item.label().first;
     NodeID src = item.src();
     NodeID dst = item.dst();
@@ -97,9 +99,9 @@ void UCFL::procPrimaryItem(CFLItem item)
         return;
 
     if (ecgs[symb]->isReachable(dst, src))   // // src --> dst is a back edge
-        return ecgs[symb]->insertBackEdge(src, dst);
+        return insertBackEdge(src, dst, symb);
 
-    ecgs[symb]->insertForthEdge(src, dst);
+    insertForthEdge(src, dst, symb);
 }
 
 
@@ -136,3 +138,85 @@ bool UCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 }
 
 
+/// -------------------- Overridden ECG methods -------------------------------
+void UCFL::insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb)
+{
+    ECGNode* vi = ecgs[symb]->getNode(i);
+    ECGNode* vj = ecgs[symb]->getNode(j);
+    searchBack(vi, vj, symb);
+
+    ECG::addEdge(vi, vj, ECG::Forth);
+}
+
+
+void UCFL::searchBack(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
+{
+    std::stack<ECGEdge> edgesToRemove;
+    for (auto succ : vi->successors)
+    {
+        ECGNode* vSucc = succ.first;
+        if (ecgs[symb]->isReachable(vj->id, vSucc->id) && vj->id != vSucc->id)
+            edgesToRemove.push(ECGEdge(vi, vSucc));
+    }
+    while (!edgesToRemove.empty())
+    {
+        auto edge = edgesToRemove.top();
+        edgesToRemove.pop();
+        ECG::removeEdge(edge);
+    }
+
+    searchForth(vi, vj, symb);
+
+    for (auto pred : vi->predecessors)
+    {
+        ECGNode* vPred = pred.first;
+        if (!ecgs[symb]->isReachable(vPred->id, vj->id))
+            searchBack(vPred, vj, symb);
+    }
+}
+
+
+void UCFL::searchForth(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
+{
+    updateTrEdge(vi->id, vj->id, symb);
+    for (auto succ : vj->successors)
+    {
+        ECGNode* vSucc = succ.first;
+        if (!ecgs[symb]->isReachable(vi->id, vSucc->id))
+            searchForth(vi, vSucc, symb);
+    }
+}
+
+
+void UCFL::updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb)
+{
+    stat->checks++;
+    ecgs[symb]->setReachable(i, j);
+    addEdge(i, j, Label(symb, 0));
+    /// New ECG edges are added to worklist as secondary edges
+    pushIntoWorklist(i, j, Label(symb, 0), false);
+}
+
+
+void UCFL::insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb)
+{
+    ECGNode* vi = ecgs[symb]->getNode(i);
+    ECGNode* vj = ecgs[symb]->getNode(j);
+
+    searchBackInCycle(vi, vj, symb);
+
+    ECG::addEdge(vi, vj, ECG::Back);
+}
+
+
+void UCFL::searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
+{
+    searchForth(vi, vj, symb);
+
+    for (auto pred : vi->predecessors)
+    {
+        ECGNode* vPred = pred.first;
+        if (!ecgs[symb]->isReachable(vPred->id, vj->id))
+            searchBackInCycle(vPred, vj, symb);
+    }
+}

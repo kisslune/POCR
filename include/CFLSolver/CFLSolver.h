@@ -150,6 +150,7 @@ class UCFL : public StdCFL
 {
 public:
     typedef ECG::ECGNode ECGNode;
+    typedef ECG::ECGEdge ECGEdge;
     typedef Map<CFGSymbTy, ECG*> ECGMap;
 
 protected:
@@ -169,9 +170,16 @@ public:
 
     static bool isPrimary(CFLItem& item)
     { return item.isPrimary(); }
+
+    /// Overridden ECG methods
+    void insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb);
+    void insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb);
+    void searchForth(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
+    void searchBack(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
+    void updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb);
+    void searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
 };
 
 }
-
 
 #endif //POCR_SVF_CFLSOLVER_H

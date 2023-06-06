@@ -61,8 +61,27 @@ void CFLStat::performStat()
     cfl->countSumEdges();
 
     timeStatMap["AnalysisTime"] = timeOfSolving;
+    timeStatMap["VmrssInGB"] = (_vmrssUsageAfter - _vmrssUsageBefore) / 1024.0 / 1024.0;
     PTNumStatMap["#Checks"] = checks;
     PTNumStatMap["#SumEdges"] = numOfSumEdges - numOfEdges;
 
     CFLStat::printStat("CFL-reachability analysis Stats");
+}
+
+
+void CFLStat::setMemUsageBefore()
+{
+    u32_t vmrss, vmsize;
+    SVFUtil::getMemoryUsageKB(&vmrss, &vmsize);
+    _vmrssUsageBefore = vmrss;
+    _vmsizeUsageBefore = vmsize;
+}
+
+
+void CFLStat::setMemUsageAfter()
+{
+    u32_t vmrss, vmsize;
+    SVFUtil::getMemoryUsageKB(&vmrss, &vmsize);
+    _vmrssUsageAfter = vmrss;
+    _vmsizeUsageAfter = vmsize;
 }

@@ -43,6 +43,12 @@ private:
     NUMStatMap PTNumStatMap;
     TIMEStatMap timeStatMap;
 
+    /// Memory usage, in KB
+    u32_t _vmrssUsageBefore;
+    u32_t _vmrssUsageAfter;
+    u32_t _vmsizeUsageBefore;
+    u32_t _vmsizeUsageAfter;
+
 public:
     CFLStat(StdCFL* p) : cfl(p),
                          numOfIteration(0),
@@ -55,8 +61,7 @@ public:
     };
 
     virtual ~CFLStat()
-    {
-    }
+    {}
 
     virtual inline void startClk()
     { startTime = CLOCK_IN_MS(); }
@@ -66,6 +71,9 @@ public:
 
     static inline double getClk()
     { return CLOCK_IN_MS(); }
+
+    void setMemUsageBefore();
+    void setMemUsageAfter();
 
     void performStat();
     void graphStat();
