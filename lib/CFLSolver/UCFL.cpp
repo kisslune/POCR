@@ -9,7 +9,7 @@ using namespace SVF;
 
 void UCFL::initSolver()
 {
-//    CFLOpt::ucflSumm.setValue(true);
+    CFLOpt::ucflSumm.setValue(true);
 
     StdCFL::initSolver();
     /// Initialize ECG
