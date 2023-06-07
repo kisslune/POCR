@@ -9,8 +9,9 @@ using namespace SVF;
 
 void UCFL::initSolver()
 {
-    StdCFL::initSolver();
+//    CFLOpt::ucflSumm.setValue(true);
 
+    StdCFL::initSolver();
     /// Initialize ECG
     for (auto lbl : grammar()->transitiveSymbols)
         ecgs[lbl] = new ECG();
@@ -40,7 +41,7 @@ void UCFL::processCFLItem(CFLItem item)
 
     /// Process other items
     for (Label newTy : unarySumm(item.label()))
-        if (addEdge(item.src(), item.dst(), newTy))
+        if (updateEdge(item.src(), item.dst(), newTy))
         {
             stat->checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
@@ -58,7 +59,7 @@ void UCFL::processCFLItem(CFLItem item)
             }
             else
             {
-                NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
+                NodeBS diffDsts = updateEdges(item.src(), iter.second, newTy);
                 stat->checks += iter.second.count();
                 for (NodeID diffDst : diffDsts)
                     pushIntoWorklist(item.src(), diffDst, newTy);
@@ -77,7 +78,7 @@ void UCFL::processCFLItem(CFLItem item)
             }
             else
             {
-                NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
+                NodeBS diffSrcs = updateEdges(iter.second, item.dst(), newTy);
                 stat->checks += iter.second.count();
                 for (NodeID diffSrc : diffSrcs)
                     pushIntoWorklist(diffSrc, item.dst(), newTy);
@@ -109,7 +110,7 @@ void UCFL::checkPreds(Label newLbl, ECGNode* src, NodeID dst)
 {
     stat->checks++;
     for (auto pred : src->predecessors)
-        if (addEdge(pred.first->id, dst, newLbl))
+        if (updateEdge(pred.first->id, dst, newLbl))
         {
             pushIntoWorklist(pred.first->id, dst, newLbl);
             checkPreds(newLbl, pred.first, dst);
@@ -121,7 +122,7 @@ void UCFL::checkSuccs(Label newLbl, NodeID src, ECGNode* dst)
 {
     stat->checks++;
     for (auto succ : dst->successors)
-        if (addEdge(src, succ.first->id, newLbl))
+        if (updateEdge(src, succ.first->id, newLbl))
         {
             pushIntoWorklist(src, succ.first->id, newLbl);
             checkSuccs(newLbl, src, succ.first);
@@ -138,7 +139,49 @@ bool UCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 }
 
 
+/// -------------------- Methods for updating adjacency lists ---------------------------------
+
+bool UCFL::updateEdge(NodeID srcId, NodeID dstId, Label ty)
+{
+    if (!CFLOpt::ucflSumm())
+        return CFLBase::addEdge(srcId, dstId, ty);
+
+    if (!ty.first)
+        return false;
+    if (grammar()->isInsertSymbol(ty.first))
+        return cflData()->addEdge(srcId, dstId, ty);
+    return followData.addEdge(srcId, dstId, ty);
+}
+
+
+NodeBS UCFL::updateEdges(NodeID srcId, const NodeBS& dstData, Label ty)
+{
+    if (!CFLOpt::ucflSumm())
+        return CFLBase::addEdges(srcId, dstData, ty);
+
+    if (!ty.first)
+        return emptyBS;
+    if (grammar()->isInsertSymbol(ty.first))
+        return cflData()->addEdges(srcId, dstData, ty);
+    return followData.addEdges(srcId, dstData, ty);
+}
+
+
+NodeBS UCFL::updateEdges(const NodeBS& srcData, NodeID dstId, Label ty)
+{
+    if (!CFLOpt::ucflSumm())
+        return CFLBase::addEdges(srcData, dstId, ty);
+
+    if (!ty.first)
+        return emptyBS;
+    if (grammar()->isInsertSymbol(ty.first))
+        return cflData()->addEdges(srcData, dstId, ty);
+    return followData.addEdges(srcData, dstId, ty);
+}
+
+
 /// -------------------- Overridden ECG methods -------------------------------
+
 void UCFL::insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb)
 {
     ECGNode* vi = ecgs[symb]->getNode(i);
@@ -192,7 +235,7 @@ void UCFL::updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb)
 {
     stat->checks++;
     ecgs[symb]->setReachable(i, j);
-    addEdge(i, j, Label(symb, 0));
+    updateEdge(i, j, Label(symb, 0));
     /// New ECG edges are added to worklist as secondary edges
     pushIntoWorklist(i, j, Label(symb, 0), false);
 }
@@ -218,5 +261,34 @@ void UCFL::searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
         ECGNode* vPred = pred.first;
         if (!ecgs[symb]->isReachable(vPred->id, vj->id))
             searchBackInCycle(vPred, vj, symb);
+    }
+}
+
+
+/// ---------------------- stats --------------------------------
+
+void UCFL::countSumEdges()
+{
+    stat->numOfSumEdges = 0;
+    stat->numOfCountEdges = 0;
+
+    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
+    {
+        for (auto& iter2 : iter1->second)
+        {
+            stat->numOfSumEdges += iter2.second.count();
+            if (grammar()->isCountSymbol(iter2.first.first))
+                stat->numOfCountEdges += iter2.second.count();
+        }
+    }
+
+    for (auto iter1 = followData.begin(); iter1 != followData.end(); ++iter1)
+    {
+        for (auto& iter2 : iter1->second)
+        {
+            stat->numOfSumEdges += iter2.second.count();
+            if (grammar()->isCountSymbol(iter2.first.first))
+                stat->numOfCountEdges += iter2.second.count();
+        }
     }
 }

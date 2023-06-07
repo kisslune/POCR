@@ -195,11 +195,16 @@ void StdCFL::dumpStat()
 void StdCFL::countSumEdges()
 {
     stat->numOfSumEdges = 0;
+    stat->numOfCountEdges = 0;
 
     for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
     {
         for (auto& iter2 : iter1->second)
+        {
             stat->numOfSumEdges += iter2.second.count();
+            if (grammar()->isCountSymbol(iter2.first.first))
+                stat->numOfCountEdges += iter2.second.count();
+        }
     }
 }
 

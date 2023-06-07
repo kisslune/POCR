@@ -27,6 +27,7 @@ public:
     u32_t numOfIteration;
     u32_t checks;
     u32_t numOfSumEdges;
+    u32_t numOfCountEdges;
     u32_t numOfNodes;
     u32_t numOfEdges;
 
@@ -54,6 +55,7 @@ public:
                          numOfIteration(0),
                          checks(0),
                          numOfSumEdges(0),
+                         numOfCountEdges(0),
                          numOfNodes(0),
                          numOfEdges(0),
                          timeOfSolving(0)

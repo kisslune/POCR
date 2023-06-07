@@ -49,21 +49,15 @@ public:
     /// Grammar
     //@{
     virtual CFG* grammar()
-    {
-        return _grammar;
-    }
+    { return _grammar; }
 
     /// Graph
     //@{
     const inline CFLGraph* graph() const
-    {
-        return _graph;
-    }
+    { return _graph; }
 
     virtual CFLGraph* graph()
-    {
-        return _graph;
-    }
+    { return _graph; }
     //@}
 
     virtual void initialize();
@@ -155,6 +149,7 @@ public:
 
 protected:
     ECGMap ecgs;
+    CFLData followData;
 
 public:
     UCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
@@ -171,6 +166,10 @@ public:
     static bool isPrimary(CFLItem& item)
     { return item.isPrimary(); }
 
+    bool updateEdge(NodeID srcId, NodeID dstId, Label ty);
+    NodeBS updateEdges(NodeID srcId, const NodeBS& dstData, Label ty);
+    NodeBS updateEdges(const NodeBS& srcData, NodeID dstId, Label ty);
+
     /// Overridden ECG methods
     void insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb);
     void insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb);
@@ -178,6 +177,9 @@ public:
     void searchBack(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
     void updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb);
     void searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
+
+    /// stat
+    void countSumEdges() override;
 };
 
 }

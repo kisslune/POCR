@@ -64,6 +64,7 @@ void CFLStat::performStat()
     timeStatMap["VmrssInGB"] = (_vmrssUsageAfter - _vmrssUsageBefore) / 1024.0 / 1024.0;
     PTNumStatMap["#Checks"] = checks;
     PTNumStatMap["#SumEdges"] = numOfSumEdges - numOfEdges;
+    PTNumStatMap["#CountEdges"] = numOfCountEdges;
 
     CFLStat::printStat("CFL-reachability analysis Stats");
 }

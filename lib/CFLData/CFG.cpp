@@ -63,6 +63,8 @@ void CFG::readGrammarFile(std::string fname)
             readUCFLSymbol(line, lineTy);
     }
 
+//    if (insertSymbols.empty() && followSymbols.empty())
+
     gFile.close();
 }
 

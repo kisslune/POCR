@@ -87,8 +87,14 @@ public:
     Set<CFGSymbTy>& getEmptyRules()
     { return emptyRules; }
 
-    bool isTransitive(CFGSymbTy c)
-    { return transitiveSymbols.find(c) != transitiveSymbols.end(); }
+    bool isTransitive(CFGSymbTy s)
+    { return transitiveSymbols.find(s) != transitiveSymbols.end(); }
+
+    bool isInsertSymbol(CFGSymbTy s)
+    { return insertSymbols.find(s) != insertSymbols.end(); }
+
+    bool isCountSymbol(CFGSymbTy s)
+    { return countSymbols.find(s) != countSymbols.end(); }
 
     void parseGrammar(std::string fname);
     void readGrammarFile(std::string fname);
