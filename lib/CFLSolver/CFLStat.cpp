@@ -53,7 +53,8 @@ void CFLStat::performStat()
 
     timeStatMap["AnalysisTime"] = cfl->timeOfSolving;
     PTNumStatMap["#Checks"] = cfl->checks;
-    PTNumStatMap["#SumEdges"] = cfl->numOfSumEdges - numOfEdges;
+    PTNumStatMap["#SumEdges"] = cfl->numOfSumEdges;
+    // - numOfEdges;
 
     CFLStat::printStat("CFL-reachability analysis Stats");
 }

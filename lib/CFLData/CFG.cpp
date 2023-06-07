@@ -79,6 +79,8 @@ void CFG::addLabel(std::string& s)
     numOfLabels++;
     labelToIntMap[s] = numOfLabels;
     intToLabelMap[numOfLabels] = s;
+    std::cout << "label: " << s  << " num: " << numOfLabels << " entry: " << labelToIntMap[s] << std::endl;
+
 
     /// check whether the label has an index
     if (s.find("_i") == s.size() - 2 && s.find("_i") != -1)

@@ -222,7 +222,6 @@ void StdCFL::dumpStat()
         stat->performStat();
 }
 
-
 void StdCFL::countSumEdges()
 {
     numOfSumEdges = 0;
@@ -231,7 +230,19 @@ void StdCFL::countSumEdges()
     {
         for (auto& iter2: iter1->second)
         {
-            numOfSumEdges += iter2.second.count();
+            // std::cout << "num "<<(int)(iter2.first).first <<std::endl;
+            // numOfSumEdges += iter2.second.count();
+            if ((int)(iter2.first).first == 1){
+                numOfSumEdges += iter2.second.count();
+                // numOfSumEdges = 0;
+                // std::cout << (int)(*iter1).first << ": ";
+                // for (int dst : iter2.second){
+                //     std::cout << dst << ", " ;
+                // }
+                // std::cout<<std::endl;
+                // std::cout << (int) iter2.second.count() <<std::endl;
+                // std::cout << (int)iter2.second <<std::endl;
+            }
         }
     }
 }
