@@ -25,8 +25,6 @@ public:
     static const Option<bool> interDyck;
 };
 
-void processArgs(int argc, char** argv, int& arg_num, char** arg_vec, std::vector<std::string>& inFileVec);
-
 }  // namespace SVF
 
 #endif

@@ -9,7 +9,7 @@
 #define CFGDATA_H_
 
 #include "Util/WorkList.h"
-#include "BasicTypes.h"
+#include "BasicUtils.h"
 
 namespace SVF
 {

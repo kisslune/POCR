@@ -31,32 +31,64 @@ void CFG::readGrammarFile(std::string fname)
     std::string line;
     while (getline(gFile, line))
     {
-        std::vector<std::string> vec = split(line, '\t');
-
-        if (vec.empty())
+        /// Switch line types
+        //@{
+        if (line == "Production:")
+        {
+            lineTy = Production;
             continue;
+        }
+        else if (line == "Insert:")
+        {
+            lineTy = Insert;
+            continue;
+        }
+        else if (line == "Follow:")
+        {
+            lineTy = Follow;
+            continue;
+        }
+        else if (line == "Count:")
+        {
+            lineTy = Count;
+            continue;
+        }
+        //@}
 
-        if (vec.size() == 1)
-        {
-            addSymbol(vec[0]);
-            emptyRules.insert(getSymbolId(vec[0]));
-        }
-        else if (vec.size() == 2)
-        {
-            addSymbol(vec[0]);
-            addSymbol(vec[1]);
-            unaryRules[getSymbolId(vec[1])].insert(getSymbolId(vec[0]));
-        }
-        else if (vec.size() == 3)
-        {
-            addSymbol(vec[0]);
-            addSymbol(vec[1]);
-            addSymbol(vec[2]);
-            binaryRules[std::make_pair(getSymbolId(vec[1]), getSymbolId(vec[2]))].insert(getSymbolId(vec[0]));
-        }
+        if (lineTy == Production)
+            readProduction(line);
+        // TODO
+
+
     }
 
+        // TODO: add all to insert, follow, and count if empty ...
     gFile.close();
+}
+
+
+void CFG::readProduction(std::string& line)
+{
+    std::vector<std::string> vec = split(line, '\t');
+
+    if (vec.size() == 1)
+    {
+        addSymbol(vec[0]);
+        emptyRules.insert(getSymbolId(vec[0]));
+    }
+    else if (vec.size() == 2)
+    {
+        addSymbol(vec[0]);
+        addSymbol(vec[1]);
+        unaryRules[getSymbolId(vec[1])].insert(getSymbolId(vec[0]));
+    }
+    else if (vec.size() == 3)
+    {
+        addSymbol(vec[0]);
+        addSymbol(vec[1]);
+        addSymbol(vec[2]);
+        binaryRules[std::make_pair(getSymbolId(vec[1]), getSymbolId(vec[2]))].insert(getSymbolId(vec[0]));
+    }
 }
 
 
