@@ -23,6 +23,8 @@ public:
     static const Option<bool> scc;
     static const Option<bool> gf;
     static const Option<bool> interDyck;
+
+    static Option<bool> ucflSumm;
 };
 
 }  // namespace SVF

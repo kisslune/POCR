@@ -35,6 +35,9 @@ public:
     /// the IDs of symbols with variant subscript
     Set<CFGSymbTy> variableSymbols;
     Set<CFGSymbTy> transitiveSymbols;                     // X ::= X X
+    Set<CFGSymbTy> insertSymbols;
+    Set<CFGSymbTy> followSymbols;
+    Set<CFGSymbTy> countSymbols;
 
     /// Sets of rules
     Set<CFGSymbTy> emptyRules;                                          // X ::= epsilon
@@ -90,6 +93,7 @@ public:
     void parseGrammar(std::string fname);
     void readGrammarFile(std::string fname);
     void readProduction(std::string& line);
+    void readUCFLSymbol(std::string& line, LineTy ty);
     void detectTransitiveSymbol();
     void printCFGStat();
 };

@@ -55,7 +55,8 @@ public:
                          checks(0),
                          numOfSumEdges(0),
                          numOfNodes(0),
-                         numOfEdges(0)
+                         numOfEdges(0),
+                         timeOfSolving(0)
     {
         startClk();
     };

@@ -61,7 +61,7 @@ std::string strip(std::string& str)
     std::string whiteSpace = " \n\r\t\f\v";
 
     size_t lPos = str.find_first_not_of(whiteSpace);
-    size_t rPos = str.find_first_not_of(whiteSpace);
+    size_t rPos = str.find_last_not_of(whiteSpace);
 
     if (lPos != std::string::npos && rPos != std::string::npos && rPos >= lPos)
         return str.substr(lPos, rPos + 1);

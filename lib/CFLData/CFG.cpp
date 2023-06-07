@@ -14,7 +14,7 @@ void CFG::parseGrammar(std::string fname)
 {
     readGrammarFile(fname);
     detectTransitiveSymbol();
-//    printCFGStat();
+    printCFGStat();
 }
 
 
@@ -31,6 +31,8 @@ void CFG::readGrammarFile(std::string fname)
     std::string line;
     while (getline(gFile, line))
     {
+        line = strip(line);
+
         /// Switch line types
         //@{
         if (line == "Production:")
@@ -57,12 +59,10 @@ void CFG::readGrammarFile(std::string fname)
 
         if (lineTy == Production)
             readProduction(line);
-        // TODO
-
-
+        else
+            readUCFLSymbol(line, lineTy);
     }
 
-        // TODO: add all to insert, follow, and count if empty ...
     gFile.close();
 }
 
@@ -88,6 +88,29 @@ void CFG::readProduction(std::string& line)
         addSymbol(vec[1]);
         addSymbol(vec[2]);
         binaryRules[std::make_pair(getSymbolId(vec[1]), getSymbolId(vec[2]))].insert(getSymbolId(vec[0]));
+    }
+}
+
+
+void CFG::readUCFLSymbol(std::string& line, LineTy ty)
+{
+    Set<CFGSymbTy>* ucflSymbolSet = nullptr;
+    if (ty == Insert)
+        ucflSymbolSet = &insertSymbols;
+    else if (ty == Follow)
+        ucflSymbolSet = &followSymbols;
+    else if (ty == Count)
+        ucflSymbolSet = &countSymbols;
+
+    if (!ucflSymbolSet)
+        return;
+
+    std::vector<std::string> vec = split(line, ',');
+    for (auto& it : vec)
+    {
+        std::string symbStr = strip(it);
+        addSymbol(symbStr);
+        ucflSymbolSet->insert(getSymbolId(symbStr));
     }
 }
 
@@ -135,10 +158,27 @@ void CFG::printCFGStat()
         numOfRules += rule.second.size();
 
     std::cout << "#Symbol = " << numOfSymbols << std::endl;
-    for (auto it : intToSymbMap)
+    for (auto& it : intToSymbMap)
         std::cout << it.second << ", ";
+    std::cout << std::endl << std::endl;
+
+    std::cout << "Insert:" << std::endl;
+    for (auto it : insertSymbols)
+        std::cout << getSymbolString(it) << ", ";
+    std::cout << std::endl << std::endl;
+
+    std::cout << "Follow:" << std::endl;
+    for (auto it : followSymbols)
+        std::cout << getSymbolString(it) << ", ";
+    std::cout << std::endl << std::endl;
+
+    std::cout << "Count:" << std::endl;
+    for (auto it : countSymbols)
+        std::cout << getSymbolString(it) << ", ";
     std::cout << std::endl << std::endl;
 
     std::cout << "#VariantSymbol = " << numOfVariantSymbols << std::endl;
     std::cout << "#Rule = " << numOfRules << std::endl;
+
+    std::cout << std::endl;
 }

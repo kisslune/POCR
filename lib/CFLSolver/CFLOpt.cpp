@@ -48,4 +48,10 @@ const Option<bool> CFLOpt::interDyck(
         false   // slower than expected
 );
 
+Option<bool> CFLOpt::ucflSumm(
+        "ucfl-summ",
+        "Enable uni-directional CFL-reachability summarization scheme",
+        false   // slower than expected
+);
+
 } // namespace SVF.
