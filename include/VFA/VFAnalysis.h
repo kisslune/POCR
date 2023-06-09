@@ -13,6 +13,7 @@
 #include "VFAStat.h"
 #include "IVFGFold.h"
 #include "IVFGInterDyck.h"
+#include "CFLData/ECG.h"
 
 namespace SVF
 {
@@ -37,15 +38,7 @@ public:
     };
 
     // Statistics
-    //@{
     VFAStat* stat;
-    u32_t numOfIteration;
-    u32_t checks;
-    u32_t numOfTEdges;
-    u32_t numOfSumEdges;
-    u32_t numOfAdd;
-    double timeOfSolving;
-    //@}
 
 protected:
     /// Reanalyze flag
@@ -60,13 +53,7 @@ protected:
 
 public:
     /// Constructor
-    VFAnalysis(std::string& gName) : numOfIteration(0),
-                                     checks(0),
-                                     numOfTEdges(0),
-                                     numOfSumEdges(0),
-                                     numOfAdd(0),
-                                     timeOfSolving(0),
-                                     reanalyze(false),
+    VFAnalysis(std::string& gName) : reanalyze(false),
                                      _graph(nullptr),
                                      graphName(gName),
                                      scc(nullptr),
@@ -84,24 +71,26 @@ public:
     /// Graph operations
     //@{
     const inline IVFG* graph() const
-    {
-        return _graph;
-    }
+    { return _graph; }
 
     virtual inline void setGraph(IVFG* g)
-    {
-        _graph = g;
-    }
+    { _graph = g; }
 
     virtual IVFG* graph()
-    {
-        return _graph;
-    }
+    { return _graph; }
     //@}
 
     virtual void analyze();
     virtual void initialize();
+    virtual void initSolver() = 0;
     virtual void finalize();
+    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
+
+    Set<Label> unarySumm(Label lty) override
+    { return {}; }
+
+    Set<Label> binarySumm(Label lty, Label rty) override
+    { return {}; }
 
     /// Print statistics results
     inline void dumpStat()
@@ -144,27 +133,24 @@ public:
     StdVFA(std::string gName) : VFAnalysis(gName)
     {}
 
-    virtual void initialize();
-    virtual void initSolver();
+    void initSolver() override;
 
     // CFLItem operations
     //@{
     // Get a new edge kind from CFL grammar
-    virtual Label binarySumm(Label lty, Label rty);
-    Label unarySumm(Label lty);
-    virtual void processCFLItem(CFLItem item);
+    Set<Label> binarySumm(Label lty, Label rty) override;
+    Set<Label> unarySumm(Label lty) override;
+    void processCFLItem(CFLItem item) override;
     //@}
 
-    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
-
-    void countSumEdges();
+    void countSumEdges() override;
 };
 
 
 /*!
  * POCR
  */
-class PocrVFA : public StdVFA
+class PocrVFA : public VFAnalysis
 {
 public:
     typedef HybridData::TreeNode TreeNode;
@@ -179,11 +165,11 @@ protected:
     CallRetMap clChildren;
 
 public:
-    PocrVFA(std::string gName) : StdVFA(gName)
+    PocrVFA(std::string gName) : VFAnalysis(gName)
     {}
 
-    void initSolver();
-    virtual void solve();
+    void initSolver() override;
+    void solve() override;
 
     virtual void addArc(NodeID src, NodeID dst);
     void meld(NodeID x, TreeNode* uNode, TreeNode* vNode);
@@ -191,7 +177,55 @@ public:
     virtual void matchCallRet(NodeID u, NodeID v);
     void addCl(NodeID u, u32_t idx, TreeNode* vNode);
 
-    void countSumEdges();
+    void countSumEdges() override;
+};
+
+
+/*!
+ * VFA with transitive reduction
+ */
+class TRVFA : public VFAnalysis
+{
+public:
+    typedef ECG::ECGNode ECGNode;
+    typedef ECG::ECGEdge ECGEdge;
+    typedef ECG::ECGEdgeTy ECGEdgeTy;
+    typedef std::unordered_map<NodeID, std::unordered_map<u32_t, std::unordered_set<NodeID>>> CallRetMap;
+    typedef std::unordered_map<NodeID, std::unordered_set<NodeID>> ChildrenMap;
+
+protected:
+    ECG ecg;
+    CallRetMap callParents;
+    CallRetMap retChildren;
+    ChildrenMap sChildren;
+    CallRetMap clChildren;
+
+public:
+    TRVFA(std::string gName) : VFAnalysis(gName)
+    {}
+
+    void initSolver() override;
+    void solve() override;
+
+    virtual void addArc(NodeID src, NodeID dst);
+    virtual void matchCallRet(NodeID u, NodeID v);
+    void addCl(NodeID u, u32_t idx, ECGNode* vNode);
+
+    void insertForthEdge(NodeID i, NodeID j);
+    void insertBackEdge(NodeID i, NodeID j);
+    void searchForth(ECGNode* vi, ECGNode* vj);
+    void searchBack(ECGNode* vi, ECGNode* vj);
+//
+//    void searchForthInCycle(ECGNode* vj);  // no use vi
+    void searchBackInCycle(ECGNode* vi, ECGNode* vj);   // no use vj
+
+    inline bool isReachable(NodeID src, NodeID dst)
+    {
+        stat->checks++;
+        return ecg.isReachable(src, dst);
+    }
+
+    void countSumEdges() override;
 };
 
 
@@ -215,9 +249,9 @@ public:
         return _oldData;
     }
 
-    void initSolver();
-    virtual void solve();
-    void countSumEdges();
+    void initSolver() override;
+    void solve() override;
+    void countSumEdges() override;
 };
 
 
@@ -230,8 +264,8 @@ public:
     GRVFA(std::string gName) : StdVFA(gName)
     {}
 
-    Label binarySumm(Label lty, Label rty);
-    Label unarySumm(Label lty);
+    Set<Label> binarySumm(Label lty, Label rty) override;
+    Set<Label> unarySumm(Label lty) override;
 };
 
 
@@ -244,8 +278,8 @@ public:
     GRGspanVFA(std::string gName) : GspanVFA(gName)
     {}
 
-    Label binarySumm(Label lty, Label rty);
-    Label unarySumm(Label lty);
+    Set<Label> binarySumm(Label lty, Label rty) override;
+    Set<Label> unarySumm(Label lty) override;
 };
 
 }

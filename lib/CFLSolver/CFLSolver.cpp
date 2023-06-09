@@ -16,6 +16,7 @@ void StdCFL::initialize()
     _graph->readGraph(graphName);
 
     stat = new CFLStat(this);
+    stat->setMemUsageBefore();
 
     initSolver();
 }
@@ -23,6 +24,8 @@ void StdCFL::initialize()
 
 void StdCFL::finalize()
 {
+    stat->setMemUsageAfter();
+
     dumpStat();
     if (CFLOpt::writeGraph())
         graph()->writeGraph("cflg");
@@ -40,14 +43,14 @@ void StdCFL::analyze()
 
     do
     {
-        numOfIteration++;
+        stat->numOfIteration++;
         reanalyze = false;
         if (CFLOpt::solveCFL())
             solve();
     } while (reanalyze);
 
     double propEnd = stat->getClk();
-    timeOfSolving += (propEnd - propStart) / TIMEINTERVAL;
+    stat->timeOfSolving += (propEnd - propStart) / TIMEINTERVAL;
 
     finalize();
 
@@ -56,88 +59,54 @@ void StdCFL::analyze()
 }
 
 
-Set<Label> StdCFL::cflBinarySumm(Label lty, Label rty)
+Set<Label> StdCFL::unarySumm(Label lty)
 {
     Set<Label> retVal;
-    auto lhsSet = grammar()->getLhs(std::make_pair(lty.first, rty.first));
+    auto& lhsSet = grammar()->getLhs(lty.first);
 
-    for (auto lhs: lhsSet)
+    for (auto lhs : lhsSet)
     {
-        if (!lhs)       // a fault label
+        if (!lhs)
             continue;
 
-        if (grammar()->isaVariantLabel(lty.first))
-        {
-            if ((grammar()->isaVariantLabel(rty.first) && lty.second == rty.second)
-                || !grammar()->isaVariantLabel(rty.first))
-            {
-                if (grammar()->isaVariantLabel(lhs))
-                    retVal.insert(Label(lhs, lty.second));
-                else
-                    retVal.insert(Label(lhs, 0));
-            }
-        }
-        else if (grammar()->isaVariantLabel(rty.first))
-        {
-            if (grammar()->isaVariantLabel(lhs))
-                retVal.insert(Label(lhs, rty.second));
-            else
-                retVal.insert(Label(lhs, 0));
-        }
+        if (grammar()->isaVariantSymbol(lhs) && grammar()->isaVariantSymbol(lty.first))
+            retVal.insert(Label(lhs, lty.second));
         else
             retVal.insert(Label(lhs, 0));
-
-//        if (grammar()->isaVariantLabel(lty.first) &&
-//            grammar()->isaVariantLabel(rty.first) &&
-//            lty.second == rty.second)
-//        {
-//            if (grammar()->isaVariantLabel(lhs))
-//                retVal.insert(Label(lhs, lty.second));
-//            else
-//                retVal.insert(Label(lhs, 0));
-//        }
-//
-//        if (grammar()->isaVariantLabel(lty.first) &&
-//            !grammar()->isaVariantLabel(rty.first))
-//        {
-//            if (grammar()->isaVariantLabel(lhs))
-//                retVal.insert(Label(lhs, lty.second));
-//            else
-//                retVal.insert(Label(lhs, 0));
-//        }
-//
-//        if (!grammar()->isaVariantLabel(lty.first) &&
-//            grammar()->isaVariantLabel(rty.first))
-//        {
-//            if (grammar()->isaVariantLabel(lhs))
-//                retVal.insert(Label(lhs, rty.second));
-//            else
-//                retVal.insert(Label(lhs, 0));
-//        }
-//
-//        if (!grammar()->isaVariantLabel(lty.first) &&
-//            !grammar()->isaVariantLabel(rty.first))
-//        {
-//            retVal.insert(Label(lhs, 0));
-//        }
     }
 
     return retVal;
 }
 
 
-Set<Label> StdCFL::cflUnarySumm(Label lty)
+Set<Label> StdCFL::binarySumm(Label lty, Label rty)
 {
     Set<Label> retVal;
-    auto& lhsSet = grammar()->getLhs(lty.first);
+    auto lhsSet = grammar()->getLhs(std::make_pair(lty.first, rty.first));
 
-    for (auto lhs: lhsSet)
+    for (auto lhs : lhsSet)
     {
-        if (!lhs)
+        if (!lhs)       // a fault label
             continue;
 
-        if (grammar()->isaVariantLabel(lhs) && grammar()->isaVariantLabel(lty.first))
-            retVal.insert(Label(lhs, lty.second));
+        if (grammar()->isaVariantSymbol(lty.first))
+        {
+            if ((grammar()->isaVariantSymbol(rty.first) && lty.second == rty.second)
+                || !grammar()->isaVariantSymbol(rty.first))
+            {
+                if (grammar()->isaVariantSymbol(lhs))
+                    retVal.insert(Label(lhs, lty.second));
+                else
+                    retVal.insert(Label(lhs, 0));
+            }
+        }
+        else if (grammar()->isaVariantSymbol(rty.first))
+        {
+            if (grammar()->isaVariantSymbol(lhs))
+                retVal.insert(Label(lhs, rty.second));
+            else
+                retVal.insert(Label(lhs, 0));
+        }
         else
             retVal.insert(Label(lhs, 0));
     }
@@ -149,7 +118,7 @@ Set<Label> StdCFL::cflUnarySumm(Label lty)
 void StdCFL::initSolver()
 {
     /// add all edges into adjacency list and worklist
-    for (auto edge: graph()->getCFLEdges())
+    for (auto edge : graph()->getCFLEdges())
     {
         addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(edge->getEdgeKind(), edge->getEdgeIdx()));
         pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(edge->getEdgeKind(), edge->getEdgeIdx()));
@@ -159,7 +128,7 @@ void StdCFL::initSolver()
     for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter)
     {
         NodeID nodeId = nIter->first;
-        for (auto lhs: grammar()->getEmptyRules())
+        for (auto lhs : grammar()->getEmptyRules())
         {
             addEdge(nodeId, nodeId, std::make_pair(lhs, 0));
             pushIntoWorklist(nodeId, nodeId, std::make_pair(lhs, 0));
@@ -170,40 +139,40 @@ void StdCFL::initSolver()
 
 void StdCFL::processCFLItem(CFLItem item)
 {
-    auto newTySet = cflUnarySumm(item.type());
-    for (Label newTy: newTySet){
+    /// Derive edges via unary production rules
+    for (Label newTy : unarySumm(item.label()))
         if (addEdge(item.src(), item.dst(), newTy))
         {
-            checks++;
+            stat->checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
         }
-    }
 
-    for (auto& iter: cflData()->getSuccMap(item.dst()))
+    /// Derive edges via binary production rules
+    //@{
+    for (auto& iter : cflData()->getSuccMap(item.dst()))
     {
         Label rty = iter.first;
-        auto newTySet = cflBinarySumm(item.type(), rty);
-        for (Label newTy: newTySet)
+        for (Label newTy : binarySumm(item.label(), rty))
         {
             NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-            checks += iter.second.count();
-            for (NodeID diffDst: diffDsts)
+            stat->checks += iter.second.count();
+            for (NodeID diffDst : diffDsts)
                 pushIntoWorklist(item.src(), diffDst, newTy);
         }
     }
 
-    for (auto& iter: cflData()->getPredMap(item.src()))
+    for (auto& iter : cflData()->getPredMap(item.src()))
     {
         Label lty = iter.first;
-        auto newTySet = cflBinarySumm(lty, item.type());
-        for (Label newTy: newTySet)
+        for (Label newTy : binarySumm(lty, item.label()))
         {
             NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-            checks += iter.second.count();
-            for (NodeID diffSrc: diffSrcs)
+            stat->checks += iter.second.count();
+            for (NodeID diffSrc : diffSrcs)
                 pushIntoWorklist(diffSrc, item.dst(), newTy);
         }
     }
+    //@}
 }
 
 
@@ -224,25 +193,16 @@ void StdCFL::dumpStat()
 
 void StdCFL::countSumEdges()
 {
-    numOfSumEdges = 0;
+    stat->numOfSumEdges = 0;
+    stat->numOfCountEdges = 0;
 
     for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
     {
-        for (auto& iter2: iter1->second)
+        for (auto& iter2 : iter1->second)
         {
-            // std::cout << "num "<<(int)(iter2.first).first <<std::endl;
-            // numOfSumEdges += iter2.second.count();
-            if ((int)(iter2.first).first == 1){
-                numOfSumEdges += iter2.second.count();
-                // numOfSumEdges = 0;
-                // std::cout << (int)(*iter1).first << ": ";
-                // for (int dst : iter2.second){
-                //     std::cout << dst << ", " ;
-                // }
-                // std::cout<<std::endl;
-                // std::cout << (int) iter2.second.count() <<std::endl;
-                // std::cout << (int)iter2.second <<std::endl;
-            }
+            stat->numOfSumEdges += iter2.second.count();
+            if (grammar()->isCountSymbol(iter2.first.first))
+                stat->numOfCountEdges += iter2.second.count();
         }
     }
 }

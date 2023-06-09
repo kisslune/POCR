@@ -45,16 +45,7 @@ public:
         FV
     };
     /// Statistics
-    //@{
     AAStat* stat;
-
-    u32_t numOfIteration;
-    u32_t checks;
-    u32_t numOfTEdges;
-    u32_t numOfSumEdges;
-    u32_t numOfAdd;
-    double timeOfSolving;
-    //@}
 
 protected:
     /// Reanalyze flag
@@ -70,12 +61,6 @@ protected:
 
 public:
     AliasAnalysis(std::string& gName) : stat(nullptr),
-                                        numOfIteration(0),
-                                        checks(0),
-                                        numOfTEdges(0),
-                                        numOfSumEdges(0),
-                                        numOfAdd(0),
-                                        timeOfSolving(0),
                                         reanalyze(false),
                                         _graph(nullptr),
                                         graphName(gName),
@@ -167,8 +152,8 @@ public:
 
     // Alias data operations
     //@{
-    virtual Label binarySumm(Label lty, Label rty);
-    virtual Label unarySumm(Label lty);
+    virtual Set<Label> binarySumm(Label lty, Label rty);
+    virtual Set<Label> unarySumm(Label lty);
     //@}
 
     virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
@@ -190,7 +175,7 @@ public:
 
 protected:
     HybridData hybridData;
-    std::unordered_map<NodeID, NodeID> dChildren;
+    ChildrenMap dChildren;
     ChildrenMap aParents;
     CallRetMap fChildren;
     ChildrenMap vChildren;
@@ -219,16 +204,6 @@ public:
     bool setV(NodeID src, NodeID dst);
     bool hasM(NodeID src, NodeID dst);
     void setM(NodeID src, NodeID dst);
-
-    u32_t getNumOfAdd()
-    {
-        return numOfAdd;
-    };
-
-    double getAnalysisTime()
-    {
-        return timeOfSolving;
-    };
 
     void countSumEdges();
 };
@@ -271,7 +246,7 @@ public:
     GRAA(std::string gName) : StdAA(gName)
     {};
 
-    Label binarySumm(Label lty, Label rty);
+    Set<Label> binarySumm(Label lty, Label rty);
 };
 
 
@@ -284,7 +259,7 @@ public:
     GRGspanAA(std::string gName) : GspanAA(gName)
     {}
 
-    Label binarySumm(Label lty, Label rty);
+    Set<Label> binarySumm(Label lty, Label rty);
 };
 
 }

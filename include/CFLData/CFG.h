@@ -6,6 +6,7 @@
 #define POCR_SVF_CFG_H
 
 #include "SVF-LLVM/BasicTypes.h"
+#include "BasicUtils.h"
 
 namespace SVF
 {
@@ -15,53 +16,59 @@ namespace SVF
 class CFG
 {
 public:
-    typedef u32_t LabelIDTy;
+    enum LineTy
+    {
+        Production,     // production rule
+        Insert,         // insert non-terminals
+        Follow,         // follow non-terminals
+        Count           // count non-terminals
+    };
 
-public:
-    LabelIDTy numOfLabels;       // maximum 128 labels are allowed
+    LineTy lineTy;      // used to track the type of the current line
 
-    /// mapping string label to int
-    Map<std::string, LabelIDTy> labelToIntMap;
-    Map<LabelIDTy, std::string> intToLabelMap;
-    /// the IDs of labels with variant subscript
-    Set<LabelIDTy> variantLabels;
+    /// number of symbols
+    CFGSymbTy numOfSymbols;
+
+    /// mapping string symbol to int
+    Map<std::string, CFGSymbTy> symbToIntMap;
+    Map<CFGSymbTy, std::string> intToSymbMap;
+    /// the IDs of symbols with variant subscript
+    Set<CFGSymbTy> variableSymbols;
+    Set<CFGSymbTy> transitiveSymbols;                     // X ::= X X
+    Set<CFGSymbTy> insertSymbols;
+    Set<CFGSymbTy> followSymbols;
+    Set<CFGSymbTy> countSymbols;
 
     /// Sets of rules
-    Set<LabelIDTy> emptyRules;                           // X ::= epsilon
-    Map<LabelIDTy, Set<LabelIDTy>> unaryRules;                     // X ::= Y
-    Map<std::pair<LabelIDTy, LabelIDTy>, Set<LabelIDTy>> binaryRules;   // X ::= Y Z
-    Set<LabelIDTy> transitiveLabels;                     // X ::= X X
+    Set<CFGSymbTy> emptyRules;                                          // X ::= epsilon
+    Map<CFGSymbTy, Set<CFGSymbTy>> unaryRules;                          // X ::= Y
+    Map<std::pair<CFGSymbTy, CFGSymbTy>, Set<CFGSymbTy>> binaryRules;   // X ::= Y Z
 
-    const Set<LabelIDTy> emptySet;
+    const Set<CFGSymbTy> emptySet;
 
 public:
-    CFG() : numOfLabels(0)
+    CFG() : numOfSymbols(0),
+            lineTy(Production)
     {}
 
-    bool hasLabel(std::string& s)
+    bool hasSymbol(std::string& s)
+    { return symbToIntMap.find(s) != symbToIntMap.end(); }
+
+    void addSymbol(std::string& s);
+
+    CFGSymbTy getSymbolId(std::string& s)
     {
-        return labelToIntMap.find(s) != labelToIntMap.end();
+        assert(hasSymbol(s) && "Attempting to access a non-existing symbol!!");
+        return symbToIntMap[s];
     }
 
-    void addLabel(std::string& s);
+    std::string getSymbolString(CFGSymbTy c)
+    { return intToSymbMap[c]; }
 
-    LabelIDTy getLabelId(std::string& s)
-    {
-        assert(hasLabel(s) && "Attempting to access a non-existing label!!");
-        return labelToIntMap[s];
-    }
+    bool isaVariantSymbol(CFGSymbTy c)
+    { return variableSymbols.find(c) != variableSymbols.end(); }
 
-    std::string getLabelString(LabelIDTy c)
-    {
-        return intToLabelMap[c];
-    }
-
-    bool isaVariantLabel(LabelIDTy c)
-    {
-        return variantLabels.find(c) != variantLabels.end();
-    }
-
-    const Set<LabelIDTy>& getLhs(LabelIDTy rhs) const
+    const Set<CFGSymbTy>& getLhs(CFGSymbTy rhs) const
     {
         auto it = unaryRules.find(rhs);
         if (it == unaryRules.end())
@@ -69,7 +76,7 @@ public:
         return it->second;
     }
 
-    const Set<LabelIDTy>& getLhs(std::pair<LabelIDTy, LabelIDTy> rhs) const
+    const Set<CFGSymbTy>& getLhs(std::pair<CFGSymbTy, CFGSymbTy> rhs) const
     {
         auto it = binaryRules.find(rhs);
         if (it == binaryRules.end())
@@ -77,19 +84,23 @@ public:
         return it->second;
     }
 
-    Set<LabelIDTy>& getEmptyRules()
-    {
-        return emptyRules;
-    }
+    Set<CFGSymbTy>& getEmptyRules()
+    { return emptyRules; }
 
-    bool isTransitive(LabelIDTy c)
-    {
-        return transitiveLabels.find(c) != transitiveLabels.end();
-    }
+    bool isTransitive(CFGSymbTy s)
+    { return transitiveSymbols.find(s) != transitiveSymbols.end(); }
+
+    bool isInsertSymbol(CFGSymbTy s)
+    { return insertSymbols.find(s) != insertSymbols.end(); }
+
+    bool isCountSymbol(CFGSymbTy s)
+    { return countSymbols.find(s) != countSymbols.end(); }
 
     void parseGrammar(std::string fname);
     void readGrammarFile(std::string fname);
-    void detectTransitiveLabel();
+    void readProduction(std::string& line);
+    void readUCFLSymbol(std::string& line, LineTy ty);
+    void detectTransitiveSymbol();
     void printCFGStat();
 };
 

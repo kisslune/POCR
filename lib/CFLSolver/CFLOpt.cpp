@@ -1,6 +1,5 @@
 //===- Options.cpp -- Command line options ------------------------//
 
-#include <llvm/Support/CommandLine.h>
 #include "CFLSolver/CFLOpt.h"
 
 namespace SVF
@@ -46,6 +45,12 @@ const Option<bool> CFLOpt::gf(
 const Option<bool> CFLOpt::interDyck(
         "interdyck",
         "Enable non-Dyck-contributing edge elimination",
+        false   // slower than expected
+);
+
+Option<bool> CFLOpt::ucflSumm(
+        "ucfl-summ",
+        "Enable uni-directional CFL-reachability summarization scheme",
         false   // slower than expected
 );
 

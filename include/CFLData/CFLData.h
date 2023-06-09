@@ -9,11 +9,10 @@
 #define CFGDATA_H_
 
 #include "Util/WorkList.h"
+#include "BasicUtils.h"
 
 namespace SVF
 {
-typedef std::pair<u32_t, u32_t> Label;
-
 /*!
  * Adjacency-list graph representation
  */
@@ -34,14 +33,10 @@ protected:
     // union/add data
     //@{
     inline bool addPred(const NodeID key, const NodeID src, const Label ty)
-    {
-        return predMap[key][ty].test_and_set(src);
-    };
+    { return predMap[key][ty].test_and_set(src); };
 
     inline bool addSucc(const NodeID key, const NodeID dst, const Label ty)
-    {
-        return succMap[key][ty].test_and_set(dst);
-    };
+    { return succMap[key][ty].test_and_set(dst); };
 
     inline bool addPreds(const NodeID key, const NodeBS& data, const Label ty)
     {
@@ -74,54 +69,34 @@ public:
     }
 
     inline const_iterator begin() const
-    {
-        return succMap.begin();
-    }
+    { return succMap.begin(); }
 
     inline const_iterator end() const
-    {
-        return succMap.end();
-    }
+    { return succMap.end(); }
 
     inline iterator begin()
-    {
-        return succMap.begin();
-    }
+    { return succMap.begin(); }
 
     inline iterator end()
-    {
-        return succMap.end();
-    }
+    { return succMap.end(); }
 
     inline DataMap& getSuccMap()
-    {
-        return succMap;
-    }
+    { return succMap; }
 
     inline DataMap& getPredMap()
-    {
-        return predMap;
-    }
+    { return predMap; }
 
     inline TypeMap& getSuccMap(const NodeID key)
-    {
-        return succMap[key];
-    }
+    { return succMap[key]; }
 
     inline TypeMap& getPredMap(const NodeID key)
-    {
-        return predMap[key];
-    }
+    { return predMap[key]; }
 
     inline NodeBS& getSuccs(const NodeID key, const Label ty)
-    {
-        return succMap[key][ty];
-    }
+    { return succMap[key][ty]; }
 
     inline NodeBS& getPreds(const NodeID key, const Label ty)
-    {
-        return predMap[key][ty];
-    }
+    { return predMap[key][ty]; }
 
     // Alias data operations
     //@{
@@ -136,7 +111,7 @@ public:
         NodeBS newDsts;
         if (addSuccs(src, dstData, ty))
         {
-            for (const NodeID datum: dstData)
+            for (const NodeID datum : dstData)
                 if (addPred(datum, src, ty))
                     newDsts.set(datum);
         }
@@ -148,7 +123,7 @@ public:
         NodeBS newSrcs;
         if (addPreds(dst, srcData, ty))
         {
-            for (const NodeID datum: srcData)
+            for (const NodeID datum : srcData)
                 if (addSucc(datum, dst, ty))
                     newSrcs.set(datum);
         }
@@ -205,16 +180,16 @@ public:
 
 
 public:
-    Map <NodeID, std::unordered_map<NodeID, TreeNode*>> indMap;   // indMap[v][u] points to node v in tree(u)
+    Map<NodeID, std::unordered_map<NodeID, TreeNode*>> indMap;   // indMap[v][u] points to node v in tree(u)
 
     HybridData()
     {}
 
     ~HybridData()
     {
-        for (auto iter1: indMap)
+        for (auto iter1 : indMap)
         {
-            for (auto iter2: iter1.second)
+            for (auto iter2 : iter1.second)
             {
                 delete iter2.second;
                 iter2.second = NULL;
@@ -255,7 +230,7 @@ public:
     {
         if (!hasInd(src, dst))
         {
-            for (auto iter: indMap[src])
+            for (auto iter : indMap[src])
             {
                 meld(iter.first, getNode(iter.first, src), getNode(dst, dst));
             }
@@ -269,7 +244,7 @@ public:
             return;
 
         insertEdge(uNode, newVNode);
-        for (TreeNode* vChild: vNode->children)
+        for (TreeNode* vChild : vNode->children)
         {
             meld(x, newVNode, vChild);
         }

@@ -9,7 +9,7 @@ using namespace SVF;
 /*!
  *
  */
-Label GRVFA::binarySumm(Label lty, Label rty)
+Set<Label> GRVFA::binarySumm(Label lty, Label rty)
 {
     char lWord = lty.first;
     char rWord = rty.first;
@@ -18,37 +18,38 @@ Label GRVFA::binarySumm(Label lty, Label rty)
     u32_t rInd = rty.second;
 
     if (lWord == A && (rWord == a))
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
 
     if (lWord == A && (rWord == B))
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
 
     if (lWord == call && rWord == A)
-        return std::make_pair(Cl, lInd);
+        return {std::make_pair(Cl, lInd)};
 
     if (lWord == Cl && rWord == ret && lInd == rInd)
-        return std::make_pair(B, 0);
+        return {std::make_pair(B, 0)};
 
-    return std::make_pair(fault, 0);
+    return {std::make_pair(fault, 0)};
 }
 
 
 /*!
  *
  */
-Label GRVFA::unarySumm(Label lty)
+Set<Label> GRVFA::unarySumm(Label lty)
 {
     char lWord = lty.first;
     if (lWord == a)
-        return std::make_pair(A, 0);
-    return std::make_pair(fault, 0);
+        return {std::make_pair(A, 0)};
+
+    return {std::make_pair(fault, 0)};
 }
 
 
 /*!
  *
  */
-Label GRGspanVFA::binarySumm(Label lty, Label rty)
+Set<Label> GRGspanVFA::binarySumm(Label lty, Label rty)
 {
     char lWord = lty.first;
     char rWord = rty.first;
@@ -57,28 +58,29 @@ Label GRGspanVFA::binarySumm(Label lty, Label rty)
     u32_t rInd = rty.second;
 
     if (lWord == A && (rWord == a))
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
 
     if (lWord == A && (rWord == B))
-        return std::make_pair(A, 0);
+        return {std::make_pair(A, 0)};
 
     if (lWord == call && rWord == A)
-        return std::make_pair(Cl, lInd);
+        return {std::make_pair(Cl, lInd)};
 
     if (lWord == Cl && rWord == ret && lInd == rInd)
-        return std::make_pair(B, 0);
+        return {std::make_pair(B, 0)};
 
-    return std::make_pair(fault, 0);
+    return {std::make_pair(fault, 0)};
 }
 
 
 /*!
  *
  */
-Label GRGspanVFA::unarySumm(Label lty)
+Set<Label> GRGspanVFA::unarySumm(Label lty)
 {
     char lWord = lty.first;
     if (lWord == a)
-        return std::make_pair(A, 0);
-    return std::make_pair(fault, 0);
+        return {std::make_pair(A, 0)};
+
+    return {std::make_pair(fault, 0)};
 }

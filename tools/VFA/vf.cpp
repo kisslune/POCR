@@ -14,6 +14,7 @@ static Option<bool> Pocr_VFA("pocr", "POCR valueflow analysis", false);
 static Option<bool> Gspan_VFA("gspan", "Graspan valueflow analysis", false);
 static Option<bool> Gr_VFA("gr", "Grammar rewritting valueflow analysis", false);
 static Option<bool> GrGspan_VFA("grgspan", "Grammar rewritting Graspan valueflow analysis", false);
+static Option<bool> TR_VFA("tr", "Transitive-reduction valueflow analysis", false);
 
 
 int main(int argc, char** argv)
@@ -22,10 +23,10 @@ int main(int argc, char** argv)
     char** arg_vec = new char* [argc];
     std::vector<std::string> moduleNameVec;
     std::vector<std::string> inFileVec;
-    CFLBase::processArgs(argc, argv, arg_num, arg_vec, inFileVec);
+    processArgs(argc, argv, arg_num, arg_vec, inFileVec);
     OptionBase::parseOptions(arg_num, arg_vec, "Valueflow analysis\n", "[options] <input>");
 
-    StdVFA* vfa;
+    VFAnalysis* vfa;
     if (Default_VFA()) {
         vfa = new StdVFA(inFileVec[0]);
         vfa->analyze();
@@ -44,6 +45,10 @@ int main(int argc, char** argv)
     }
     else if (GrGspan_VFA()) {
         vfa = new GRGspanVFA(inFileVec[0]);
+        vfa->analyze();
+    }
+    else if (TR_VFA()) {
+        vfa = new TRVFA(inFileVec[0]);
         vfa->analyze();
     }
     else

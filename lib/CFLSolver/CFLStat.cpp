@@ -36,6 +36,16 @@ void CFLStat::printStat(std::string statname)
 
 void CFLStat::graphStat()
 {
+    CFLGraph* g = cfl->graph();
+
+    for (auto nodeIt = g->begin(); nodeIt != g->end(); nodeIt++) {
+        numOfNodes++;
+    }
+
+    for (auto it: g->getCFLEdges()) {
+        numOfEdges++;
+    }
+
     PTNumStatMap["#Nodes"] = numOfNodes;
     PTNumStatMap["#Edges"] = numOfEdges;
 
@@ -47,30 +57,32 @@ void CFLStat::performStat()
 {
     endClk();
 
-    calcGraphInfo();
     graphStat();
     cfl->countSumEdges();
 
-    timeStatMap["AnalysisTime"] = cfl->timeOfSolving;
-    PTNumStatMap["#Checks"] = cfl->checks;
-    PTNumStatMap["#SumEdges"] = cfl->numOfSumEdges;
-    // - numOfEdges;
+    timeStatMap["AnalysisTime"] = timeOfSolving;
+    timeStatMap["VmrssInGB"] = (_vmrssUsageAfter - _vmrssUsageBefore) / 1024.0 / 1024.0;
+    PTNumStatMap["#Checks"] = checks;
+    PTNumStatMap["#SumEdges"] = numOfSumEdges - numOfEdges;
+    PTNumStatMap["#CountEdges"] = numOfCountEdges;
 
     CFLStat::printStat("CFL-reachability analysis Stats");
 }
 
 
-void CFLStat::calcGraphInfo()
+void CFLStat::setMemUsageBefore()
 {
-    numOfNodes = 0;
-    numOfEdges = 0;
-    CFLGraph* g = cfl->graph();
+    u32_t vmrss, vmsize;
+    SVFUtil::getMemoryUsageKB(&vmrss, &vmsize);
+    _vmrssUsageBefore = vmrss;
+    _vmsizeUsageBefore = vmsize;
+}
 
-    for (auto nodeIt = g->begin(); nodeIt != g->end(); nodeIt++) {
-        numOfNodes++;
-    }
 
-    for (auto it: g->getCFLEdges()) {
-        numOfEdges++;
-    }
+void CFLStat::setMemUsageAfter()
+{
+    u32_t vmrss, vmsize;
+    SVFUtil::getMemoryUsageKB(&vmrss, &vmsize);
+    _vmrssUsageAfter = vmrss;
+    _vmsizeUsageAfter = vmsize;
 }

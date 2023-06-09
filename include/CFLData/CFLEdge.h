@@ -27,7 +27,7 @@ typedef GenericEdge<CFLNode> GenericPEGEdgeTy;
 class CFLEdge : public GenericPEGEdgeTy
 {
 public:
-    /// edge type
+    /// edge label
     typedef GenericNode<CFLNode, CFLEdge>::GEdgeSetTy CFLEdgeSetTy;
 
 protected:

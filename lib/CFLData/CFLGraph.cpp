@@ -23,7 +23,7 @@ void CFLGraph::readGraph(std::string fname)
 
     std::string line;
     while (getline(gFile, line)) {
-        std::vector<std::string> vec = CFLBase::split(line, '\t');
+        std::vector<std::string> vec = split(line, '\t');
         if (vec.empty())
             continue;
 
@@ -31,14 +31,14 @@ void CFLGraph::readGraph(std::string fname)
         NodeID dst = stoi(vec[1]);
 
         std::string lblString = vec[2];
-        if (!grammar->hasLabel(lblString))
+        if (!grammar->hasSymbol(lblString))
             continue;
 
-        char lbl = grammar->getLabelId(vec[2]);
+        char lbl = grammar->getSymbolId(vec[2]);
         addNode(src);
         addNode(dst);
 
-        if (vec.size() == 4 && grammar->isaVariantLabel(lbl))
+        if (vec.size() == 4 && grammar->isaVariantSymbol(lbl))
             addEdge(src, dst, lbl, std::stoi(vec[3]));
         else
             addEdge(src, dst, lbl);
@@ -119,11 +119,11 @@ void CFLGraph::writeGraph(std::string name)
         for (auto edge: node->getOutEdges()) {
             NodeID dst = edge->getDstID();
             char edgeK = edge->getEdgeKind();
-            if (grammar->isaVariantLabel(edgeK))
-                outFile << src << "\t" << dst << "\t" << grammar->getLabelString(edgeK) << '\t' << edge->getEdgeIdx()
+            if (grammar->isaVariantSymbol(edgeK))
+                outFile << src << "\t" << dst << "\t" << grammar->getSymbolString(edgeK) << '\t' << edge->getEdgeIdx()
                         << std::endl;
             else
-                outFile << src << "\t" << dst << "\t" << grammar->getLabelString(edgeK) << std::endl;
+                outFile << src << "\t" << dst << "\t" << grammar->getSymbolString(edgeK) << std::endl;
         }
     }
 

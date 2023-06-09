@@ -7,9 +7,11 @@
 
 using namespace SVF;
 
-static Option<bool> Default_CFL("std", "Standard alias analysis", false);
-static Option<bool> Pocr_CFL("pocr", "POCR alias analysis", false);
-static Option<bool> HPocr_CFL("hpocr", "Hierarchical POCR alias analysis", false);
+static Option<bool> Default_CFL("std", "Standard CFL-reachability analysis", false);
+static Option<bool> Pocr_CFL("pocr", "POCR CFL-reachability analysis", false);
+static Option<bool> HPocr_CFL("hpocr", "Hierarchical POCR CFL-reachability analysis", false);
+static Option<bool> UCFL_CFL("ucfl", "Uni-directional CFL-reachability analysis", false);
+
 
 int main(int argc, char** argv)
 {
@@ -17,7 +19,7 @@ int main(int argc, char** argv)
     char** arg_vec = new char* [argc];
     std::vector<std::string> moduleNameVec;
     std::vector<std::string> inFileVec;
-    CFLBase::processArgs(argc, argv, arg_num, arg_vec, inFileVec);
+    processArgs(argc, argv, arg_num, arg_vec, inFileVec);
     OptionBase::parseOptions(arg_num, arg_vec, "CFL-reachability analysis\n", "[options] <input>");
 
     StdCFL* cfl;
@@ -34,7 +36,12 @@ int main(int argc, char** argv)
     }
     else if (HPocr_CFL())
     {
-        cfl = new HPocrCFL(inFileVec[0],inFileVec[1]);
+        cfl = new HPocrCFL(inFileVec[0], inFileVec[1]);
+        cfl->analyze();
+    }
+    else if (UCFL_CFL())
+    {
+        cfl = new UCFL(inFileVec[0],inFileVec[1]);
         cfl->analyze();
     }
     else

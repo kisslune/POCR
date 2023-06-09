@@ -32,11 +32,32 @@ public:
     typedef llvm::DenseMap<const char*, u64_t> NUMStatMap;
     typedef llvm::DenseMap<const char*, double> TIMEStatMap;
 
+    /// num counters
+    u32_t numOfIteration;
+    u32_t checks;
+    u32_t numOfTEdges;
+    u32_t numOfSumEdges;
+    u32_t numOfAdd;
+
+    /// time counters
+    double timeOfSolving;
+    double startTime;
+    double endTime;
+    double sccTime;
+    double gfTime;
+    double interDyckTime;
+    double gsTime;
+
 private:
     AliasAnalysis* aa;
 
 public:
-    AAStat(AliasAnalysis* p) : aa(p)
+    AAStat(AliasAnalysis* p) : aa(p),
+                               numOfIteration(0),
+                               checks(0),
+                               numOfTEdges(0),
+                               numOfSumEdges(0),
+                               numOfAdd(0)
     {
         startClk();
     };
@@ -62,13 +83,6 @@ public:
 
     NUMStatMap PTNumStatMap;
     TIMEStatMap timeStatMap;
-
-    double startTime;
-    double endTime;
-    double sccTime;
-    double gfTime;
-    double interDyckTime;
-    double gsTime;
 
     /// Memory usage, in KB
     u32_t _vmrssUsageBefore;

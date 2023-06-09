@@ -72,10 +72,10 @@ void VFAStat::performStat()
 
     ivf->countSumEdges();
 
-    timeStatMap["AnalysisTime"] = ivf->timeOfSolving;
+    timeStatMap["AnalysisTime"] = timeOfSolving;
     timeStatMap["VmrssInGB"] = (_vmrssUsageAfter - _vmrssUsageBefore) / 1024.0 / 1024.0;
-    PTNumStatMap["#Checks"] = ivf->checks;
-    PTNumStatMap["#SumEdges"] = ivf->numOfSumEdges;
+    PTNumStatMap["#Checks"] = checks;
+    PTNumStatMap["#SumEdges"] = numOfSumEdges;
 
     VFAStat::printStat("CFL-reachability analysis Stats");
 }

@@ -9,6 +9,7 @@
 #include "CFLBase.h"
 #include "CFLData/CFLGraph.h"
 #include "CFLStat.h"
+#include "CFLData/ECG.h"
 
 namespace SVF
 {
@@ -19,14 +20,7 @@ class StdCFL : public CFLBase
 {
 public:
     /// Statistics
-    //@{
     CFLStat* stat;
-
-    u32_t numOfIteration;
-    u32_t checks;
-    u32_t numOfSumEdges;
-    double timeOfSolving;
-    //@}
 
 protected:
     bool reanalyze;
@@ -36,17 +30,12 @@ protected:
     CFLGraph* _graph;
 
 public:
-    StdCFL(std::string& _grammarName, std::string& _graphName) :
-            stat(nullptr),
-            numOfIteration(0),
-            checks(0),
-            numOfSumEdges(0),
-            timeOfSolving(0),
-            reanalyze(false),
-            grammarName(_grammarName),
-            graphName(_graphName),
-            _grammar(nullptr),
-            _graph(nullptr)
+    StdCFL(std::string& _grammarName, std::string& _graphName) : stat(nullptr),
+                                                                 reanalyze(false),
+                                                                 grammarName(_grammarName),
+                                                                 graphName(_graphName),
+                                                                 _grammar(nullptr),
+                                                                 _graph(nullptr)
     {}
 
     virtual ~StdCFL()
@@ -60,21 +49,15 @@ public:
     /// Grammar
     //@{
     virtual CFG* grammar()
-    {
-        return _grammar;
-    }
+    { return _grammar; }
 
     /// Graph
     //@{
     const inline CFLGraph* graph() const
-    {
-        return _graph;
-    }
+    { return _graph; }
 
     virtual CFLGraph* graph()
-    {
-        return _graph;
-    }
+    { return _graph; }
     //@}
 
     virtual void initialize();
@@ -94,14 +77,8 @@ public:
 
     /// rules
     //@{
-    virtual Label binarySumm(Label lty, Label rty)
-    { return Label(0, 0); }
-
-    virtual Label unarySumm(Label lty)
-    { return Label(0, 0); }
-
-    virtual Set<Label> cflBinarySumm(Label lty, Label rty);
-    virtual Set<Label> cflUnarySumm(Label lty);
+    Set<Label> unarySumm(Label lty) override;
+    Set<Label> binarySumm(Label lty, Label rty) override;
     //@}
     virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
     virtual void processCFLItem(CFLItem item);
@@ -121,7 +98,6 @@ protected:
     TransitiveLblMap ptrees;
     TransitiveLblMap strees;
     CFLItem tmpPrimaryItem;
-//    Set<CFLItem> primaryItems;
 
 public:
     PocrCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName),
@@ -139,16 +115,8 @@ public:
     void checkPtree(Label newLbl, TreeNode* src, NodeID dst);
     void checkStree(Label newLbl, NodeID src, TreeNode* dst);
 
-    bool isPrimary(CFLItem& item)
-    {
-        return item.isPrimary();
-//        return primaryItems.find(item) != primaryItems.end();
-    }
-
-//    void addPrimaryItem(NodeID src, NodeID dst, Label ty)
-//    {
-//        primaryItems.insert(CFLItem(src, dst, ty));
-//    }
+    static bool isPrimary(CFLItem& item)
+    { return item.isPrimary(); }
 };
 
 
@@ -169,7 +137,51 @@ public:
 };
 
 
-}
+/*!
+ * Unidirectional CFL-reachability
+ */
+class UCFL : public StdCFL
+{
+public:
+    typedef ECG::ECGNode ECGNode;
+    typedef ECG::ECGEdge ECGEdge;
+    typedef Map<CFGSymbTy, ECG*> ECGMap;
 
+protected:
+    ECGMap ecgs;
+    CFLData followData;
+
+public:
+    UCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
+    {}
+
+    /// UCFL methods
+    void initSolver() override;
+    void procPrimaryItem(CFLItem item);
+    bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true) override;
+    void processCFLItem(CFLItem item) override;
+    void checkPreds(Label newLbl, ECGNode* src, NodeID dst);
+    void checkSuccs(Label newLbl, NodeID src, ECGNode* dst);
+
+    static bool isPrimary(CFLItem& item)
+    { return item.isPrimary(); }
+
+    bool updateEdge(NodeID srcId, NodeID dstId, Label ty);
+    NodeBS updateEdges(NodeID srcId, const NodeBS& dstData, Label ty);
+    NodeBS updateEdges(const NodeBS& srcData, NodeID dstId, Label ty);
+
+    /// Overridden ECG methods
+    void insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb);
+    void insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb);
+    void searchForth(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
+    void searchBack(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
+    void updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb);
+    void searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
+
+    /// stat
+    void countSumEdges() override;
+};
+
+}
 
 #endif //POCR_SVF_CFLSOLVER_H
