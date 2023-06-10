@@ -191,7 +191,6 @@ void StdCFL::dumpStat()
         stat->performStat();
 }
 
-
 void StdCFL::countSumEdges()
 {
     stat->numOfSumEdges = 0;

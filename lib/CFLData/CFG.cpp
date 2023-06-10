@@ -138,6 +138,7 @@ void CFG::addSymbol(std::string& s)
     numOfSymbols++;
     symbToIntMap[s] = numOfSymbols;
     intToSymbMap[numOfSymbols] = s;
+    // std::cout << "label: " << s  << " num: " << numOfSymbols << " entry: " << labelToIntMap[s] << std::endl;
 
     /// check whether the label has an index
     if (s.find("_i") == s.size() - 2 && s.find("_i") != -1)

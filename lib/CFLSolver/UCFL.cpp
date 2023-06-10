@@ -40,8 +40,18 @@ void UCFL::processCFLItem(CFLItem item)
     }
 
     /// Process other items
+    // grammar()->isInsertSymbol(ty.first)
     for (Label newTy : unarySumm(item.label()))
-        if (updateEdge(item.src(), item.dst(), newTy))
+        if (!grammar()->isInsertSymbol(newTy.first))
+        {
+            // if(grammar()->isCountSymbol(newTy.first))
+            // {
+                // // figure out a more efficient way to store this, since it's causing 10s slower for i3
+            //     followData.addEdge(item.src(), item.dst(), newTy);
+            // }
+            pushIntoWorklist(item.src(), item.dst(), newTy);
+        }
+        else if (updateEdge(item.src(), item.dst(), newTy))
         {
             stat->checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
@@ -57,7 +67,14 @@ void UCFL::processCFLItem(CFLItem item)
                 ECGNode* dst = ecgs[rty.first]->getNode(item.dst());
                 checkSuccs(newTy, item.src(), dst);
             }
-            else
+            else if (!grammar()->isInsertSymbol(newTy.first))
+            {
+                NodeBS diffDsts = cflData()->getSuccs(item.dst(), rty);
+                stat->checks += iter.second.count();
+                for (NodeID diffDst : diffDsts)
+                    pushIntoWorklist(item.src(), diffDst, newTy);
+            }
+            else 
             {
                 NodeBS diffDsts = updateEdges(item.src(), iter.second, newTy);
                 stat->checks += iter.second.count();
@@ -75,6 +92,13 @@ void UCFL::processCFLItem(CFLItem item)
                 /// X ::= A X
                 ECGNode* src = ecgs[lty.first]->getNode(item.src());
                 checkPreds(newTy, src, item.dst());
+            }
+            else if (!grammar()->isInsertSymbol(newTy.first))
+            {
+                NodeBS diffSrcs = cflData()->getPreds(item.src(), lty);
+                // stat->checks += iter.second.count();
+                for (NodeID diffSrc : diffSrcs)
+                    pushIntoWorklist(diffSrc, item.dst(), newTy);
             }
             else
             {
