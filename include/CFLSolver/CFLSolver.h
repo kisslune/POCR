@@ -23,6 +23,7 @@ public:
     CFLStat* stat;
 
 protected:
+    CFLData countData;
     bool reanalyze;
     std::string grammarName;
     std::string graphName;
@@ -38,7 +39,7 @@ public:
                                                                  _graph(nullptr)
     {}
 
-    virtual ~StdCFL()
+    ~StdCFL() override
     {
         delete _grammar;
         _grammar = nullptr;
@@ -75,13 +76,19 @@ public:
         assert(false && "Time out!!");
     }
 
-    /// rules
+    /// summarizations via production rules
     //@{
     Set<Label> unarySumm(Label lty) override;
     Set<Label> binarySumm(Label lty, Label rty) override;
     //@}
-    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
-    virtual void processCFLItem(CFLItem item);
+
+    /// CFL data methods with UCFL options
+    void addEdge(NodeID src, NodeID dst, Label lbl);
+    bool checkAndAddEdge(NodeID src, NodeID dst, Label lbl) override;
+    NodeBS checkAndAddEdges(NodeID src, const NodeBS& dstSet, Label lbl) override;
+    NodeBS checkAndAddEdges(const NodeBS& srcSet, NodeID dst, Label lbl) override;
+
+    void printCountEdges();
 };
 
 
@@ -97,26 +104,25 @@ public:
 protected:
     TransitiveLblMap ptrees;
     TransitiveLblMap strees;
-    CFLItem tmpPrimaryItem;
 
 public:
-    PocrCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName),
-                                                                  tmpPrimaryItem(0, 0, Label(0, 0))
+    PocrCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
     {}
 
-    void initSolver();
-    virtual void solve();
+    void initSolver() override;
     void procPrimaryItem(CFLItem item);
-    void traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
-    void traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
-    bool updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
-    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true);
-    virtual void processCFLItem(CFLItem item);
+    bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true) override;
+    void processCFLItem(CFLItem item) override;
     void checkPtree(Label newLbl, TreeNode* src, NodeID dst);
     void checkStree(Label newLbl, NodeID src, TreeNode* dst);
 
     static bool isPrimary(CFLItem& item)
     { return item.isPrimary(); }
+
+    /// Overridden spanning tree methods
+    void traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
+    void traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
+    bool updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
 };
 
 
@@ -138,9 +144,9 @@ public:
 
 
 /*!
- * Unidirectional CFL-reachability
+ * Fully-ordered CFL-reachability
  */
-class UCFL : public StdCFL
+class FocrCFL : public StdCFL
 {
 public:
     typedef ECG::ECGNode ECGNode;
@@ -152,7 +158,7 @@ protected:
     CFLData followData;
 
 public:
-    UCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
+    FocrCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
     {}
 
     /// UCFL methods
@@ -166,10 +172,6 @@ public:
     static bool isPrimary(CFLItem& item)
     { return item.isPrimary(); }
 
-    bool updateEdge(NodeID srcId, NodeID dstId, Label ty);
-    NodeBS updateEdges(NodeID srcId, const NodeBS& dstData, Label ty);
-    NodeBS updateEdges(const NodeBS& srcData, NodeID dstId, Label ty);
-
     /// Overridden ECG methods
     void insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb);
     void insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb);
@@ -177,9 +179,6 @@ public:
     void searchBack(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
     void updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb);
     void searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
-
-    /// stat
-    void countSumEdges() override;
 };
 
 }

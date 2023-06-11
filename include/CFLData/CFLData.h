@@ -30,37 +30,13 @@ protected:
     const NodeBS emptyData;
     NodeBS diff;
 
-    // union/add data
-    //@{
-    inline bool addPred(const NodeID key, const NodeID src, const Label ty)
-    { return predMap[key][ty].test_and_set(src); };
-
-    inline bool addSucc(const NodeID key, const NodeID dst, const Label ty)
-    { return succMap[key][ty].test_and_set(dst); };
-
-    inline bool addPreds(const NodeID key, const NodeBS& data, const Label ty)
-    {
-        if (data.empty())
-            return false;
-        return predMap[key][ty] |= data;
-    }
-
-    inline bool addSuccs(const NodeID key, const NodeBS& data, const Label ty)
-    {
-        if (data.empty())
-            return false;
-        return succMap[key][ty] |= data;
-    }
-    //@}
-
 public:
     // Constructor
     CFLData()
     {}
 
     // Destructor
-    virtual ~CFLData()
-    {}
+    virtual ~CFLData() = default;
 
     virtual void clear()
     {
@@ -92,55 +68,61 @@ public:
     inline TypeMap& getPredMap(const NodeID key)
     { return predMap[key]; }
 
-    inline NodeBS& getSuccs(const NodeID key, const Label ty)
-    { return succMap[key][ty]; }
+    inline NodeBS& getSuccs(const NodeID key, const Label lbl)
+    { return succMap[key][lbl]; }
 
-    inline NodeBS& getPreds(const NodeID key, const Label ty)
-    { return predMap[key][ty]; }
+    inline NodeBS& getPreds(const NodeID key, const Label lbl)
+    { return predMap[key][lbl]; }
 
     // Alias data operations
     //@{
-    inline bool addEdge(const NodeID src, const NodeID dst, const Label ty)
+    inline void addEdge(const NodeID src, const NodeID dst, const Label lbl)
     {
-        addSucc(src, dst, ty);
-        return addPred(dst, src, ty);
+        succMap[src][lbl].set(dst);
+        predMap[dst][lbl].set(src);
     }
 
-    inline NodeBS addEdges(const NodeID src, const NodeBS& dstData, const Label ty)
+    inline bool checkAndAddEdge(const NodeID src, const NodeID dst, const Label lbl)
+    {
+        succMap[src][lbl].test_and_set(dst);
+        return predMap[dst][lbl].test_and_set(src);
+    }
+
+    inline NodeBS checkAndAddEdges(const NodeID src, const NodeBS& dstSet, const Label lbl)
     {
         NodeBS newDsts;
-        if (addSuccs(src, dstData, ty))
+        if (succMap[src][lbl] |= dstSet)
         {
-            for (const NodeID datum : dstData)
-                if (addPred(datum, src, ty))
-                    newDsts.set(datum);
+            for (const NodeID dst : dstSet)
+                if (predMap[dst][lbl].test_and_set(src))
+                    newDsts.set(dst);
         }
         return newDsts;
     }
 
-    inline NodeBS addEdges(const NodeBS& srcData, const NodeID dst, const Label ty)
+    inline NodeBS checkAndAddEdges(const NodeBS& srcSet, const NodeID dst, const Label lbl)
     {
         NodeBS newSrcs;
-        if (addPreds(dst, srcData, ty))
+        if (predMap[dst][lbl] |= srcSet)
         {
-            for (const NodeID datum : srcData)
-                if (addSucc(datum, dst, ty))
-                    newSrcs.set(datum);
+            for (const NodeID src : srcSet)
+                if (succMap[src][lbl].test_and_set(dst))
+                    newSrcs.set(src);
         }
         return newSrcs;
     }
 
-    inline bool hasEdge(const NodeID src, const NodeID dst, const Label ty)
+    inline bool hasEdge(const NodeID src, const NodeID dst, const Label lbl)
     {
-        const_iterator iter1 = succMap.find(src);
-        if (iter1 == succMap.end())
+        auto it1 = succMap.find(src);
+        if (it1 == succMap.end())
             return false;
 
-        auto iter2 = iter1->second.find(ty);
-        if (iter2 == iter1->second.end())
+        auto it2 = it1->second.find(lbl);
+        if (it2 == it1->second.end())
             return false;
 
-        return iter2->second.test(dst);
+        return it2->second.test(dst);
     }
 
     /* This is a dataset version, to be modified to a cflData version */

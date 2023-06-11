@@ -138,6 +138,7 @@ void CFG::addSymbol(std::string& s)
     numOfSymbols++;
     symbToIntMap[s] = numOfSymbols;
     intToSymbMap[numOfSymbols] = s;
+    // std::cout << "label: " << s  << " num: " << numOfSymbols << " entry: " << labelToIntMap[s] << std::endl;
 
     /// check whether the label has an index
     if (s.find("_i") == s.size() - 2 && s.find("_i") != -1)
@@ -163,18 +164,18 @@ void CFG::printCFGStat()
 
     std::cout << "#Symbol = " << numOfSymbols << std::endl;
     for (auto& it : intToSymbMap)
-        std::cout << it.second << ", ";
-    std::cout << std::endl << std::endl;
+        std::cout << it.second << ":" << it.first << ", ";
+    std::cout << std::endl;
 
     std::cout << "Insert:" << std::endl;
     for (auto it : insertSymbols)
         std::cout << getSymbolString(it) << ", ";
-    std::cout << std::endl << std::endl;
+    std::cout << std::endl;
 
     std::cout << "Follow:" << std::endl;
     for (auto it : followSymbols)
         std::cout << getSymbolString(it) << ", ";
-    std::cout << std::endl << std::endl;
+    std::cout << std::endl;
 
     std::cout << "Count:" << std::endl;
     for (auto it : countSymbols)

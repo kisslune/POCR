@@ -13,24 +13,24 @@ void GspanVFA::initSolver()
     {
         if (edge->getEdgeKind() == IVFG::DirectVF)
         {
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
         }
         else if (edge->getEdgeKind() == IVFG::CallVF)
         {
             u32_t offset = edge->getEdgeIdx();
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(call, offset));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(call, offset));
         }
         else if (edge->getEdgeKind() == IVFG::RetVF)
         {
             u32_t offset = edge->getEdgeIdx();
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(ret, offset));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(ret, offset));
         }
     }
 
     for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter)
     {
         NodeID nodeId = nIter->first;
-        addEdge(nodeId, nodeId, std::make_pair(A, 0));
+        checkAndAddEdge(nodeId, nodeId, std::make_pair(A, 0));
     }
 }
 

@@ -14,28 +14,28 @@ void GspanAA::initSolver()
     {
         if (edge->getEdgeKind() == PEG::Asgn)
         {
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
-            addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(abar, 0));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
+            checkAndAddEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(abar, 0));
         }
         else if (edge->getEdgeKind() == PEG::Gep)
         {
             u32_t offset = edge->getEdgeIdx();
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(f, offset));
-            addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(fbar, offset));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(f, offset));
+            checkAndAddEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(fbar, offset));
         }
         else if (edge->getEdgeKind() == PEG::Deref)
         {
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(d, 0));
-            addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(dbar, 0));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(d, 0));
+            checkAndAddEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(dbar, 0));
         }
     }
 
     for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter)
     {
         NodeID nodeId = nIter->first;
-        addEdge(nodeId, nodeId, std::make_pair(V, 0));
-        addEdge(nodeId, nodeId, std::make_pair(A, 0));
-        addEdge(nodeId, nodeId, std::make_pair(Abar, 0));
+        checkAndAddEdge(nodeId, nodeId, std::make_pair(V, 0));
+        checkAndAddEdge(nodeId, nodeId, std::make_pair(A, 0));
+        checkAndAddEdge(nodeId, nodeId, std::make_pair(Abar, 0));
     }
 }
 
@@ -129,6 +129,6 @@ void GspanAA::countSumEdges()
     std::set<int> s1 = {A};
     for (auto it = oldData()->begin(); it != oldData()->end(); ++it)
     {
-        oldData()->addEdge(it->first, it->first, std::make_pair(A, 0));
+        oldData()->checkAndAddEdge(it->first, it->first, std::make_pair(A, 0));
     }
 }

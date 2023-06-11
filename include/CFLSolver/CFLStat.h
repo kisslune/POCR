@@ -37,6 +37,9 @@ public:
     double endTime;
     double gsTime;
 
+    /// A set for S edges
+    std::map<NodeID, NodeBS> sEdgeSet;
+
 private:
     StdCFL* cfl;
 
@@ -81,6 +84,7 @@ public:
     void performStat();
     void graphStat();
     virtual void printStat(std::string str = "");
+    void writeSPairsIntoFile(std::string fName);
 };
 }
 

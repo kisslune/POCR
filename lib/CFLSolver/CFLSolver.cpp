@@ -120,7 +120,7 @@ void StdCFL::initSolver()
     /// add all edges into adjacency list and worklist
     for (auto edge : graph()->getCFLEdges())
     {
-        addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(edge->getEdgeKind(), edge->getEdgeIdx()));
+        cflData()->addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(edge->getEdgeKind(), edge->getEdgeIdx()));
         pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(edge->getEdgeKind(), edge->getEdgeIdx()));
     }
 
@@ -130,58 +130,10 @@ void StdCFL::initSolver()
         NodeID nodeId = nIter->first;
         for (auto lhs : grammar()->getEmptyRules())
         {
-            addEdge(nodeId, nodeId, std::make_pair(lhs, 0));
+            cflData()->addEdge(nodeId, nodeId, std::make_pair(lhs, 0));
             pushIntoWorklist(nodeId, nodeId, std::make_pair(lhs, 0));
         }
     }
-}
-
-
-void StdCFL::processCFLItem(CFLItem item)
-{
-    /// Derive edges via unary production rules
-    for (Label newTy : unarySumm(item.label()))
-        if (addEdge(item.src(), item.dst(), newTy))
-        {
-            stat->checks++;
-            pushIntoWorklist(item.src(), item.dst(), newTy);
-        }
-
-    /// Derive edges via binary production rules
-    //@{
-    for (auto& iter : cflData()->getSuccMap(item.dst()))
-    {
-        Label rty = iter.first;
-        for (Label newTy : binarySumm(item.label(), rty))
-        {
-            NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
-            stat->checks += iter.second.count();
-            for (NodeID diffDst : diffDsts)
-                pushIntoWorklist(item.src(), diffDst, newTy);
-        }
-    }
-
-    for (auto& iter : cflData()->getPredMap(item.src()))
-    {
-        Label lty = iter.first;
-        for (Label newTy : binarySumm(lty, item.label()))
-        {
-            NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
-            stat->checks += iter.second.count();
-            for (NodeID diffSrc : diffSrcs)
-                pushIntoWorklist(diffSrc, item.dst(), newTy);
-        }
-    }
-    //@}
-}
-
-
-bool StdCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
-{
-    if (ty.first == 0)
-        return false;
-
-    return CFLBase::pushIntoWorklist(src, dst, ty);
 }
 
 
@@ -194,17 +146,85 @@ void StdCFL::dumpStat()
 
 void StdCFL::countSumEdges()
 {
+    /// calculate summary edges
     stat->numOfSumEdges = 0;
-    stat->numOfCountEdges = 0;
+    for (auto it1 = cflData()->begin(); it1 != cflData()->end(); ++it1)
+        for (auto& it2 : it1->second)
+            stat->numOfSumEdges += it2.second.count();
 
-    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
-    {
-        for (auto& iter2 : iter1->second)
-        {
-            stat->numOfSumEdges += iter2.second.count();
-            if (grammar()->isCountSymbol(iter2.first.first))
-                stat->numOfCountEdges += iter2.second.count();
-        }
-    }
+    /// calculate S edges
+    stat->sEdgeSet.clear();
+    for (auto& it1 : cflData()->getSuccMap())
+        for (auto& it2 : it1.second)
+            if (grammar()->isCountSymbol(it2.first.first))
+                stat->sEdgeSet[it1.first] |= it2.second;
+
+    stat->numOfCountEdges = 0;
+    for (auto& it1 : stat->sEdgeSet)
+        stat->numOfCountEdges += it1.second.count();
 }
 
+
+/// ---------------- CFL data methods with UCFL options ----------------------------
+
+void StdCFL::addEdge(NodeID src, NodeID dst, Label lbl)
+{
+    if (!lbl.first || (CFLOpt::ucfl() && !grammar()->isInsertSymbol(lbl.first)))
+    {
+//        if (grammar()->isCountSymbol(lbl.first))
+//            countData.addEdge(src, dst, lbl);
+        return;
+    }
+    cflData()->addEdge(src, dst, lbl);
+}
+
+
+bool StdCFL::checkAndAddEdge(NodeID src, NodeID dst, Label lbl)
+{
+    if (!lbl.first)
+        return false;
+
+    // TODO: need to count the number of checks when lbl is a follow label??
+    if (CFLOpt::ucfl() && !grammar()->isInsertSymbol(lbl.first))
+    {
+//        if (grammar()->isCountSymbol(lbl.first))
+//            countData.addEdge(src, dst, lbl);
+        return true;
+    }
+    stat->checks++;
+    return cflData()->checkAndAddEdge(src, dst, lbl);
+}
+
+
+NodeBS StdCFL::checkAndAddEdges(NodeID src, const NodeBS& dstSet, Label lbl)
+{
+    if (!lbl.first)
+        return emptyBS;
+
+    // TODO: need to count the number of checks when lbl is a follow label??
+    if (CFLOpt::ucfl() && !grammar()->isInsertSymbol(lbl.first))
+    {
+//        if (grammar()->isCountSymbol(lbl.first))
+//            countData.checkAndAddEdges(src, dstSet, lbl);
+        return dstSet;
+    }
+    stat->checks += dstSet.count();
+    return cflData()->checkAndAddEdges(src, dstSet, lbl);
+}
+
+
+NodeBS StdCFL::checkAndAddEdges(const NodeBS& srcSet, NodeID dst, Label lbl)
+{
+    if (!lbl.first)
+        return emptyBS;
+
+    // TODO: need to count the number of checks when lbl is a follow label??
+    if (CFLOpt::ucfl() && !grammar()->isInsertSymbol(lbl.first))
+    {
+//        if (grammar()->isCountSymbol(lbl.first))
+//            countData.checkAndAddEdges(srcSet, dst, lbl);
+        return srcSet;
+    }
+    stat->checks += srcSet.count();
+    return cflData()->checkAndAddEdges(srcSet, dst, lbl);
+}

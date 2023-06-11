@@ -24,7 +24,8 @@ public:
     static const Option<bool> gf;
     static const Option<bool> interDyck;
 
-    static Option<bool> ucflSumm;
+    static Option<bool> ucfl;
+    static const Option<std::string> sPairsFName;
 };
 
 }  // namespace SVF

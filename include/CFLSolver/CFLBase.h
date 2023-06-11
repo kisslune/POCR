@@ -129,25 +129,25 @@ public:
     virtual Set<Label> unarySumm(Label lty) = 0;
     virtual Set<Label> binarySumm(Label lty, Label rty) = 0;
 
-    virtual bool addEdge(const NodeID srcId, const NodeID dstId, const Label ty)
+    inline virtual bool checkAndAddEdge(const NodeID srcId, const NodeID dstId, const Label ty)
     {
         if (!ty.first)
             return false;
-        return cflData()->addEdge(srcId, dstId, ty);
+        return cflData()->checkAndAddEdge(srcId, dstId, ty);
     }
 
-    virtual NodeBS addEdges(const NodeID srcId, const NodeBS& dstData, const Label ty)
+    inline virtual NodeBS checkAndAddEdges(const NodeID srcId, const NodeBS& dstData, const Label ty)
     {
         if (!ty.first)
             return emptyBS;
-        return cflData()->addEdges(srcId, dstData, ty);
+        return cflData()->checkAndAddEdges(srcId, dstData, ty);
     }
 
-    virtual NodeBS addEdges(const NodeBS& srcData, const NodeID dstId, const Label ty)
+    inline virtual NodeBS checkAndAddEdges(const NodeBS& srcData, const NodeID dstId, const Label ty)
     {
         if (!ty.first)
             return emptyBS;
-        return cflData()->addEdges(srcData, dstId, ty);
+        return cflData()->checkAndAddEdges(srcData, dstId, ty);
     }
     //@}
 
@@ -164,7 +164,7 @@ public:
     {
         /// Derive edges via unary production rules
         for (Label newTy : unarySumm(item.label()))
-            if (addEdge(item.src(), item.dst(), newTy))
+            if (checkAndAddEdge(item.src(), item.dst(), newTy))
                 pushIntoWorklist(item.src(), item.dst(), newTy);
 
         /// Derive edges via binary production rules
@@ -174,7 +174,7 @@ public:
             Label rty = iter.first;
             for (Label newTy : binarySumm(item.label(), rty))
             {
-                NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
+                NodeBS diffDsts = checkAndAddEdges(item.src(), iter.second, newTy);
                 for (NodeID diffDst : diffDsts)
                     pushIntoWorklist(item.src(), diffDst, newTy);
             }
@@ -185,7 +185,7 @@ public:
             Label lty = iter.first;
             for (Label newTy : binarySumm(lty, item.label()))
             {
-                NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
+                NodeBS diffSrcs = checkAndAddEdges(iter.second, item.dst(), newTy);
                 for (NodeID diffSrc : diffSrcs)
                     pushIntoWorklist(diffSrc, item.dst(), newTy);
             }

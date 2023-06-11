@@ -144,23 +144,23 @@ void StdAA::initSolver()
     {
         if (edge->getEdgeKind() == PEG::Asgn)
         {
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
-            addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(abar, 0));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
+            checkAndAddEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(abar, 0));
             pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
             pushIntoWorklist(edge->getDstID(), edge->getSrcID(), std::make_pair(abar, 0));
         }
         else if (edge->getEdgeKind() == PEG::Gep)
         {
             u32_t offset = edge->getEdgeIdx();
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(f, offset));
-            addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(fbar, offset));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(f, offset));
+            checkAndAddEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(fbar, offset));
             pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(f, offset));
             pushIntoWorklist(edge->getDstID(), edge->getSrcID(), std::make_pair(fbar, offset));
         }
         else if (edge->getEdgeKind() == PEG::Deref)
         {
-            addEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(d, 0));
-            addEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(dbar, 0));
+            checkAndAddEdge(edge->getSrcID(), edge->getDstID(), std::make_pair(d, 0));
+            checkAndAddEdge(edge->getDstID(), edge->getSrcID(), std::make_pair(dbar, 0));
             pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(d, 0));
             pushIntoWorklist(edge->getDstID(), edge->getSrcID(), std::make_pair(dbar, 0));
         }
@@ -170,10 +170,10 @@ void StdAA::initSolver()
     for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter)
     {
         NodeID nodeId = nIter->first;
-        addEdge(nodeId, nodeId, std::make_pair(V, 0));
+        checkAndAddEdge(nodeId, nodeId, std::make_pair(V, 0));
         pushIntoWorklist(nodeId, nodeId, std::make_pair(V, 0));
-        addEdge(nodeId, nodeId, std::make_pair(A, 0));
-        addEdge(nodeId, nodeId, std::make_pair(Abar, 0));
+        checkAndAddEdge(nodeId, nodeId, std::make_pair(A, 0));
+        checkAndAddEdge(nodeId, nodeId, std::make_pair(Abar, 0));
     }
 }
 
@@ -190,7 +190,7 @@ void StdAA::processCFLItem(CFLItem item)
 {
     /// Derive edges via unary production rules
     for (Label newTy : unarySumm(item.label()))
-        if (addEdge(item.src(), item.dst(), newTy))
+        if (checkAndAddEdge(item.src(), item.dst(), newTy))
         {
             stat->checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
@@ -203,7 +203,7 @@ void StdAA::processCFLItem(CFLItem item)
         Label rty = iter.first;
         for (Label newTy : binarySumm(item.label(), rty))
         {
-            NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
+            NodeBS diffDsts = checkAndAddEdges(item.src(), iter.second, newTy);
             stat->checks += iter.second.count();
             for (NodeID diffDst : diffDsts)
                 pushIntoWorklist(item.src(), diffDst, newTy);
@@ -215,7 +215,7 @@ void StdAA::processCFLItem(CFLItem item)
         Label lty = iter.first;
         for (Label newTy : binarySumm(lty, item.label()))
         {
-            NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
+            NodeBS diffSrcs = checkAndAddEdges(iter.second, item.dst(), newTy);
             stat->checks += iter.second.count();
             for (NodeID diffSrc : diffSrcs)
                 pushIntoWorklist(diffSrc, item.dst(), newTy);
@@ -256,6 +256,6 @@ void StdAA::countSumEdges()
     std::set<int> s1 = {A};
     for (auto it = cflData()->begin(); it != cflData()->end(); ++it)
     {
-        cflData()->addEdge(it->first, it->first, std::make_pair(A, 0));
+        cflData()->checkAndAddEdge(it->first, it->first, std::make_pair(A, 0));
     }
 }

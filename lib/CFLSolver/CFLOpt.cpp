@@ -48,10 +48,16 @@ const Option<bool> CFLOpt::interDyck(
         false   // slower than expected
 );
 
-Option<bool> CFLOpt::ucflSumm(
-        "ucfl-summ",
+Option<bool> CFLOpt::ucfl(
+        "ucfl",
         "Enable uni-directional CFL-reachability summarization scheme",
-        false   // slower than expected
+        false
+);
+
+const Option<std::string> CFLOpt::sPairsFName(
+        "write-spairs",
+        "Write S pairs into specified file",
+        ""
 );
 
 } // namespace SVF.

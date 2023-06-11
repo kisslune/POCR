@@ -119,17 +119,17 @@ void StdVFA::initSolver()
 
         if (edge->getEdgeKind() == IVFG::DirectVF)
         {
-            addEdge(srcId, dstId, std::make_pair(a, 0));
+            checkAndAddEdge(srcId, dstId, std::make_pair(a, 0));
             pushIntoWorklist(srcId, dstId, std::make_pair(a, 0));
         }
         if (edge->getEdgeKind() == IVFG::CallVF)
         {
-            addEdge(srcId, dstId, std::make_pair(call, edge->getEdgeIdx()));
+            checkAndAddEdge(srcId, dstId, std::make_pair(call, edge->getEdgeIdx()));
             pushIntoWorklist(srcId, dstId, std::make_pair(call, edge->getEdgeIdx()));
         }
         if (edge->getEdgeKind() == IVFG::RetVF)
         {
-            addEdge(srcId, dstId, std::make_pair(ret, edge->getEdgeIdx()));
+            checkAndAddEdge(srcId, dstId, std::make_pair(ret, edge->getEdgeIdx()));
             pushIntoWorklist(srcId, dstId, std::make_pair(ret, edge->getEdgeIdx()));
         }
     }
@@ -138,7 +138,7 @@ void StdVFA::initSolver()
     for (auto nIter = graph()->begin(); nIter != graph()->end(); ++nIter)
     {
         NodeID nodeId = nIter->first;
-        addEdge(nodeId, nodeId, std::make_pair(A, 0));
+        checkAndAddEdge(nodeId, nodeId, std::make_pair(A, 0));
         pushIntoWorklist(nodeId, nodeId, std::make_pair(A, 0));
     }
 }
@@ -148,7 +148,7 @@ void StdVFA::processCFLItem(CFLItem item)
 {
     /// Derive edges via unary production rules
     for (Label newTy: unarySumm(item.label()))
-        if (addEdge(item.src(), item.dst(), newTy))
+        if (checkAndAddEdge(item.src(), item.dst(), newTy))
         {
             stat->checks++;
             pushIntoWorklist(item.src(), item.dst(), newTy);
@@ -161,7 +161,7 @@ void StdVFA::processCFLItem(CFLItem item)
         Label rty = iter.first;
         for (Label newTy : binarySumm(item.label(), rty))
         {
-            NodeBS diffDsts = addEdges(item.src(), iter.second, newTy);
+            NodeBS diffDsts = checkAndAddEdges(item.src(), iter.second, newTy);
             stat->checks += iter.second.count();
             for (NodeID diffDst: diffDsts)
                 pushIntoWorklist(item.src(), diffDst, newTy);
@@ -173,7 +173,7 @@ void StdVFA::processCFLItem(CFLItem item)
         Label lty = iter.first;
         for (Label newTy : binarySumm(lty, item.label()))
         {
-            NodeBS diffSrcs = addEdges(iter.second, item.dst(), newTy);
+            NodeBS diffSrcs = checkAndAddEdges(iter.second, item.dst(), newTy);
             stat->checks += iter.second.count();
             for (NodeID diffSrc: diffSrcs)
                 pushIntoWorklist(diffSrc, item.dst(), newTy);

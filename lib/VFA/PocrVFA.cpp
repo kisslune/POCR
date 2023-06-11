@@ -52,7 +52,7 @@ void PocrVFA::meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
     stat->checks++;
 
     TreeNode* newVNode = treeData.addInd(x, vNode->id);
-    addEdge(x, vNode->id, std::make_pair(A, 0));
+    checkAndAddEdge(x, vNode->id, std::make_pair(A, 0));
     if (!newVNode)
         return;
 
