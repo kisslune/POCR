@@ -1,5 +1,5 @@
 //
-// Created by kisslune on 30/5/23.
+// Created by kisslune on 6/12/23.
 //
 
 #include "CFLSolver/CFLSolver.h"
@@ -7,12 +7,12 @@
 using namespace SVF;
 
 
-void FocrCFL::initSolver()
+void BSFocrCFL::initSolver()
 {
     StdCFL::initSolver();
     /// Initialize ECG
     for (auto lbl : grammar()->transitiveSymbols)
-        ecgs[lbl] = new ECG();
+        ecgs[lbl] = new BSECG();
     /// Create ECG nodes
     for (auto it = graph()->begin(); it != graph()->end(); ++it)
     {
@@ -28,7 +28,7 @@ void FocrCFL::initSolver()
 }
 
 
-void FocrCFL::processCFLItem(CFLItem item)
+void BSFocrCFL::processCFLItem(CFLItem item)
 {
     /// Process primary transitive items
     if (grammar()->isTransitive(item.label().first) && isPrimary(item))
@@ -49,8 +49,7 @@ void FocrCFL::processCFLItem(CFLItem item)
             if (newTy == item.label() && grammar()->isTransitive(rty.first))
             {
                 /// X ::= X A
-                ECGNode* dst = ecgs[rty.first]->getNode(item.dst());
-                checkSuccs(newTy, item.src(), dst);
+                checkSuccs(newTy, item.src(), item.dst(), ecgs[rty.first]);
             }
             else
             {
@@ -67,8 +66,7 @@ void FocrCFL::processCFLItem(CFLItem item)
             if (newTy == item.label() && grammar()->isTransitive(lty.first))
             {
                 /// X ::= A X
-                ECGNode* src = ecgs[lty.first]->getNode(item.src());
-                checkPreds(newTy, src, item.dst());
+                checkPreds(newTy, item.src(), item.dst(), ecgs[lty.first]);
             }
             else
             {
@@ -83,7 +81,7 @@ void FocrCFL::processCFLItem(CFLItem item)
 /*!
  * Transitive items generated in this methods are marked as secondary
  */
-void FocrCFL::procPrimaryItem(CFLItem item)
+void BSFocrCFL::procPrimaryItem(CFLItem item)
 {
     CFGSymbTy symb = item.label().first;
     NodeID src = item.src();
@@ -99,24 +97,24 @@ void FocrCFL::procPrimaryItem(CFLItem item)
 }
 
 
-void FocrCFL::checkPreds(Label newLbl, ECGNode* src, NodeID dst)
+void BSFocrCFL::checkPreds(Label newLbl, NodeID src, NodeID dst, BSECG* g)
 {
-    for (auto& pred : src->predecessors)
-        if (checkAndAddEdge(pred->id, dst, newLbl))
+    for (auto pred : g->getPreds(src))
+        if (checkAndAddEdge(pred, dst, newLbl))
         {
-            pushIntoWorklist(pred->id, dst, newLbl);
-            checkPreds(newLbl, pred, dst);
+            pushIntoWorklist(pred, dst, newLbl);
+            checkPreds(newLbl, pred, dst, g);
         }
 }
 
 
-void FocrCFL::checkSuccs(Label newLbl, NodeID src, ECGNode* dst)
+void BSFocrCFL::checkSuccs(Label newLbl, NodeID src, NodeID dst, BSECG* g)
 {
-    for (auto& succ : dst->successors)
-        if (checkAndAddEdge(src, succ->id, newLbl))
+    for (auto succ : g->getSuccs(dst))
+        if (checkAndAddEdge(src, succ, newLbl))
         {
-            pushIntoWorklist(src, succ->id, newLbl);
-            checkSuccs(newLbl, src, succ);
+            pushIntoWorklist(src, succ, newLbl);
+            checkSuccs(newLbl, src, succ, g);
         }
 }
 
@@ -124,7 +122,7 @@ void FocrCFL::checkSuccs(Label newLbl, NodeID src, ECGNode* dst)
 /*!
  * All the transitive items generated during ordinary solving is regarded as primary
  */
-bool FocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
+bool BSFocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 {
     return CFLBase::pushIntoWorklist(src, dst, ty, isPrimary);
 }
@@ -132,53 +130,50 @@ bool FocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 
 /// -------------------- Overridden ECG methods -------------------------------
 
-void FocrCFL::insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb)
+void BSFocrCFL::insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb)
 {
-    ECGNode* vi = ecgs[symb]->getNode(i);
-    ECGNode* vj = ecgs[symb]->getNode(j);
-    searchBack(vi, vj, symb);
-
-    ECG::addEdge(vi, vj, ECG::Forth);
+    searchBack(i, j, symb);
+    ecgs[symb]->addEdge(i, j);
 }
 
 
-void FocrCFL::searchBack(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
+void BSFocrCFL::searchBack(NodeID i, NodeID j, CFGSymbTy symb)
 {
     std::stack<ECGEdge> edgesToRemove;
-    for (auto vSucc : vi->successors)
+    for (auto succ : ecgs[symb]->getSuccs(i))
     {
-        if (ecgs[symb]->isReachable(vj->id, vSucc->id) && vj->id != vSucc->id)
-            edgesToRemove.push(ECGEdge(vi, vSucc));
+        if (ecgs[symb]->isReachable(j, succ))
+            edgesToRemove.push(ECGEdge(i, succ));
     }
     while (!edgesToRemove.empty())
     {
         auto edge = edgesToRemove.top();
         edgesToRemove.pop();
-        ECG::removeEdge(edge);
+        ecgs[symb]->removeEdge(edge);
     }
 
-    searchForth(vi, vj, symb);
+    searchForth(i, j, symb);
 
-    for (auto vPred : vi->predecessors)
+    for (auto pred : ecgs[symb]->getPreds(i))
     {
-        if (!ecgs[symb]->isReachable(vPred->id, vj->id))
-            searchBack(vPred, vj, symb);
+        if (!ecgs[symb]->isReachable(pred, j))
+            searchBack(pred, j, symb);
     }
 }
 
 
-void FocrCFL::searchForth(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
+void BSFocrCFL::searchForth(NodeID i, NodeID j, CFGSymbTy symb)
 {
-    updateTrEdge(vi->id, vj->id, symb);
-    for (auto& vSucc : vj->successors)
+    updateTrEdge(i, j, symb);
+    for (auto succ : ecgs[symb]->getSuccs(j))
     {
-        if (!ecgs[symb]->isReachable(vi->id, vSucc->id))
-            searchForth(vi, vSucc, symb);
+        if (!ecgs[symb]->isReachable(i, succ))
+            searchForth(i, succ, symb);
     }
 }
 
 
-void FocrCFL::updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb)
+void BSFocrCFL::updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb)
 {
     stat->checks++;
     ecgs[symb]->setReachable(i, j);
@@ -188,25 +183,21 @@ void FocrCFL::updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb)
 }
 
 
-void FocrCFL::insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb)
+void BSFocrCFL::insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb)
 {
-    ECGNode* vi = ecgs[symb]->getNode(i);
-    ECGNode* vj = ecgs[symb]->getNode(j);
-
-    searchBackInCycle(vi, vj, symb);
-
-    ECG::addEdge(vi, vj, ECG::Back);
+    searchBackInCycle(i, j, symb);
+    ecgs[symb]->addEdge(i, j);
 }
 
 
-void FocrCFL::searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
+void BSFocrCFL::searchBackInCycle(NodeID i, NodeID j, CFGSymbTy symb)
 {
-    searchForth(vi, vj, symb);
+    searchForth(i, j, symb);
 
-    for (auto vPred : vi->predecessors)
+    for (auto pred : ecgs[symb]->getPreds(i))
     {
-        if (!ecgs[symb]->isReachable(vPred->id, vj->id))
-            searchBackInCycle(vPred, vj, symb);
+        if (!ecgs[symb]->isReachable(pred, j))
+            searchBackInCycle(pred, j, symb);
     }
 }
 

@@ -22,17 +22,18 @@
 namespace SVF
 {
 /*!
- *
+ * CFL-reachability worklist item
  */
 class CFLItem
 {
-public:
+private:
     NodeID _src;
     NodeID _dst;
     Label _lbl;
     bool _isPrimary;
 
-    //Constructor
+public:
+    /// Constructor
     CFLItem(NodeID e1, NodeID e2, Label e3, bool e4 = true) :
             _src(e1), _dst(e2), _lbl(e3), _isPrimary(e4)
     {}
@@ -55,19 +56,19 @@ public:
     }
     //@}
 
-    NodeID src() const
+    inline NodeID src() const
     { return _src; }
 
-    NodeID dst() const
+    inline NodeID dst() const
     { return _dst; }
 
-    Label label() const
+    inline Label label() const
     { return _lbl; }
 
-    void setPrimary(bool v)
+    inline void setPrimary(bool v)
     { _isPrimary = v; }
 
-    bool isPrimary() const
+    inline bool isPrimary() const
     { return _isPrimary; }
 };
 

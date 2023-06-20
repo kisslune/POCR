@@ -82,7 +82,7 @@ void TRVFA::searchBack(ECGNode* vi, ECGNode* vj)
     std::stack<ECGEdge> edgesToRemove;
     for (auto succ: vi->successors)
     {
-        ECGNode* vSucc = succ.first;
+        ECGNode* vSucc = succ;
         if (isReachable(vj->id, vSucc->id) && vj->id != vSucc->id)
             edgesToRemove.push(ECGEdge(vi, vSucc));
     }
@@ -97,7 +97,7 @@ void TRVFA::searchBack(ECGNode* vi, ECGNode* vj)
 
     for (auto pred: vi->predecessors)
     {
-        ECGNode* vPred = pred.first;
+        ECGNode* vPred = pred;
         if (!isReachable(vPred->id, vj->id))
             searchBack(vPred, vj);
     }
@@ -109,9 +109,8 @@ void TRVFA::searchForth(ECGNode* vi, ECGNode* vj)
     ecg.setReachable(vi->id, vj->id);
     matchCallRet(vi->id, vj->id);       // vertical propagation
 
-    for (auto succ: vj->successors)
+    for (auto vSucc: vj->successors)
     {
-        ECGNode* vSucc = succ.first;
         if (!isReachable(vi->id, vSucc->id))
             searchForth(vi, vSucc);
     }
@@ -122,9 +121,8 @@ void TRVFA::searchBackInCycle(ECGNode* vi, ECGNode* vj)
 {
     searchForth(vi, vj);
 
-    for (auto pred: vi->predecessors)
+    for (auto vPred: vi->predecessors)
     {
-        ECGNode* vPred = pred.first;
         if (!isReachable(vPred->id, vj->id))
             searchBackInCycle(vPred, vj);
     }
@@ -165,7 +163,7 @@ void TRVFA::addCl(NodeID u, u32_t idx, ECGNode* vNode)
         return;
 
     for (auto succ: vNode->successors)
-        addCl(u, idx, succ.first);
+        addCl(u, idx, succ);
 }
 
 

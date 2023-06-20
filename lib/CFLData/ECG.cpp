@@ -45,7 +45,7 @@ void ECG::searchBackward(ECGNode* vi, ECGNode* vj)
     std::stack<ECGEdge> edgesToRemove;
     for (auto succ : vi->successors)
     {
-        ECGNode* vSucc = succ.first;
+        ECGNode* vSucc = succ;
         if (isReachable(vj->id, vSucc->id) && vj->id != vSucc->id)
             edgesToRemove.push(ECGEdge(vi, vSucc));
     }
@@ -61,7 +61,7 @@ void ECG::searchBackward(ECGNode* vi, ECGNode* vj)
 
     for (auto pred : vi->predecessors)
     {
-        ECGNode* vPred = pred.first;
+        ECGNode* vPred = pred;
         if (!isReachable(vPred->id, vj->id))
             searchBackward(vPred, vj);
     }
@@ -75,7 +75,7 @@ void ECG::searchForward(ECGNode* vi, ECGNode* vj)
 
     for (auto succ : vj->successors)
     {
-        ECGNode* vSucc = succ.first;
+        ECGNode* vSucc = succ;
         if (!isReachable(vi->id, vSucc->id))
             searchForward(vi, vSucc);
     }
@@ -88,7 +88,7 @@ void ECG::searchBackwardInCycle(ECGNode* vi, ECGNode* vj)
 
     for (auto pred : vi->predecessors)
     {
-        ECGNode* vPred = pred.first;
+        ECGNode* vPred = pred;
         if (!isReachable(vPred->id, vj->id))
             searchBackwardInCycle(vPred, vj);
     }
@@ -98,7 +98,7 @@ void ECG::searchBackwardInCycle(ECGNode* vi, ECGNode* vj)
 u32_t ECG::countReachablePairs()
 {
     u32_t retVal = 0;
-    for (auto& iter : succMap)
+    for (auto& iter : reachableMap)
     {
         retVal += iter.second.count();
     }
