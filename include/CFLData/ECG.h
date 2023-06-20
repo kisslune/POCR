@@ -48,6 +48,7 @@ protected:
     std::unordered_map<NodeID, NodeID> nodeToRepMap;
     std::unordered_map<NodeID, ECGNode*> idToNodeMap;
     std::unordered_map<NodeID, NodeBS> succMap;
+    std::unordered_map<NodeID, NodeBS> newEdgeMap;
 
     ECGNode* _backSrc;
     ECGNode* _backDst;
@@ -64,11 +65,8 @@ public:
     //@{
     inline void addNode(NodeID id)
     {
-//        if (idToNodeMap.find(id) != idToNodeMap.end())
-//            return false;
         idToNodeMap[id] = new ECGNode(id);
         setReachable(id, id);
-//        return true;
     }
 
     inline NodeID repNodeID(NodeID id) const
@@ -148,20 +146,17 @@ public:
 
     inline void setReachable(NodeID n, NodeID tgt)
     { succMap[n].set(tgt); }
+
+    inline void recordNewEdge(NodeID n, NodeID tgt)
+    { newEdgeMap[n].set(tgt); }
     //@}
 
     /// graph methods
-    void insertForthEdge(NodeID i, NodeID j);
-    void insertBackEdge(NodeID i, NodeID j);
-    void searchForth(ECGNode* vi, ECGNode* vj);
-    void searchBack(ECGNode* vi, ECGNode* vj);
-
-//    void searchForthInCycle(ECGNode* vi, ECGNode* vj);  // no use vi
-    void searchBackInCycle(ECGNode* vi, ECGNode* vj);   // no use vj
-
-//    void searchForthInCycle(ECGNode* vj);  // no use vi
-//    void searchBackInCycle(ECGNode* vi);   // no use vj
-//    void resetBackEdge(ECGNode* vi, ECGNode* vj);
+    std::unordered_map<NodeID, NodeBS>& insertForthEdge(NodeID i, NodeID j);
+    std::unordered_map<NodeID, NodeBS>& insertBackEdge(NodeID i, NodeID j);
+    void searchForward(ECGNode* vi, ECGNode* vj);
+    void searchBackward(ECGNode* vi, ECGNode* vj);
+    void searchBackwardInCycle(ECGNode* vi, ECGNode* vj);   // no use vj
 
     /// calculator
     u32_t countReachablePairs();
