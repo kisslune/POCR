@@ -123,6 +123,8 @@ public:
     void traversePtree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
     void traverseStree(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
     bool updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNode* sy);
+
+    void countSumEdges() override;
 };
 
 
@@ -172,13 +174,7 @@ public:
     static bool isPrimary(CFLItem& item)
     { return item.isPrimary(); }
 
-    /// Overridden ECG methods
-    void insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb);
-    void insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb);
-    void searchForth(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
-    void searchBack(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
-    void updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb);
-    void searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb);
+    void countSumEdges() override;
 };
 
 

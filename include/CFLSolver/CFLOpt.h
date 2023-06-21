@@ -26,6 +26,7 @@ public:
 
     static Option<bool> ucfl;
     static const Option<std::string> sPairsFName;
+    static const Option<bool> ecgSCC;
 };
 
 }  // namespace SVF

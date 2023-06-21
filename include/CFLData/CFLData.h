@@ -82,6 +82,24 @@ public:
         predMap[dst][lbl].set(src);
     }
 
+    inline void addEdges(const NodeID src, const NodeBS& dstSet, const Label lbl)
+    {
+        if (succMap[src][lbl] |= dstSet)
+        {
+            for (const NodeID dst : dstSet)
+                predMap[dst][lbl].set(src);
+        }
+    }
+
+    inline void addEdges(const NodeBS& srcSet, const NodeID dst, const Label lbl)
+    {
+        if (predMap[dst][lbl] |= srcSet)
+        {
+            for (const NodeID src : srcSet)
+                succMap[src][lbl].set(dst);
+        }
+    }
+
     inline bool checkAndAddEdge(const NodeID src, const NodeID dst, const Label lbl)
     {
         succMap[src][lbl].test_and_set(dst);
@@ -150,21 +168,18 @@ public:
         {}
 
         inline bool operator==(const TreeNode& rhs) const
-        {
-            return id == rhs.id;
-        }
+        { return id == rhs.id; }
 
         inline bool operator<(const TreeNode& rhs) const
-        {
-            return id < rhs.id;
-        }
+        { return id < rhs.id; }
     };
 
+    u32_t checks;
 
 public:
     Map<NodeID, std::unordered_map<NodeID, TreeNode*>> indMap;   // indMap[v][u] points to node v in tree(u)
 
-    HybridData()
+    HybridData() : checks(0)
     {}
 
     ~HybridData()
@@ -179,8 +194,9 @@ public:
         }
     }
 
-    bool hasInd(NodeID src, NodeID dst)
+    inline bool hasInd(NodeID src, NodeID dst)
     {
+        checks++;
         auto it = indMap.find(dst);
         if (it == indMap.end())
             return false;
@@ -198,15 +214,11 @@ public:
 
     /// Get the node dst in tree(src)
     TreeNode* getNode(NodeID src, NodeID dst)
-    {
-        return indMap[dst][src];
-    }
+    { return indMap[dst][src]; }
 
     /// add v into desc(x) as a child of u
-    void insertEdge(TreeNode* u, TreeNode* v)
-    {
-        u->children.insert(v);
-    }
+    inline void insertEdge(TreeNode* u, TreeNode* v)
+    { u->children.insert(v); }
 
     void addArc(NodeID src, NodeID dst)
     {

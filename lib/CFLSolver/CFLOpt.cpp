@@ -60,4 +60,10 @@ const Option<std::string> CFLOpt::sPairsFName(
         ""
 );
 
+const Option<bool> CFLOpt::ecgSCC(
+        "ecgscc",
+        "Simplify cycles in ECG",
+        false
+);
+
 } // namespace SVF.

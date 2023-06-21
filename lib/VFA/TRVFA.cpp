@@ -61,7 +61,7 @@ void TRVFA::insertForthEdge(NodeID i, NodeID j)
     ECGNode* vj = ecg.getNode(j);
     searchBack(vi, vj);
 
-    ECG::addEdge(vi, vj, ECG::Forth);
+    ECG::addEdge(vi, vj);
 }
 
 
@@ -73,7 +73,7 @@ void TRVFA::insertBackEdge(NodeID i, NodeID j)
 
     searchBackInCycle(vi, vj);
 
-    ECG::addEdge(vi, vj, ECG::Back);
+    ECG::addEdge(vi, vj);
 }
 
 

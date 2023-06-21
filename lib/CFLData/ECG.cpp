@@ -4,11 +4,12 @@
 //
 
 #include "CFLData/ECG.h"
+#include "CFLSolver/CFLOpt.h"
 
 using namespace SVF;
 
 
-std::unordered_map<NodeID, NodeBS>& ECG::insertForthEdge(NodeID i, NodeID j)
+std::unordered_map<NodeID, NodeBS>& ECG::insertForwardEdge(NodeID i, NodeID j)
 {
     newEdgeMap.clear();
 
@@ -16,7 +17,7 @@ std::unordered_map<NodeID, NodeBS>& ECG::insertForthEdge(NodeID i, NodeID j)
     ECGNode* vj = getNode(j);
     searchBackward(vi, vj);
 
-    addEdge(vi, vj, Forth);
+    addEdge(vi, vj);
 
     return newEdgeMap;
 }
@@ -31,7 +32,10 @@ std::unordered_map<NodeID, NodeBS>& ECG::insertBackEdge(NodeID i, NodeID j)
     ECGNode* vj = getNode(j);
     searchBackwardInCycle(vi, vj);
 
-    addEdge(vi, vj, Back);
+    addEdge(vi, vj);
+
+    if (CFLOpt::ecgSCC())
+        simplifyCycle(vi);
 
     return newEdgeMap;
 }
@@ -91,6 +95,51 @@ void ECG::searchBackwardInCycle(ECGNode* vi, ECGNode* vj)
         ECGNode* vPred = pred;
         if (!isReachable(vPred->id, vj->id))
             searchBackwardInCycle(vPred, vj);
+    }
+}
+
+
+void ECG::simplifyCycle(ECGNode* vi)
+{
+    /// reset visited nodes
+    delete visited;
+    visited = new VisitedStack();
+
+    stepInto(vi);
+
+    if (visited->top() != vi)
+        addEdge(visited->top(), vi);
+}
+
+
+void ECG::stepInto(ECGNode* vi)
+{
+    visited->push(vi);
+
+    /// select nodes in cycle
+    std::stack<ECGNode*> succsInCycle;
+    for (auto vj : vi->successors)
+        if (isReachable(vj->id, vi->id))
+            succsInCycle.push(vj);
+
+    /// trim edges
+    while (!succsInCycle.empty())
+    {
+        ECGNode* vj = succsInCycle.top();
+        succsInCycle.pop();
+
+        if (visited->hasElement(vj))
+            removeEdge(vi, vj);     // remove redundant back edges
+        else
+        {
+            if (visited->top() != vi)
+            {
+                /// reset a branch
+                removeEdge(vi, vj);
+                addEdge(visited->top(), vj);
+            }
+            stepInto(vj);
+        }
     }
 }
 

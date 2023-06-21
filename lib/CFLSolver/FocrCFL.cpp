@@ -92,10 +92,26 @@ void FocrCFL::procPrimaryItem(CFLItem item)
     if (ecgs[symb]->isReachable(src, dst))
         return;
 
-    if (ecgs[symb]->isReachable(dst, src))   // // src --> dst is a back edge
-        return insertBackEdge(src, dst, symb);
-
-    insertForthEdge(src, dst, symb);
+    if (ecgs[symb]->isReachable(dst, src))    // src --> dst is a back edge
+    {
+        auto& newEdgeMap = ecgs[symb]->insertBackEdge(src, dst);
+        for (auto& it : newEdgeMap)
+        {
+            cflData()->addEdges(it.first, it.second, item.label());
+            for (auto newDst : it.second)
+                pushIntoWorklist(it.first, newDst, item.label(), false);
+        }
+    }
+    else
+    {
+        auto& newEdgeMap = ecgs[symb]->insertForwardEdge(src, dst);
+        for (auto& it : newEdgeMap)
+        {
+            cflData()->addEdges(it.first, it.second, item.label());
+            for (auto newDst : it.second)
+                pushIntoWorklist(it.first, newDst, item.label(), false);
+        }
+    }
 }
 
 
@@ -130,83 +146,26 @@ bool FocrCFL::pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary)
 }
 
 
-/// -------------------- Overridden ECG methods -------------------------------
-
-void FocrCFL::insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb)
+void FocrCFL::countSumEdges()
 {
-    ECGNode* vi = ecgs[symb]->getNode(i);
-    ECGNode* vj = ecgs[symb]->getNode(j);
-    searchBack(vi, vj, symb);
+    /// calculate checks
+    for (auto it : ecgs)
+        stat->checks += it.second->checks;
 
-    ECG::addEdge(vi, vj, ECG::Forth);
+    /// calculate summary edges
+    stat->numOfSumEdges = 0;
+    for (auto it1 = cflData()->begin(); it1 != cflData()->end(); ++it1)
+        for (auto& it2 : it1->second)
+            stat->numOfSumEdges += it2.second.count();
+
+    /// calculate S edges
+    stat->sEdgeSet.clear();
+    for (auto& it1 : cflData()->getSuccMap())
+        for (auto& it2 : it1.second)
+            if (grammar()->isCountSymbol(it2.first.first))
+                stat->sEdgeSet[it1.first] |= it2.second;
+
+    stat->numOfCountEdges = 0;
+    for (auto& it1 : stat->sEdgeSet)
+        stat->numOfCountEdges += it1.second.count();
 }
-
-
-void FocrCFL::searchBack(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
-{
-    std::stack<ECGEdge> edgesToRemove;
-    for (auto vSucc : vi->successors)
-    {
-        if (ecgs[symb]->isReachable(vj->id, vSucc->id) && vj->id != vSucc->id)
-            edgesToRemove.push(ECGEdge(vi, vSucc));
-    }
-    while (!edgesToRemove.empty())
-    {
-        auto edge = edgesToRemove.top();
-        edgesToRemove.pop();
-        ECG::removeEdge(edge);
-    }
-
-    searchForth(vi, vj, symb);
-
-    for (auto vPred : vi->predecessors)
-    {
-        if (!ecgs[symb]->isReachable(vPred->id, vj->id))
-            searchBack(vPred, vj, symb);
-    }
-}
-
-
-void FocrCFL::searchForth(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
-{
-    updateTrEdge(vi->id, vj->id, symb);
-    for (auto& vSucc : vj->successors)
-    {
-        if (!ecgs[symb]->isReachable(vi->id, vSucc->id))
-            searchForth(vi, vSucc, symb);
-    }
-}
-
-
-void FocrCFL::updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb)
-{
-    stat->checks++;
-    ecgs[symb]->setReachable(i, j);
-    addEdge(i, j, Label(symb, 0));
-    /// New ECG edges are added to worklist as secondary edges
-    pushIntoWorklist(i, j, Label(symb, 0), false);
-}
-
-
-void FocrCFL::insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb)
-{
-    ECGNode* vi = ecgs[symb]->getNode(i);
-    ECGNode* vj = ecgs[symb]->getNode(j);
-
-    searchBackInCycle(vi, vj, symb);
-
-    ECG::addEdge(vi, vj, ECG::Back);
-}
-
-
-void FocrCFL::searchBackInCycle(ECGNode* vi, ECGNode* vj, CFGSymbTy symb)
-{
-    searchForth(vi, vj, symb);
-
-    for (auto vPred : vi->predecessors)
-    {
-        if (!ecgs[symb]->isReachable(vPred->id, vj->id))
-            searchBackInCycle(vPred, vj, symb);
-    }
-}
-
