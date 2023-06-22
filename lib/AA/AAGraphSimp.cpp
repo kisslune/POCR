@@ -10,11 +10,11 @@ void AliasAnalysis::simplifyGraph()
 {
     double startClk = stat->getClk();
 
-    if (CFLOpt::scc())
+    if (CFLOpt::scc() || CFLOpt::graphSimp())
     {
         SCCElimination();
     }
-    if (CFLOpt::gf())
+    if (CFLOpt::gf() || CFLOpt::graphSimp())
     {
         graphFolding();
     }
@@ -35,7 +35,9 @@ void AliasAnalysis::graphFolding()
 
     if (!pegFold)
         pegFold = new PEGFold(_graph);
+
     pegFold->foldGraph();
+    pegFold->mergeDeref();
 
     double endClk = stat->getClk();
     stat->gfTime = (endClk - startClk) / TIMEINTERVAL;

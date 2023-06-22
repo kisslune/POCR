@@ -11,11 +11,11 @@ void VFAnalysis::simplifyGraph()
 {
     double startClk = stat->getClk();
 
-    if (CFLOpt::scc())
+    if (CFLOpt::scc() || CFLOpt::graphSimp())
     {
         SCCElimination();
     }
-    if (CFLOpt::gf())
+    if (CFLOpt::gf() || CFLOpt::graphSimp())
     {
         graphFolding();
     }

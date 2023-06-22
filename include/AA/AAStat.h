@@ -57,7 +57,8 @@ public:
                                checks(0),
                                numOfTEdges(0),
                                numOfSumEdges(0),
-                               numOfAdd(0)
+                               numOfAdd(0),
+                               timeOfSolving(0)
     {
         startClk();
     };

@@ -47,8 +47,8 @@ void AliasAnalysis::finalize()
     stat->setMemUsageAfter();
 
     dumpStat();
-    if (CFLOpt::writeGraph())
-        graph()->writeGraph("peg");
+    if (!CFLOpt::outGraphFName().empty())
+        graph()->writeGraph(CFLOpt::outGraphFName());
 }
 
 

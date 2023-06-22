@@ -27,8 +27,8 @@ void StdCFL::finalize()
     stat->setMemUsageAfter();
 
     dumpStat();
-    if (CFLOpt::writeGraph())
-        graph()->writeGraph("cflg");
+    if (!CFLOpt::outGraphFName().empty())
+        graph()->writeGraph(CFLOpt::outGraphFName());
 }
 
 
@@ -158,6 +158,9 @@ void StdCFL::countSumEdges()
         for (auto& it2 : it1.second)
             if (grammar()->isCountSymbol(it2.first.first))
                 stat->sEdgeSet[it1.first] |= it2.second;
+
+    for (auto& it : stat->sEdgeSet)
+        it.second.reset(it.first);
 
     stat->numOfCountEdges = 0;
     for (auto& it1 : stat->sEdgeSet)

@@ -102,7 +102,7 @@ void CFLGraph::removeEdge(CFLEdge* edge)
 
 void CFLGraph::writeGraph(std::string name)
 {
-    std::ofstream outFile(name + ".g", std::ios::out);
+    std::ofstream outFile(name, std::ios::out);
     if (!outFile) {
         std::cout << "error opening file!";
         return;

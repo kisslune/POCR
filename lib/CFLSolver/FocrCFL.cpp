@@ -152,20 +152,5 @@ void FocrCFL::countSumEdges()
     for (auto it : ecgs)
         stat->checks += it.second->checks;
 
-    /// calculate summary edges
-    stat->numOfSumEdges = 0;
-    for (auto it1 = cflData()->begin(); it1 != cflData()->end(); ++it1)
-        for (auto& it2 : it1->second)
-            stat->numOfSumEdges += it2.second.count();
-
-    /// calculate S edges
-    stat->sEdgeSet.clear();
-    for (auto& it1 : cflData()->getSuccMap())
-        for (auto& it2 : it1.second)
-            if (grammar()->isCountSymbol(it2.first.first))
-                stat->sEdgeSet[it1.first] |= it2.second;
-
-    stat->numOfCountEdges = 0;
-    for (auto& it1 : stat->sEdgeSet)
-        stat->numOfCountEdges += it1.second.count();
+    StdCFL::countSumEdges();
 }

@@ -63,8 +63,8 @@ void VFAnalysis::finalize()
     stat->setMemUsageAfter();
 
     dumpStat();
-    if (CFLOpt::writeGraph())
-        graph()->writeGraph("vfg");
+    if (!CFLOpt::outGraphFName().empty())
+        graph()->writeGraph(CFLOpt::outGraphFName());
 }
 
 

@@ -24,6 +24,7 @@ public:
     {}
 
     void foldGraph();
+    void mergeDeref();
 };
 }
 

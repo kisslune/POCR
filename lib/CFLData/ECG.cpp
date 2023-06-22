@@ -74,6 +74,7 @@ void ECG::searchBackward(ECGNode* vi, ECGNode* vj)
 
 void ECG::searchForward(ECGNode* vi, ECGNode* vj)
 {
+    checks++;
     setReachable(vi->id, vj->id);
     recordNewEdge(vi->id, vj->id);
 

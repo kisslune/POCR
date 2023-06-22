@@ -18,10 +18,10 @@ const Option<bool> CFLOpt::solveCFL(
         true
 );
 
-const Option<bool> CFLOpt::writeGraph(
+const Option<std::string> CFLOpt::outGraphFName(
         "write-graph",
         "Write the graph into file",
-        false
+        ""
 );
 
 const Option<bool> CFLOpt::graphStat(
@@ -45,6 +45,12 @@ const Option<bool> CFLOpt::gf(
 const Option<bool> CFLOpt::interDyck(
         "interdyck",
         "Enable non-Dyck-contributing edge elimination",
+        false   // slower than expected
+);
+
+const Option<bool> CFLOpt::graphSimp(
+        "simplify-graph",
+        "Enable graph simplification",
         false   // slower than expected
 );
 

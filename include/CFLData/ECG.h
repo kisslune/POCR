@@ -107,14 +107,14 @@ public:
 
     inline bool hasEdge(NodeID src, NodeID dst)
     {
-        ECGNode * srcNode = getNode(src);
+        ECGNode* srcNode = getNode(src);
         return srcNode->successors.find(getNode(dst)) != srcNode->successors.end();
     }
 
     inline void addEdge(NodeID src, NodeID dst)
     {
-        ECGNode * srcNode = getNode(src);
-        ECGNode * dstNode = getNode(dst);
+        ECGNode* srcNode = getNode(src);
+        ECGNode* dstNode = getNode(dst);
         addEdge(srcNode, dstNode);
     }
 
@@ -126,15 +126,15 @@ public:
 
     inline void removeEdge(NodeID src, NodeID dst)
     {
-        ECGNode * vSrc = getNode(src);
-        ECGNode * vDst = getNode(dst);
+        ECGNode* vSrc = getNode(src);
+        ECGNode* vDst = getNode(dst);
         removeEdge(vSrc, vDst);
     }
 
     inline static void removeEdge(ECGEdge edge)
     {
-        ECGNode * vSrc = edge.first;
-        ECGNode * vDst = edge.second;
+        ECGNode* vSrc = edge.first;
+        ECGNode* vDst = edge.second;
         removeEdge(vSrc, vDst);
     }
 
@@ -148,10 +148,7 @@ public:
     /// adjacency list methods
     //@{
     inline bool isReachable(NodeID n, NodeID tgt)
-    {
-        checks++;
-        return reachableMap[n].test(tgt);
-    }
+    { return reachableMap[n].test(tgt); }
 
     inline void setReachable(NodeID n, NodeID tgt)
     { reachableMap[n].set(tgt); }
