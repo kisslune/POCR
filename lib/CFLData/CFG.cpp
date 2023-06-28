@@ -162,25 +162,25 @@ void CFG::printCFGStat()
     for (auto rule : binaryRules)
         numOfRules += rule.second.size();
 
-    std::cout << "#Symbol = " << numOfSymbols << std::endl;
+    std::cout << "#Symbol = " << numOfSymbols << ":\t";
     for (auto& it : intToSymbMap)
-        std::cout << it.second << ":" << it.first << ", ";
+        std::cout << it.second << "->" << it.first << ", ";
     std::cout << std::endl;
 
-    std::cout << "Insert:" << std::endl;
+    std::cout << "Insert:" << "\t\t";
     for (auto it : insertSymbols)
         std::cout << getSymbolString(it) << ", ";
     std::cout << std::endl;
 
-    std::cout << "Follow:" << std::endl;
+    std::cout << "Follow:" << "\t\t";
     for (auto it : followSymbols)
         std::cout << getSymbolString(it) << ", ";
     std::cout << std::endl;
 
-    std::cout << "Count:" << std::endl;
+    std::cout << "Count:" << "\t\t";
     for (auto it : countSymbols)
         std::cout << getSymbolString(it) << ", ";
-    std::cout << std::endl << std::endl;
+    std::cout << std::endl;
 
     std::cout << "#VariantSymbol = " << numOfVariantSymbols << std::endl;
     std::cout << "#Rule = " << numOfRules << std::endl;

@@ -175,9 +175,15 @@ public:
             Label rty = iter.first;
             for (Label newTy : binarySumm(item.label(), rty))
             {
-                NodeBS diffDsts = checkAndAddEdges(item.src(), iter.second, newTy);
-                for (NodeID diffDst : diffDsts)
-                    pushIntoWorklist(item.src(), diffDst, newTy);
+//                NodeBS diffDsts = checkAndAddEdges(item.src(), iter.second, newTy);
+//                for (NodeID diffDst : diffDsts)
+//                    pushIntoWorklist(item.src(), diffDst, newTy);
+                for (NodeID dst : iter.second)
+                {
+                    if (checkAndAddEdge(item.src(), dst, newTy))
+                        pushIntoWorklist(item.src(), dst, newTy);
+
+                }
             }
         }
 
@@ -186,9 +192,14 @@ public:
             Label lty = iter.first;
             for (Label newTy : binarySumm(lty, item.label()))
             {
-                NodeBS diffSrcs = checkAndAddEdges(iter.second, item.dst(), newTy);
-                for (NodeID diffSrc : diffSrcs)
-                    pushIntoWorklist(diffSrc, item.dst(), newTy);
+//                NodeBS diffSrcs = checkAndAddEdges(iter.second, item.dst(), newTy);
+//                for (NodeID diffSrc : diffSrcs)
+//                    pushIntoWorklist(diffSrc, item.dst(), newTy);
+                for (NodeID src : iter.second)
+                {
+                    if (checkAndAddEdge(src, item.dst(), newTy))
+                        pushIntoWorklist(src, item.dst(), newTy);
+                }
             }
         }
         //@}
