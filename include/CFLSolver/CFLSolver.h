@@ -179,40 +179,30 @@ public:
 
 
 /*!
- * BSECG-based focr
+ * Simple transitive reduction for CFL-reachability
  */
-class BSFocrCFL : public StdCFL
+class TRCFL : public StdCFL
 {
-public:
-    typedef BSECG::ECGEdge ECGEdge;
-    typedef Map<CFGSymbTy, BSECG*> ECGMap;
-
 protected:
-    ECGMap ecgs;
-    CFLData followData;
+    CFLData secondaryData;
 
 public:
-    BSFocrCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
+    TRCFL(std::string& _grammarName, std::string& _graphName) : StdCFL(_grammarName, _graphName)
     {}
 
     /// UCFL methods
-    void initSolver() override;
-    void procPrimaryItem(CFLItem item);
     bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true) override;
     void processCFLItem(CFLItem item) override;
-    void checkPreds(Label newLbl, NodeID src, NodeID dst, BSECG* g);
-    void checkSuccs(Label newLbl, NodeID src, NodeID dst, BSECG* g);
+//    void checkPreds(Label newLbl, ECGNode* src, NodeID dst);
+//    void checkSuccs(Label newLbl, NodeID src, ECGNode* dst);
+
+    NodeBS computeDiffEdges(NodeID src, const NodeBS& dstSet, Label lbl);
+    NodeBS computeDiffEdges(const NodeBS& srcSet, NodeID dst, Label lbl);
 
     static bool isPrimary(CFLItem& item)
     { return item.isPrimary(); }
 
-    /// Overridden ECG methods
-    void insertForthEdge(NodeID i, NodeID j, CFGSymbTy symb);
-    void insertBackEdge(NodeID i, NodeID j, CFGSymbTy symb);
-    void searchForth(NodeID i, NodeID j, CFGSymbTy symb);
-    void searchBack(NodeID i, NodeID j, CFGSymbTy symb);
-    void updateTrEdge(NodeID i, NodeID j, CFGSymbTy symb);
-    void searchBackInCycle(NodeID i, NodeID j, CFGSymbTy symb);
+    void countSumEdges() override;
 };
 
 }
