@@ -52,6 +52,12 @@ POCR provides a general standard CFL-reachability solver as the baseline, which 
 cfl -std <GRAMMAR_FILE> <GRAPH_FILE>
 ```
 
+or 
+
+```
+cfl -pocr <GRAMMAR_FILE> <GRAPH_FILE>
+```
+
 The <GRAMMAR_FILE> should be normalized with the following format:
 
 ```
