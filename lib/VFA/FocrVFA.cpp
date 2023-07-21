@@ -55,7 +55,7 @@ void FocrVFA::addArc(NodeID src, NodeID dst)
 
     if (ecg.isReachable(dst, src))     // src --> dst is a back edge
         newEdgeMapPtr = &ecg.insertBackEdge(src, dst);
-    else                                    // src --> dst is a forth edge
+    else                                    // src --> dst is a forward edge
         newEdgeMapPtr = &ecg.insertForwardEdge(src, dst);
 
     for (auto& it1 : *newEdgeMapPtr)

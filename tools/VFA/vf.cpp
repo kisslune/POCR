@@ -14,7 +14,7 @@ static Option<bool> Pocr_VFA("pocr", "POCR valueflow analysis", false);
 static Option<bool> Gspan_VFA("gspan", "Graspan valueflow analysis", false);
 static Option<bool> Gr_VFA("gr", "Grammar rewritting valueflow analysis", false);
 static Option<bool> GrGspan_VFA("grgspan", "Grammar rewritting Graspan valueflow analysis", false);
-static Option<bool> TR_VFA("focr", "Transitive-reduction valueflow analysis", false);
+static Option<bool> Focr_VFA("focr", "Transitive-reduction valueflow analysis", false);
 
 
 int main(int argc, char** argv)
@@ -27,32 +27,41 @@ int main(int argc, char** argv)
     OptionBase::parseOptions(arg_num, arg_vec, "Valueflow analysis\n", "[options] <input>");
 
     VFAnalysis* vfa;
-    if (Default_VFA()) {
+    if (Default_VFA())
+    {
         vfa = new StdVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (Pocr_VFA()) {
+    else if (Pocr_VFA())
+    {
         vfa = new PocrVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (Gspan_VFA()) {
+    else if (Gspan_VFA())
+    {
         vfa = new GspanVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (Gr_VFA()) {
+    else if (Gr_VFA())
+    {
         vfa = new GRVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (GrGspan_VFA()) {
+    else if (GrGspan_VFA())
+    {
         vfa = new GRGspanVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else if (TR_VFA()) {
+    else if (Focr_VFA())
+    {
         vfa = new FocrVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else
-        std::cout << "No valueflow analysis solver specified!" << std::endl;
+    else    // focr is the default solver
+    {
+        vfa = new FocrVFA(inFileVec[0]);
+        vfa->analyze();
+    }
 
     return 0;
 }

@@ -187,22 +187,35 @@ public:
 /*!
  * Focr AA
  */
-//class FocrAA : public AliasAnalysis
-//{
-//public:
-//    typedef ECG::ECGNode ECGNode;
-//    typedef ECG::ECGEdge ECGEdge;
-//    typedef ECG::ECGEdgeTy ECGEdgeTy;
-//    typedef std::unordered_map<NodeID, std::unordered_map<u32_t, std::unordered_set<NodeID>>> CallRetMap;
-//    typedef std::unordered_map<NodeID, std::unordered_set<NodeID>> ChildrenMap;
-//
-//protected:
-//    ECG ecg;
-//
-//public:
-//    FocrAA(std::string gName) : AliasAnalysis(gName)
-//    {}
-//};
+class FocrAA : public AliasAnalysis
+{
+public:
+    typedef ECG::ECGNode ECGNode;
+    typedef ECG::ECGEdge ECGEdge;
+    typedef ECG::ECGEdgeTy ECGEdgeTy;
+    typedef std::unordered_map<NodeID, std::unordered_map<u32_t, std::unordered_set<NodeID>>> CallRetMap;
+    typedef std::unordered_map<NodeID, std::unordered_set<NodeID>> ChildrenMap;
+
+protected:
+    ECG ecg;
+
+public:
+    FocrAA(std::string gName) : AliasAnalysis(gName)
+    {}
+
+    void initSolver() override;
+    void solve() override;
+
+    void addArc(NodeID src, NodeID dst);
+    void checkdEdges(NodeID src, NodeID dst);
+    void checkfEdges(NodeID src, NodeID dst);
+    void addV(ECGNode* u, ECGNode* v);
+    bool setV(NodeID src, NodeID dst);
+    bool hasM(NodeID src, NodeID dst);
+    void setM(NodeID src, NodeID dst);
+
+    void countSumEdges() override;
+};
 
 /*!
  * Graspan (single thread for collecting derivation info)
