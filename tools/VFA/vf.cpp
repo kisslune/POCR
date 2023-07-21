@@ -57,9 +57,9 @@ int main(int argc, char** argv)
         vfa = new FocrVFA(inFileVec[0]);
         vfa->analyze();
     }
-    else    // focr is the default solver
+    else    // pocr is the default solver
     {
-        vfa = new FocrVFA(inFileVec[0]);
+        vfa = new PocrVFA(inFileVec[0]);
         vfa->analyze();
     }
 
