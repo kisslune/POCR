@@ -51,13 +51,13 @@ void GspanAA::solve()
         CFLData resData;
 
         // old + new
-        for (auto& tyIter: oldData()->getSuccMap(src))
+        for (auto& tyIter: oldData()->getSuccs(src))
         {
             Label lty = tyIter.first;
             for (NodeID oldDst1: tyIter.second)
             {
                 // new
-                for (auto& tyIter2: cflData()->getSuccMap(oldDst1))
+                for (auto& tyIter2: cflData()->getSuccs(oldDst1))
                 {
                     for (Label newTy: binarySumm(lty, tyIter2.first))
                         if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
@@ -67,7 +67,7 @@ void GspanAA::solve()
         }
 
         // new + old and new
-        for (auto& tyIter: cflData()->getSuccMap(src))
+        for (auto& tyIter: cflData()->getSuccs(src))
         {
             Label lty = tyIter.first;
             for (Label newTy: unarySumm(lty))
@@ -76,14 +76,14 @@ void GspanAA::solve()
                     if (newTy.first && (resData.getSuccs(src, newTy).test_and_set(newDst1)))
                         stat->checks++;       // stat
                     // old
-                    for (auto& tyIter2: oldData()->getSuccMap(newDst1))
+                    for (auto& tyIter2: oldData()->getSuccs(newDst1))
                     {
                         for (Label newTy: binarySumm(lty, tyIter2.first))
                             if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
                                 stat->checks += tyIter2.second.count();       // stat
                     }
                     // new
-                    for (auto& tyIter2: cflData()->getSuccMap(newDst1))
+                    for (auto& tyIter2: cflData()->getSuccs(newDst1))
                     {
                         for (Label newTy: binarySumm(lty, tyIter2.first))
                             if (newTy.first && (resData.getSuccs(src, newTy) |= tyIter2.second))
@@ -93,12 +93,12 @@ void GspanAA::solve()
         }
 
         // update old and new
-        for (auto& tyIter: cflData()->getSuccMap(src))
+        for (auto& tyIter: cflData()->getSuccs(src))
         {
             oldData()->getSuccs(src, tyIter.first) |= tyIter.second;
             tyIter.second.clear();
         }
-        for (auto& tyIter: resData.getSuccMap(src))
+        for (auto& tyIter: resData.getSuccs(src))
         {
             cflData()->getSuccs(src, tyIter.first) |= tyIter.second;
             cflData()->getSuccs(src, tyIter.first).intersectWithComplement(oldData()->getSuccs(src, tyIter.first));

@@ -5,10 +5,8 @@
  *      Author: Yuxiang Lei
  */
 
-
 #include <sstream>
 #include "Util/CppUtil.h"
-#include "Util/SVFUtil.h"
 #include "AA/AliasAnalysis.h"
 
 using namespace SVF;
@@ -25,20 +23,8 @@ void AliasAnalysis::initialize()
 
     /// Graph simplification
     simplifyGraph();
-}
-
-
-void AliasAnalysis::destroy()
-{
-    delete stat;
-    stat = NULL;
-}
-
-
-void AliasAnalysis::dumpStat()
-{
-    if (stat)
-        stat->performStat();
+    /// initialize online solver
+    initSolver();
 }
 
 
@@ -49,6 +35,15 @@ void AliasAnalysis::finalize()
     dumpStat();
     if (!CFLOpt::outGraphFName().empty())
         graph()->writeGraph(CFLOpt::outGraphFName());
+}
+
+
+bool AliasAnalysis::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
+{
+    if (ty.first == fault)
+        return false;
+
+    return CFLBase::pushIntoWorklist(src, dst, ty);
 }
 
 
@@ -81,10 +76,58 @@ void AliasAnalysis::analyze()
 }
 
 
+bool AliasAnalysis::checkAndAddEdge(NodeID src, NodeID dst, Label lbl)
+{
+    if (!lbl.first)
+        return false;
+
+    stat->checks++;
+    return cflData()->checkAndAddEdge(src, dst, lbl);
+}
+
+
+NodeBS AliasAnalysis::checkAndAddEdges(NodeID src, const NodeBS& dstSet, Label lbl)
+{
+    if (!lbl.first)
+        return emptyBS;
+
+    stat->checks += dstSet.count();
+    return cflData()->checkAndAddEdges(src, dstSet, lbl);
+}
+
+
+NodeBS AliasAnalysis::checkAndAddEdges(const NodeBS& srcSet, NodeID dst, Label lbl)
+{
+    if (!lbl.first)
+        return emptyBS;
+
+    stat->checks += srcSet.count();
+    return cflData()->checkAndAddEdges(srcSet, dst, lbl);
+}
+
+
+void AliasAnalysis::countSumEdges()
+{
+    stat->numOfSumEdges = 0;
+
+    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
+    {
+        for (auto& iter2 : iter1->second)
+        {
+            stat->numOfSumEdges += iter2.second.count();
+            if (iter2.first.first == V)
+                stat->numOfSEdges += iter2.second.count();
+        }
+    }
+}
+
+
+/// ------------------- Std AA Methods ----------------------
+
 Set<Label> StdAA::binarySumm(Label lty, Label rty)
 {
-    char lWord = lty.first;
-    char rWord = rty.first;
+    u32_t lWord = lty.first;
+    u32_t rWord = rty.first;
 
     if (lWord == A && rWord == A)
         return {std::make_pair(A, 0)};
@@ -113,7 +156,7 @@ Set<Label> StdAA::binarySumm(Label lty, Label rty)
 
 Set<Label> StdAA::unarySumm(Label lty)
 {
-    char lWord = lty.first;
+    u32_t lWord = lty.first;
     if (lWord == M)
         return {std::make_pair(V, 0)};
     if (lWord == a)
@@ -122,19 +165,6 @@ Set<Label> StdAA::unarySumm(Label lty)
         return {std::make_pair(Abar, 0)};
 
     return {std::make_pair(fault, 0)};
-}
-
-
-void StdAA::initialize()
-{
-    AliasAnalysis::initialize();
-    initSolver();
-}
-
-
-void StdAA::finalize()
-{
-    AliasAnalysis::finalize();
 }
 
 
@@ -174,88 +204,5 @@ void StdAA::initSolver()
         pushIntoWorklist(nodeId, nodeId, std::make_pair(V, 0));
         checkAndAddEdge(nodeId, nodeId, std::make_pair(A, 0));
         checkAndAddEdge(nodeId, nodeId, std::make_pair(Abar, 0));
-    }
-}
-
-bool StdAA::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
-{
-    if (ty.first == fault)
-        return false;
-
-    return CFLBase::pushIntoWorklist(src, dst, ty);
-}
-
-
-void StdAA::processCFLItem(CFLItem item)
-{
-    /// Derive edges via unary production rules
-    for (Label newTy : unarySumm(item.label()))
-        if (checkAndAddEdge(item.src(), item.dst(), newTy))
-        {
-            stat->checks++;
-            pushIntoWorklist(item.src(), item.dst(), newTy);
-        }
-
-    /// Derive edges via binary production rules
-    //@{
-    for (auto& iter : cflData()->getSuccMap(item.dst()))
-    {
-        Label rty = iter.first;
-        for (Label newTy : binarySumm(item.label(), rty))
-        {
-            NodeBS diffDsts = checkAndAddEdges(item.src(), iter.second, newTy);
-            stat->checks += iter.second.count();
-            for (NodeID diffDst : diffDsts)
-                pushIntoWorklist(item.src(), diffDst, newTy);
-        }
-    }
-
-    for (auto& iter : cflData()->getPredMap(item.src()))
-    {
-        Label lty = iter.first;
-        for (Label newTy : binarySumm(lty, item.label()))
-        {
-            NodeBS diffSrcs = checkAndAddEdges(iter.second, item.dst(), newTy);
-            stat->checks += iter.second.count();
-            for (NodeID diffSrc : diffSrcs)
-                pushIntoWorklist(diffSrc, item.dst(), newTy);
-        }
-    }
-    //@}
-};
-
-
-void StdAA::dumpAlias()
-{
-    for (auto& it : valAlias)
-    {
-        NodeID nId1 = it.first;
-        outs() << "\nNode " << nId1 << " ";
-        outs() << "  mayAlias with: { ";
-        for (NodeID nId2 : it.second)
-            outs() << nId2 << " ";
-        outs() << "}\n\n";
-    }
-}
-
-
-void StdAA::countSumEdges()
-{
-    stat->numOfSumEdges = 0;
-    std::set<int> s = {M, V, DV, FV, A, Abar};
-
-    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
-    {
-        for (auto& iter2 : iter1->second)
-        {
-            if (s.find(iter2.first.first) != s.end())
-                stat->numOfSumEdges += iter2.second.count();
-        }
-    }
-
-    std::set<int> s1 = {A};
-    for (auto it = cflData()->begin(); it != cflData()->end(); ++it)
-    {
-        cflData()->checkAndAddEdge(it->first, it->first, std::make_pair(A, 0));
     }
 }

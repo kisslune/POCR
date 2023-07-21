@@ -54,6 +54,7 @@ protected:
 public:
     /// Constructor
     VFAnalysis(std::string& gName) : reanalyze(false),
+                                     stat(nullptr),
                                      _graph(nullptr),
                                      graphName(gName),
                                      scc(nullptr),
@@ -64,8 +65,11 @@ public:
     /// Destructor
     virtual ~VFAnalysis()
     {
+        delete stat;
         delete _graph;
-        _graph = NULL;
+        delete scc;
+        delete ivfgFold;
+        delete interDyck;
     }
 
     /// Graph operations
@@ -73,7 +77,7 @@ public:
     const inline IVFG* graph() const
     { return _graph; }
 
-    virtual inline void setGraph(IVFG* g)
+    inline void setGraph(IVFG* g)
     { _graph = g; }
 
     virtual IVFG* graph()
@@ -92,18 +96,20 @@ public:
     Set<Label> binarySumm(Label lty, Label rty) override
     { return {}; }
 
-    /// Print statistics results
+    bool checkAndAddEdge(NodeID src, NodeID dst, Label lbl) override;
+    NodeBS checkAndAddEdges(NodeID src, const NodeBS& dstSet, Label lbl) override;
+    NodeBS checkAndAddEdges(const NodeBS& srcSet, NodeID dst, Label lbl) override;
+
+    /// stat
+    //@{
     inline void dumpStat()
     {
         if (stat)
             stat->performStat();
     }
 
-    // stat
-    //{
-    virtual void countSumEdges()
-    {}
-    //}
+    virtual void countSumEdges();
+    //@}
 
     static void timer()
     {
@@ -135,15 +141,11 @@ public:
 
     void initSolver() override;
 
-    // CFLItem operations
+    /// CFLItem operations
     //@{
-    // Get a new edge kind from CFL grammar
     Set<Label> binarySumm(Label lty, Label rty) override;
     Set<Label> unarySumm(Label lty) override;
-    void processCFLItem(CFLItem item) override;
     //@}
-
-    void countSumEdges() override;
 };
 
 
@@ -154,15 +156,9 @@ class PocrVFA : public VFAnalysis
 {
 public:
     typedef HybridData::TreeNode TreeNode;
-    typedef std::unordered_map<NodeID, std::unordered_map<u32_t, std::unordered_set<NodeID>>> CallRetMap;
-    typedef std::unordered_map<NodeID, std::unordered_set<NodeID>> ChildrenMap;
 
 protected:
-    HybridData treeData;
-    CallRetMap callParents;
-    CallRetMap retChildren;
-    ChildrenMap sChildren;
-    CallRetMap clChildren;
+    HybridData hybridData;
 
 public:
     PocrVFA(std::string gName) : VFAnalysis(gName)
@@ -171,10 +167,7 @@ public:
     void initSolver() override;
     void solve() override;
 
-    virtual void addArc(NodeID src, NodeID dst);
-    void meld(NodeID x, TreeNode* uNode, TreeNode* vNode);
-    bool hasA(NodeID src, NodeID dst);
-    virtual void matchCallRet(NodeID u, NodeID v);
+    void matchCallRet(NodeID u, NodeID v);
     void addCl(NodeID u, u32_t idx, TreeNode* vNode);
 
     void countSumEdges() override;
@@ -184,46 +177,24 @@ public:
 /*!
  * VFA with transitive reduction
  */
-class TRVFA : public VFAnalysis
+class FocrVFA : public VFAnalysis
 {
 public:
     typedef ECG::ECGNode ECGNode;
-    typedef ECG::ECGEdge ECGEdge;
-    typedef ECG::ECGEdgeTy ECGEdgeTy;
-    typedef std::unordered_map<NodeID, std::unordered_map<u32_t, std::unordered_set<NodeID>>> CallRetMap;
-    typedef std::unordered_map<NodeID, std::unordered_set<NodeID>> ChildrenMap;
 
 protected:
     ECG ecg;
-    CallRetMap callParents;
-    CallRetMap retChildren;
-    ChildrenMap sChildren;
-    CallRetMap clChildren;
 
 public:
-    TRVFA(std::string gName) : VFAnalysis(gName)
+    FocrVFA(std::string gName) : VFAnalysis(gName)
     {}
 
     void initSolver() override;
     void solve() override;
 
-    virtual void addArc(NodeID src, NodeID dst);
-    virtual void matchCallRet(NodeID u, NodeID v);
+    void addArc(NodeID src, NodeID dst);
+    void matchCallRet(NodeID u, NodeID v);
     void addCl(NodeID u, u32_t idx, ECGNode* vNode);
-
-    void insertForthEdge(NodeID i, NodeID j);
-    void insertBackEdge(NodeID i, NodeID j);
-    void searchForth(ECGNode* vi, ECGNode* vj);
-    void searchBack(ECGNode* vi, ECGNode* vj);
-//
-//    void searchForthInCycle(ECGNode* vj);  // no use vi
-    void searchBackInCycle(ECGNode* vi, ECGNode* vj);   // no use vj
-
-    inline bool isReachable(NodeID src, NodeID dst)
-    {
-        stat->checks++;
-        return ecg.isReachable(src, dst);
-    }
 
     void countSumEdges() override;
 };

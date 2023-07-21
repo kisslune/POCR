@@ -39,25 +39,14 @@ void AAStat::pegStat()
 {
     PEG* peg = aa->graph();
 
-    u32_t totalNodeNumber = 0;
-    u32_t totalEdgeNumber = 0;
-    u32_t pEdgeNumber = 0;
-
     for (auto nodeIt = peg->begin(); nodeIt != peg->end(); nodeIt++)
-    {
-        totalNodeNumber++;
-    }
+        numOfNodes++;
 
     for (auto it: peg->getPEGEdges())
-    {
-        totalEdgeNumber++;
-        if (it->getEdgeKind() == PEG::Deref || it->getEdgeKind() == PEG::Gep)
-            pEdgeNumber++;
-    }
+        numOfEdges += 2;
 
-    PTNumStatMap["#Nodes"] = totalNodeNumber;
-    PTNumStatMap["#Edges"] = totalEdgeNumber * 2;
-    PTNumStatMap["#PEdges"] = pEdgeNumber * 2;
+    PTNumStatMap["#Nodes"] = numOfNodes;
+    PTNumStatMap["#Edges"] = numOfEdges;
     timeStatMap["GraphSimpTime"] = gsTime;
 
     AAStat::printStat("PEG Stats");
@@ -79,7 +68,8 @@ void AAStat::performStat()
     timeStatMap["AnalysisTime"] = timeOfSolving;
     timeStatMap["VmrssInGB"] = (_vmrssUsageAfter - _vmrssUsageBefore) / 1024.0 / 1024.0;
     PTNumStatMap["#Checks"] = checks;
-    PTNumStatMap["#SumEdges"] = numOfSumEdges;
+    PTNumStatMap["#SumEdges"] = numOfSumEdges - numOfEdges;
+    PTNumStatMap["#SEdges"] = numOfSEdges;
 
     printStat("CFL-reachability analysis Stats");
 }

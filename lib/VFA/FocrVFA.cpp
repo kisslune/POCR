@@ -1,12 +1,13 @@
+/* -------------------- TRVFA.cpp ------------------ */
 //
-// Created by kisslune on 3/13/22.
+// Created by kisslune on 5/14/23.
 //
 
 #include "VFA/VFAnalysis.h"
 
 using namespace SVF;
 
-void PocrVFA::initSolver()
+void FocrVFA::initSolver()
 {
     for (CFLEdge* edge : graph()->getIVFGEdges())
     {
@@ -15,8 +16,8 @@ void PocrVFA::initSolver()
 
         if (edge->getEdgeKind() == IVFG::DirectVF)
         {
-            cflData()->addEdge(srcId, dstId, Label(a, 0));
-            pushIntoWorklist(srcId, dstId, Label(a, 0));
+            cflData()->addEdge(srcId,dstId,Label(a,0));
+            pushIntoWorklist(srcId,dstId,Label(a,0));
         }
         if (edge->getEdgeKind() == IVFG::CallVF)
             cflData()->addEdge(srcId, dstId, Label(call, edge->getEdgeIdx()));
@@ -27,30 +28,43 @@ void PocrVFA::initSolver()
     for (auto it = graph()->begin(); it != graph()->end(); ++it)
     {
         NodeID nId = it->first;
-        hybridData.addInd(nId, nId);
+        ecg.addNode(nId);
         matchCallRet(nId, nId);
     }
 }
 
 
-void PocrVFA::solve()
+void FocrVFA::solve()
 {
     while (!isWorklistEmpty())
     {
         CFLItem item = popFromWorklist();
-        auto& newEdgeMap = hybridData.addArc(item.src(), item.dst());
-
-        for (auto& it1 : newEdgeMap)
-            for (auto newDst : it1.second)
-                matchCallRet(it1.first, newDst);    // it1.first == newSrc
+        addArc(item.src(), item.dst());
     }
+
+    ecg.countECGEdges();
 }
 
 
-/*!
- * Matching call A ret
- */
-void PocrVFA::matchCallRet(NodeID u, NodeID v)
+void FocrVFA::addArc(NodeID src, NodeID dst)
+{
+    if (ecg.isReachable(src, dst))
+        return;
+
+    std::unordered_map<NodeID, NodeBS>* newEdgeMapPtr;
+
+    if (ecg.isReachable(dst, src))     // src --> dst is a back edge
+        newEdgeMapPtr = &ecg.insertBackEdge(src, dst);
+    else                                    // src --> dst is a forth edge
+        newEdgeMapPtr = &ecg.insertForwardEdge(src, dst);
+
+    for (auto& it1 : *newEdgeMapPtr)
+        for (auto newDst : it1.second)
+            matchCallRet(it1.first, newDst);    // it1.first == newSrc
+}
+
+
+void FocrVFA::matchCallRet(NodeID u, NodeID v)
 {
     /// vertical handling of matched parentheses
     for (auto& srcIt : cflData()->getPreds(u))
@@ -59,32 +73,32 @@ void PocrVFA::matchCallRet(NodeID u, NodeID v)
             for (auto& dstIt : cflData()->getSuccs(v))
             {
                 if (dstIt.first.first == ret && srcIt.first.second == dstIt.first.second)
-                    for (NodeID srcTgt : srcIt.second)
-                        for (NodeID dstTgt : dstIt.second)
+                    for (NodeID srcCallParent : srcIt.second)
+                        for (NodeID dstRetChild : dstIt.second)
                         {
                             stat->checks++;
-                            pushIntoWorklist(srcTgt, dstTgt, Label(A, 0));
+                            pushIntoWorklist(srcCallParent, dstRetChild, Label(A, 0));
                         }
             }
     }
 }
 
 
-void PocrVFA::addCl(NodeID u, u32_t idx, TreeNode* vNode)
+void FocrVFA::addCl(NodeID u, u32_t idx, ECGNode* vNode)
 {
     NodeID v = vNode->id;
     if (!checkAndAddEdge(u, v, Label(Cl, idx)))
         return;
 
-    for (auto child : vNode->children)
-        addCl(u, idx, child);
+    for (auto succ : vNode->successors)
+        addCl(u, idx, succ);
 }
 
 
-void PocrVFA::countSumEdges()
+void FocrVFA::countSumEdges()
 {
     /// calculate checks
-    stat->checks += hybridData.checks;
+    stat->checks += ecg.checks;
 
     /// calculate summary edges
     for (auto& it1 : cflData()->getSuccMap())
@@ -92,16 +106,10 @@ void PocrVFA::countSumEdges()
             if (it2.first.first == call)
             {
                 for (NodeID dst : it2.second)
-                    addCl(it1.first, it2.first.second, hybridData.getNode(dst, dst));
+                    addCl(it1.first, it2.first.second, ecg.getNode(dst));
             }
 
     VFAnalysis::countSumEdges();
-
-    for (auto& iter : hybridData.indMap)
-    {
-        stat->numOfSumEdges += iter.second.size();
-        stat->numOfSEdges += iter.second.size();
-    }
+    stat->numOfSumEdges += ecg.countReachablePairs();
+    stat->numOfSEdges += ecg.countReachablePairs();
 }
-
-

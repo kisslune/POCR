@@ -170,7 +170,7 @@ public:
 
         /// Derive edges via binary production rules
         //@{
-        for (auto& iter : cflData()->getSuccMap(item.dst()))
+        for (auto& iter : cflData()->getSuccs(item.dst()))
         {
             Label rty = iter.first;
             for (Label newTy : binarySumm(item.label(), rty))
@@ -187,7 +187,7 @@ public:
             }
         }
 
-        for (auto& iter : cflData()->getPredMap(item.src()))
+        for (auto& iter : cflData()->getPreds(item.src()))
         {
             Label lty = iter.first;
             for (Label newTy : binarySumm(lty, item.label()))

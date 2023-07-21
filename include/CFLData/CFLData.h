@@ -62,10 +62,10 @@ public:
     inline DataMap& getPredMap()
     { return predMap; }
 
-    inline TypeMap& getSuccMap(const NodeID key)
+    inline TypeMap& getSuccs(const NodeID key)
     { return succMap[key]; }
 
-    inline TypeMap& getPredMap(const NodeID key)
+    inline TypeMap& getPreds(const NodeID key)
     { return predMap[key]; }
 
     inline NodeBS& getSuccs(const NodeID key, const Label lbl)
@@ -176,9 +176,12 @@ public:
 
     u32_t checks;
 
-public:
     Map<NodeID, std::unordered_map<NodeID, TreeNode*>> indMap;   // indMap[v][u] points to node v in tree(u)
 
+protected:
+    std::unordered_map<NodeID, NodeBS> newEdgeMap;
+
+public:
     HybridData() : checks(0)
     {}
 
@@ -187,10 +190,7 @@ public:
         for (auto iter1 : indMap)
         {
             for (auto iter2 : iter1.second)
-            {
                 delete iter2.second;
-                iter2.second = NULL;
-            }
         }
     }
 
@@ -204,8 +204,9 @@ public:
     }
 
     /// Add a node dst to tree(src)
-    TreeNode* addInd(NodeID src, NodeID dst)
+    inline TreeNode* addInd(NodeID src, NodeID dst)
     {
+        checks++;
         auto resIns = indMap[dst].insert(std::make_pair(src, new TreeNode(dst)));
         if (resIns.second)
             return resIns.first->second;
@@ -213,22 +214,24 @@ public:
     }
 
     /// Get the node dst in tree(src)
-    TreeNode* getNode(NodeID src, NodeID dst)
+    inline TreeNode* getNode(NodeID src, NodeID dst)
     { return indMap[dst][src]; }
 
     /// add v into desc(x) as a child of u
-    inline void insertEdge(TreeNode* u, TreeNode* v)
+    inline void insertTreeEdge(TreeNode* u, TreeNode* v)
     { u->children.insert(v); }
 
-    void addArc(NodeID src, NodeID dst)
+    std::unordered_map<NodeID, NodeBS>& addArc(NodeID src, NodeID dst)
     {
+        newEdgeMap.clear();
+
         if (!hasInd(src, dst))
         {
             for (auto iter : indMap[src])
-            {
                 meld(iter.first, getNode(iter.first, src), getNode(dst, dst));
-            }
         }
+
+        return newEdgeMap;
     }
 
     void meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
@@ -237,14 +240,13 @@ public:
         if (!newVNode)
             return;
 
-        insertEdge(uNode, newVNode);
+        insertTreeEdge(uNode, newVNode);
+        newEdgeMap[x].set(vNode->id);
+
         for (TreeNode* vChild : vNode->children)
-        {
             meld(x, newVNode, vChild);
-        }
     }
 };
-
 
 }   // end namespace SVF
 

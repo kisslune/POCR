@@ -36,7 +36,7 @@ void VFAnalysis::analyze()
 
     std::thread th(VFAnalysis::timer);     // timer thread
 
-    // Start solving
+    /// Start solving
     double propHorStart = stat->getClk();
 
     do
@@ -50,7 +50,7 @@ void VFAnalysis::analyze()
     double propHorEnd = stat->getClk();
     stat->timeOfSolving += (propHorEnd - propHorStart) / TIMEINTERVAL;
 
-    // Finalize the analysis
+    /// Finalize the analysis
     finalize();
 
     pthread_cancel(th.native_handle());     // kill timer
@@ -77,12 +77,56 @@ bool VFAnalysis::pushIntoWorklist(NodeID src, NodeID dst, Label ty)
 }
 
 
+bool VFAnalysis::checkAndAddEdge(NodeID src, NodeID dst, Label lbl)
+{
+    if (!lbl.first)
+        return false;
+
+    stat->checks++;
+    return cflData()->checkAndAddEdge(src, dst, lbl);
+}
+
+
+NodeBS VFAnalysis::checkAndAddEdges(NodeID src, const NodeBS& dstSet, Label lbl)
+{
+    if (!lbl.first)
+        return emptyBS;
+
+    stat->checks += dstSet.count();
+    return cflData()->checkAndAddEdges(src, dstSet, lbl);
+}
+
+
+NodeBS VFAnalysis::checkAndAddEdges(const NodeBS& srcSet, NodeID dst, Label lbl)
+{
+    if (!lbl.first)
+        return emptyBS;
+
+    stat->checks += srcSet.count();
+    return cflData()->checkAndAddEdges(srcSet, dst, lbl);
+}
+
+
+void VFAnalysis::countSumEdges()
+{
+    stat->numOfSumEdges = 0;
+
+    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
+        for (auto& iter2 : iter1->second)
+        {
+            stat->numOfSumEdges += iter2.second.count();
+            if (iter2.first.first == A)
+                stat->numOfSEdges += iter2.second.count();
+        }
+}
+
+
 /// ------------------- Std VFA Methods ----------------------
 
 Set<Label> StdVFA::binarySumm(Label lty, Label rty)
 {
-    char lWord = lty.first;
-    char rWord = rty.first;
+    u32_t lWord = lty.first;
+    u32_t rWord = rty.first;
 
     u32_t lInd = lty.second;
     u32_t rInd = rty.second;
@@ -102,7 +146,7 @@ Set<Label> StdVFA::binarySumm(Label lty, Label rty)
 
 Set<Label> StdVFA::unarySumm(Label lty)
 {
-    char lWord = lty.first;
+    u32_t lWord = lty.first;
     if (lWord == a)
         return {std::make_pair(A, 0)};
 
@@ -112,7 +156,7 @@ Set<Label> StdVFA::unarySumm(Label lty)
 
 void StdVFA::initSolver()
 {
-    for (CFLEdge* edge: graph()->getIVFGEdges())
+    for (CFLEdge* edge : graph()->getIVFGEdges())
     {
         NodeID srcId = edge->getSrcID();
         NodeID dstId = edge->getDstID();
@@ -140,60 +184,5 @@ void StdVFA::initSolver()
         NodeID nodeId = nIter->first;
         checkAndAddEdge(nodeId, nodeId, std::make_pair(A, 0));
         pushIntoWorklist(nodeId, nodeId, std::make_pair(A, 0));
-    }
-}
-
-
-void StdVFA::processCFLItem(CFLItem item)
-{
-    /// Derive edges via unary production rules
-    for (Label newTy: unarySumm(item.label()))
-        if (checkAndAddEdge(item.src(), item.dst(), newTy))
-        {
-            stat->checks++;
-            pushIntoWorklist(item.src(), item.dst(), newTy);
-        }
-
-    /// Derive edges via binary production rules
-    //@{
-    for (auto& iter: cflData()->getSuccMap(item.dst()))
-    {
-        Label rty = iter.first;
-        for (Label newTy : binarySumm(item.label(), rty))
-        {
-            NodeBS diffDsts = checkAndAddEdges(item.src(), iter.second, newTy);
-            stat->checks += iter.second.count();
-            for (NodeID diffDst: diffDsts)
-                pushIntoWorklist(item.src(), diffDst, newTy);
-        }
-    }
-
-    for (auto& iter: cflData()->getPredMap(item.src()))
-    {
-        Label lty = iter.first;
-        for (Label newTy : binarySumm(lty, item.label()))
-        {
-            NodeBS diffSrcs = checkAndAddEdges(iter.second, item.dst(), newTy);
-            stat->checks += iter.second.count();
-            for (NodeID diffSrc: diffSrcs)
-                pushIntoWorklist(diffSrc, item.dst(), newTy);
-        }
-    }
-    //@}
-}
-
-
-void StdVFA::countSumEdges()
-{
-    stat->numOfSumEdges = 0;
-    std::set<u32_t> s = {A, Cl};
-
-    for (auto iter1 = cflData()->begin(); iter1 != cflData()->end(); ++iter1)
-    {
-        for (auto& iter2: iter1->second)
-        {
-            if (s.find(iter2.first.first) != s.end())
-                stat->numOfSumEdges += iter2.second.count();
-        }
     }
 }

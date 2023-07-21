@@ -36,9 +36,10 @@ public:
     /// num counters
     u32_t numOfIteration;
     u32_t checks;
-    u32_t numOfTEdges;
     u32_t numOfSumEdges;
-    u32_t numOfAdd;
+    u32_t numOfSEdges;
+    u32_t numOfNodes;
+    u32_t numOfEdges;
 
     /// time counters
     double timeOfSolving;
@@ -52,7 +53,6 @@ public:
 private:
     VFAnalysis* ivf;
 
-    NUMStatMap generalNumMap;
     NUMStatMap PTNumStatMap;
     TIMEStatMap timeStatMap;
 
@@ -66,9 +66,10 @@ public:
     VFAStat(VFAnalysis* p) : ivf(p),
                              numOfIteration(0),
                              checks(0),
-                             numOfTEdges(0),
+                             numOfSEdges(0),
                              numOfSumEdges(0),
-                             numOfAdd(0),
+                             numOfNodes(0),
+                             numOfEdges(0),
                              timeOfSolving(0)
     {
         startClk();
@@ -79,19 +80,13 @@ public:
     }
 
     virtual inline void startClk()
-    {
-        startTime = CLOCK_IN_MS();
-    }
+    { startTime = CLOCK_IN_MS(); }
 
     virtual inline void endClk()
-    {
-        endTime = CLOCK_IN_MS();
-    }
+    { endTime = CLOCK_IN_MS(); }
 
     static inline double getClk()
-    {
-        return CLOCK_IN_MS();
-    }
+    { return CLOCK_IN_MS(); }
 
     void setMemUsageBefore();
     void setMemUsageAfter();

@@ -15,6 +15,7 @@
 #include "AAStat.h"
 #include "PEGFold.h"
 #include "PEGInterDyck.h"
+#include "CFLData/ECG.h"
 
 namespace SVF
 {
@@ -29,7 +30,6 @@ public:
     enum Words
     {
         fault,
-        epsilon,
         a,
         abar,
         d,
@@ -71,42 +71,51 @@ public:
 
     virtual ~AliasAnalysis()
     {
-        destroy();
+        delete stat;
+        delete _graph;
+        delete scc;
+        delete pegFold;
+        delete interDyck;
     }
 
     /// Graph operations
     //@{
     const inline PEG* graph() const
-    {
-        return _graph;
-    }
+    { return _graph; }
 
-    virtual inline void setGraph(PEG* g)
-    {
-        _graph = g;
-    }
+    inline void setGraph(PEG* g)
+    { _graph = g; }
 
-    virtual PEG* graph()
-    {
-        return _graph;
-    }
+    inline virtual PEG* graph()
+    { return _graph; }
     //@}
 
-    virtual void initialize();
-    virtual void destroy();
-    virtual void finalize();
     virtual void analyze();
-    void dumpStat();
+    virtual void initialize();
+    virtual void initSolver() = 0;
+    virtual void finalize();
+    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
 
-    virtual void dumpAlias()
-    {};
+    Set<Label> unarySumm(Label lty) override
+    { return {}; }
 
-    // stat
-    //{
-    virtual void countSumEdges()
+    Set<Label> binarySumm(Label lty, Label rty) override
+    { return {}; }
+
+    bool checkAndAddEdge(NodeID src, NodeID dst, Label lbl) override;
+    NodeBS checkAndAddEdges(NodeID src, const NodeBS& dstSet, Label lbl) override;
+    NodeBS checkAndAddEdges(const NodeBS& srcSet, NodeID dst, Label lbl) override;
+
+    /// stat
+    //@{
+    inline void dumpStat()
     {
+        if (stat)
+            stat->performStat();
     }
-    //}
+
+    virtual void countSumEdges();
+    //@}
 
     static void timer()
     {
@@ -132,72 +141,38 @@ public:
  */
 class StdAA : public AliasAnalysis
 {
-protected:
-    std::map<NodeID, NodeSet> valAlias;
-
 public:
-    StdAA(std::string graphName) :
-            AliasAnalysis(graphName)
+    StdAA(std::string graphName) : AliasAnalysis(graphName)
     {}
 
-    virtual ~StdAA()
-    {
-        delete _graph;
-        _graph = NULL;
-    }
+    void initSolver() override;
 
-    virtual void initialize();
-    virtual void initSolver();
-    virtual void finalize();
-
-    // Alias data operations
+    /// CFLItem operations
     //@{
-    virtual Set<Label> binarySumm(Label lty, Label rty);
-    virtual Set<Label> unarySumm(Label lty);
+    Set<Label> binarySumm(Label lty, Label rty) override;
+    Set<Label> unarySumm(Label lty) override;
     //@}
-
-    virtual bool pushIntoWorklist(NodeID src, NodeID dst, Label ty);
-    virtual void processCFLItem(CFLItem item);
-    virtual void dumpAlias();
-    virtual void countSumEdges();
 };
 
 
 /*!
  * POCR
  */
-class PocrAA : public StdAA
+class PocrAA : public AliasAnalysis
 {
 public:
     typedef HybridData::TreeNode TreeNode;
-    typedef std::unordered_map<NodeID, std::unordered_map<short, std::unordered_set<NodeID>>> CallRetMap;
-    typedef std::unordered_map<NodeID, std::unordered_set<NodeID>> ChildrenMap;
 
 protected:
     HybridData hybridData;
-    ChildrenMap dChildren;
-    ChildrenMap aParents;
-    CallRetMap fChildren;
-    ChildrenMap vChildren;
-    ChildrenMap mChildren;
-    ChildrenMap dvChildren;
-    CallRetMap fvChildren;
 
 public:
-    PocrAA(std::string gName) : StdAA(gName)
+    PocrAA(std::string gName) : AliasAnalysis(gName)
     {}
 
-    virtual void initSolver();
-    virtual void solve();
+    void initSolver() override;
+    void solve() override;
 
-    bool pushIntoWorklist(NodeID src, NodeID dst, Label ty)
-    {
-        return AliasAnalysis::pushIntoWorklist(src, dst, ty);
-    }
-
-    void addArc(NodeID src, NodeID dst);
-    void meld(NodeID x, TreeNode* uNode, TreeNode* vNode);
-    bool hasA(NodeID u, NodeID v);
     void checkdEdges(NodeID src, NodeID dst);
     void checkfEdges(NodeID src, NodeID dst);
     void addV(TreeNode* u, TreeNode* v);
@@ -205,9 +180,29 @@ public:
     bool hasM(NodeID src, NodeID dst);
     void setM(NodeID src, NodeID dst);
 
-    void countSumEdges();
+    void countSumEdges() override;
 };
 
+
+/*!
+ * Focr AA
+ */
+//class FocrAA : public AliasAnalysis
+//{
+//public:
+//    typedef ECG::ECGNode ECGNode;
+//    typedef ECG::ECGEdge ECGEdge;
+//    typedef ECG::ECGEdgeTy ECGEdgeTy;
+//    typedef std::unordered_map<NodeID, std::unordered_map<u32_t, std::unordered_set<NodeID>>> CallRetMap;
+//    typedef std::unordered_map<NodeID, std::unordered_set<NodeID>> ChildrenMap;
+//
+//protected:
+//    ECG ecg;
+//
+//public:
+//    FocrAA(std::string gName) : AliasAnalysis(gName)
+//    {}
+//};
 
 /*!
  * Graspan (single thread for collecting derivation info)

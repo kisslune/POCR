@@ -8,24 +8,31 @@ using namespace SVF;
 
 void PocrAA::initSolver()
 {
-    // init graph edges
-    for (CFLEdge* edge: graph()->getPEGEdges())
+    /// init graph edges
+    for (CFLEdge* edge : graph()->getPEGEdges())
     {
         NodeID srcId = edge->getSrcID();
         NodeID dstId = edge->getDstID();
 
         if (edge->getEdgeKind() == PEG::Asgn)
         {
-            aParents[dstId].insert(srcId);
+            cflData()->addEdge(srcId, dstId, Label(a, 0));
+            cflData()->addEdge(dstId, srcId, Label(abar, 0));
             pushIntoWorklist(edge->getSrcID(), edge->getDstID(), std::make_pair(a, 0));
         }
         if (edge->getEdgeKind() == PEG::Deref)
-            dChildren[srcId].insert(dstId);
+        {
+            cflData()->addEdge(srcId, dstId, Label(d, 0));
+            cflData()->addEdge(dstId, srcId, Label(dbar, 0));
+        }
         if (edge->getEdgeKind() == PEG::Gep)
-            fChildren[srcId][edge->getEdgeIdx()].insert(dstId);
+        {
+            cflData()->addEdge(srcId, dstId, Label(f, edge->getEdgeIdx()));
+            cflData()->addEdge(dstId, srcId, Label(fbar, edge->getEdgeIdx()));
+        }
     }
 
-    // init dataset
+    /// init hybrid data
     for (auto it = graph()->begin(); it != graph()->end(); ++it)
     {
         NodeID nId = it->first;
@@ -45,7 +52,11 @@ void PocrAA::solve()
         NodeID dst = item.dst();
 
         if (type.first == a)
-            addArc(src, dst);
+        {
+            hybridData.addArc(src, dst);
+            for (NodeID vSrc : cflData()->getSuccs(src, Label(V, 0)))
+                pushIntoWorklist(vSrc, dst, std::make_pair(V, 0));
+        }
         else if (type.first == M)
         {
             setM(src, dst);
@@ -57,72 +68,26 @@ void PocrAA::solve()
 }
 
 
-void PocrAA::addArc(NodeID src, NodeID dst)
-{
-    if (hasA(src, dst))
-        return;
-
-    for (auto& iter: hybridData.indMap[src])
-    {
-        meld(iter.first, hybridData.getNode(iter.first, src), hybridData.getNode(dst, dst));
-    }
-
-    for (NodeID vSrc: vChildren[src])
-        pushIntoWorklist(vSrc, dst, std::make_pair(V, 0));
-}
-
-
-void PocrAA::meld(NodeID x, TreeNode* uNode, TreeNode* vNode)
-{
-    stat->checks++;
-
-    TreeNode* newVNode = hybridData.addInd(x, vNode->id);
-    if (!newVNode)
-        return;
-
-    hybridData.insertEdge(uNode, newVNode);
-    for (TreeNode* vChild: vNode->children)
-    {
-        meld(x, newVNode, vChild);
-    }
-}
-
-
-bool PocrAA::hasA(NodeID u, NodeID v)
-{
-    stat->checks++;
-
-    return hybridData.hasInd(u, v);
-}
-
-
 void PocrAA::addV(TreeNode* u, TreeNode* v)
 {
     if (!setV(u->id, v->id))
         return;
 
-    for (TreeNode* vChild: v->children)
-    {
+    for (TreeNode* vChild : v->children)
         addV(u, vChild);
-    }
 
-    for (TreeNode* uChild: u->children)
-    {
+    for (TreeNode* uChild : u->children)
         addV(uChild, v);
-    }
 }
 
 
 bool PocrAA::setV(NodeID src, NodeID dst)
 {
-    stat->checks++;
-
-    if (!vChildren[src].insert(dst).second)
+    if (!checkAndAddEdge(src, dst, Label(V, 0)))
         return false;
-    vChildren[dst].insert(src);
-    stat->checks++;
+    checkAndAddEdge(dst, src, Label(V, 0));
 
-    // solve the parentheses of d and dealloc edges
+    /// solve the parentheses of d and f edges
     checkdEdges(src, dst);
     checkfEdges(src, dst);
     return true;
@@ -136,19 +101,14 @@ bool PocrAA::hasM(NodeID src, NodeID dst)
     if (src == dst)
         return true;
 
-    auto srcM = mChildren.find(src);
-
-    if (srcM == mChildren.end())
-        return false;
-
-    return (srcM->second.find(dst) != srcM->second.end());
+    return cflData()->hasEdge(src, dst, Label(M, 0));
 }
 
 
 void PocrAA::setM(NodeID src, NodeID dst)
 {
-    mChildren[src].insert(dst);
-    mChildren[dst].insert(src);
+    checkAndAddEdge(src, dst, Label(M, 0));
+    checkAndAddEdge(dst, src, Label(M, 0));
 }
 
 
@@ -157,28 +117,20 @@ void PocrAA::setM(NodeID src, NodeID dst)
  */
 void PocrAA::checkdEdges(NodeID src, NodeID dst)
 {
-    auto srcD = dChildren.find(src);
-    if (srcD == dChildren.end())
-        return;
-
-    auto dstD = dChildren.find(dst);
-    if (dstD == dChildren.end())
-        return;
-
-    for (auto srcChild: srcD->second)
-        for (auto dstChild: dstD->second)
-            if (!hasM(srcChild, dstChild))
+    for (NodeID srcTgt : cflData()->getSuccs(src, Label(d, 0)))
+    {
+        for (NodeID dstTgt : cflData()->getSuccs(dst, Label(d, 0)))
+        {
+            if (!hasM(srcTgt, dstTgt))
             {
-                pushIntoWorklist(srcChild, dstChild, std::make_pair(M, 0));
-                for (NodeID srcP: aParents[srcChild])
-                {
-                    pushIntoWorklist(srcP, dstChild, std::make_pair(a, 0));
-                }
-                for (NodeID dstP: aParents[dstChild])
-                {
-                    pushIntoWorklist(dstP, srcChild, std::make_pair(a, 0));
-                }
+                pushIntoWorklist(srcTgt, dstTgt, Label(M, 0));
+                for (NodeID srcP : cflData()->getPreds(srcTgt, Label(a, 0)))
+                    pushIntoWorklist(srcP, dstTgt, Label(a, 0));
+                for (NodeID dstP : cflData()->getPreds(dstTgt, Label(a, 0)))
+                    pushIntoWorklist(dstP, srcTgt, Label(a, 0));
             }
+        }
+    }
 }
 
 
@@ -187,77 +139,53 @@ void PocrAA::checkdEdges(NodeID src, NodeID dst)
  */
 void PocrAA::checkfEdges(NodeID src, NodeID dst)
 {
-    auto srcD = fChildren.find(src);
-    if (srcD == fChildren.end())
-        return;
-
-    auto dstD = fChildren.find(dst);
-    if (dstD == fChildren.end())
-        return;
-
-    for (auto& srcChildIt: srcD->second)
+    for (auto& srcIt : cflData()->getSuccs(src))
     {
-        auto dstChildIt = dstD->second.find(srcChildIt.first);
-        if (dstChildIt != dstD->second.end())
-        {
-            for (NodeID srcChild: srcChildIt.second)
+        if (srcIt.first.first == f)
+            for (auto& dstIt : cflData()->getSuccs(dst))
             {
-                for (NodeID dstChild: dstChildIt->second)
-                {
-                    stat->checks++;
-                    pushIntoWorklist(srcChild, dstChild, std::make_pair(V, 0));
-                }
+                if (dstIt.first.first == f && srcIt.first.second == dstIt.first.second)
+                    for (NodeID srcTgt : srcIt.second)
+                        for (NodeID dstTgt : dstIt.second)
+                        {
+                            stat->checks++;
+                            pushIntoWorklist(srcTgt, dstTgt, Label(V, 0));
+                        }
             }
-        }
     }
 }
 
 
 void PocrAA::countSumEdges()
 {
-    for (auto& iter: dChildren)
-        for (auto dTgt: iter.second)
-        {
-            setM(dTgt, dTgt);
-            /// dv
-            for (auto dst: vChildren[iter.first])
-                dvChildren[dTgt].insert(dst);
-        }
+    /// calculate checks
+    stat->checks += hybridData.checks;
 
-    /// fv
-    for (auto& iter: fChildren)
+    /// calculate summary edges
+    for (auto& it1 : cflData()->getSuccMap())
     {
-        for (auto& iter2: iter.second)
+        for (auto& it2 : it1.second)
         {
-            for (auto& src: iter2.second)
-                for (auto& dst: vChildren[iter.first])
-                    fvChildren[src][iter2.first].insert(dst);
-        }
-    }
-
-    stat->numOfSumEdges = 0;
-
-    for (auto& iter: hybridData.indMap)
-    {
-        stat->numOfSumEdges += iter.second.size() * 2;
-    }
-    for (auto& iter: vChildren)
-    {
-        stat->numOfSumEdges += iter.second.size();
-    }
-    for (auto& iter: mChildren)
-    {
-        stat->numOfSumEdges += iter.second.size();
-    }
-    for (auto& iter: dvChildren)
-    {
-        stat->numOfSumEdges += iter.second.size();
-    }
-    for (auto& iter: fvChildren)
-    {
-        for (auto& iter2: iter.second)
-        {
-            stat->numOfSumEdges += iter2.second.size();
+            /// DV
+            if (it2.first.first == d)
+                for (NodeID dTgt : it2.second)
+                {
+                    setM(dTgt, dTgt);
+                    for (NodeID dst : cflData()->getSuccs(it1.first, Label(V, 0)))
+                        checkAndAddEdge(dTgt, dst, Label(DV, 0));
+                }
+            /// FV
+            if (it2.first.first == f)
+                for (NodeID fTgt : it2.second)
+                {
+                    for (NodeID dst : cflData()->getSuccs(it1.first, Label(V, 0)))
+                        checkAndAddEdge(fTgt, dst, Label(FV, it2.first.second));
+                }
         }
     }
+
+    AliasAnalysis::countSumEdges();
+
+    for (auto& iter : hybridData.indMap)
+        stat->numOfSumEdges += iter.second.size() * 2;  // A and Abar
 }

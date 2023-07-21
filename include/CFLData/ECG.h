@@ -148,7 +148,10 @@ public:
     /// adjacency list methods
     //@{
     inline bool isReachable(NodeID n, NodeID tgt)
-    { return reachableMap[n].test(tgt); }
+    {
+        checks++;
+        return reachableMap[n].test(tgt);
+    }
 
     inline void setReachable(NodeID n, NodeID tgt)
     { reachableMap[n].set(tgt); }

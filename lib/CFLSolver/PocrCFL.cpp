@@ -53,7 +53,7 @@ void PocrCFL::processCFLItem(CFLItem item)
         if (checkAndAddEdge(item.src(), item.dst(), newTy))
             pushIntoWorklist(item.src(), item.dst(), newTy);
 
-    for (auto& iter : cflData()->getSuccMap(item.dst()))
+    for (auto& iter : cflData()->getSuccs(item.dst()))
     {
         Label rty = iter.first;
         for (Label newTy : binarySumm(item.label(), rty))
@@ -71,7 +71,7 @@ void PocrCFL::processCFLItem(CFLItem item)
             }
     }
 
-    for (auto& iter : cflData()->getPredMap(item.src()))
+    for (auto& iter : cflData()->getPreds(item.src()))
     {
         Label lty = iter.first;
         for (Label newTy : binarySumm(lty, item.label()))
@@ -142,11 +142,11 @@ bool PocrCFL::updateTrEdge(char lbl, NodeID px, TreeNode* py, NodeID sx, TreeNod
         return false;   // the node py is already in ptree(sy)
 
     /// ptrees[lbl]->getNode(sy->id, px) refers to the node px in ptree(sy)
-    ptrees[lbl]->insertEdge(ptrees[lbl]->getNode(sy->id, px), newPy);
+    ptrees[lbl]->insertTreeEdge(ptrees[lbl]->getNode(sy->id, px), newPy);
 
     TreeNode* newSy = strees[lbl]->addInd(py->id, sy->id);
     /// strees[lbl]->getNode(py->id, sx) refers to the node sx in stree(py)
-    strees[lbl]->insertEdge(strees[lbl]->getNode(py->id, sx), newSy);
+    strees[lbl]->insertTreeEdge(strees[lbl]->getNode(py->id, sx), newSy);
     /// Update adjacency lists
     cflData()->addEdge(py->id, sy->id, Label(lbl, 0));
     /// Push the new edge into worklist as a secondary edge

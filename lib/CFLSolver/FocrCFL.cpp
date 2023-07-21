@@ -42,7 +42,7 @@ void FocrCFL::processCFLItem(CFLItem item)
         if (checkAndAddEdge(item.src(), item.dst(), newTy))
             pushIntoWorklist(item.src(), item.dst(), newTy);
 
-    for (auto& iter : cflData()->getSuccMap(item.dst()))
+    for (auto& iter : cflData()->getSuccs(item.dst()))
     {
         Label rty = iter.first;
         for (Label newTy : binarySumm(item.label(), rty))
@@ -60,7 +60,7 @@ void FocrCFL::processCFLItem(CFLItem item)
             }
     }
 
-    for (auto& iter : cflData()->getPredMap(item.src()))
+    for (auto& iter : cflData()->getPreds(item.src()))
     {
         Label lty = iter.first;
         for (Label newTy : binarySumm(lty, item.label()))
@@ -92,25 +92,18 @@ void FocrCFL::procPrimaryItem(CFLItem item)
     if (ecgs[symb]->isReachable(src, dst))
         return;
 
+    std::unordered_map<NodeID, NodeBS>* newEdgeMapPtr;
+
     if (ecgs[symb]->isReachable(dst, src))    // src --> dst is a back edge
-    {
-        auto& newEdgeMap = ecgs[symb]->insertBackEdge(src, dst);
-        for (auto& it : newEdgeMap)
-        {
-            cflData()->addEdges(it.first, it.second, item.label());
-            for (auto newDst : it.second)
-                pushIntoWorklist(it.first, newDst, item.label(), false);
-        }
-    }
+        newEdgeMapPtr = &ecgs[symb]->insertBackEdge(src, dst);
     else
+        newEdgeMapPtr = &ecgs[symb]->insertForwardEdge(src, dst);
+
+    for (auto& it : *newEdgeMapPtr)
     {
-        auto& newEdgeMap = ecgs[symb]->insertForwardEdge(src, dst);
-        for (auto& it : newEdgeMap)
-        {
-            cflData()->addEdges(it.first, it.second, item.label());
-            for (auto newDst : it.second)
-                pushIntoWorklist(it.first, newDst, item.label(), false);
-        }
+        cflData()->addEdges(it.first, it.second, item.label());
+        for (auto newDst : it.second)
+            pushIntoWorklist(it.first, newDst, item.label(), false);
     }
 }
 

@@ -42,14 +42,10 @@ void CFLStat::graphStat()
     CFLGraph* g = cfl->graph();
 
     for (auto nodeIt = g->begin(); nodeIt != g->end(); nodeIt++)
-    {
         numOfNodes++;
-    }
 
     for (auto it : g->getCFLEdges())
-    {
         numOfEdges++;
-    }
 
     PTNumStatMap["#Nodes"] = numOfNodes;
     PTNumStatMap["#Edges"] = numOfEdges;

@@ -35,9 +35,10 @@ public:
     /// num counters
     u32_t numOfIteration;
     u32_t checks;
-    u32_t numOfTEdges;
     u32_t numOfSumEdges;
-    u32_t numOfAdd;
+    u32_t numOfSEdges;
+    u32_t numOfNodes;
+    u32_t numOfEdges;
 
     /// time counters
     double timeOfSolving;
@@ -51,37 +52,6 @@ public:
 private:
     AliasAnalysis* aa;
 
-public:
-    AAStat(AliasAnalysis* p) : aa(p),
-                               numOfIteration(0),
-                               checks(0),
-                               numOfTEdges(0),
-                               numOfSumEdges(0),
-                               numOfAdd(0),
-                               timeOfSolving(0)
-    {
-        startClk();
-    };
-
-    virtual ~AAStat()
-    {
-    }
-
-    virtual inline void startClk()
-    {
-        startTime = CLOCK_IN_MS();
-    }
-
-    virtual inline void endClk()
-    {
-        endTime = CLOCK_IN_MS();
-    }
-
-    static inline double getClk()
-    {
-        return CLOCK_IN_MS();
-    }
-
     NUMStatMap PTNumStatMap;
     TIMEStatMap timeStatMap;
 
@@ -91,13 +61,38 @@ public:
     u32_t _vmsizeUsageBefore;
     u32_t _vmsizeUsageAfter;
 
+public:
+    AAStat(AliasAnalysis* p) : aa(p),
+                               numOfIteration(0),
+                               checks(0),
+                               numOfSEdges(0),
+                               numOfSumEdges(0),
+                               numOfNodes(0),
+                               numOfEdges(0),
+                               timeOfSolving(0)
+    {
+        startClk();
+    };
+
+    virtual ~AAStat()
+    {}
+
+    virtual inline void startClk()
+    { startTime = CLOCK_IN_MS(); }
+
+    virtual inline void endClk()
+    { endTime = CLOCK_IN_MS(); }
+
+    static inline double getClk()
+    { return CLOCK_IN_MS(); }
+
     void setMemUsageBefore();
     void setMemUsageAfter();
 
     virtual void performStat();
     void pegStat();
-    virtual void printStat(std::string str = "");
+    void printStat(std::string str = "");
 };
 }
 
-#endif //PROJECT_AASTAT_H
+#endif

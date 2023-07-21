@@ -25,7 +25,7 @@ int main(int argc, char** argv)
     processArgs(argc, argv, arg_num, arg_vec, inFileVec);
     OptionBase::parseOptions(arg_num, arg_vec, "Alias analysis\n", "[options] <input>");
 
-    StdAA* aa;
+    AliasAnalysis* aa;
     if (Default_AA()) {
         aa = new StdAA(inFileVec[0]);
         aa->analyze();
