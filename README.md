@@ -19,7 +19,7 @@ cd SVF
 source ./build.sh
 ```
 
-### 3. Set the SVF Directory as a Environment Parameter 
+### 3. Set SVF Directory as a Environment Parameter 
 
 You can do this by appending the following line
 
