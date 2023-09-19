@@ -1,6 +1,6 @@
 # Intro
 
-**POCR** is a light-weight CFL-reachability tool developed upon the open-source tool [SVF](https://github.com/SVF-tools/SVF.git) and run on Ubuntu (20.04 or higher) or MacOS. It includes a general CFL-reachability solver and to specific solvers for field-sensitive alias analysis and context-sensitive value-flow analysis, where our fast CFL-reachability algorithm *POCR* is implemented.
+**POCR** is a light-weight CFL-reachability tool developed upon the open-source tool [SVF](https://github.com/SVF-tools/SVF.git) and run on Ubuntu (20.04 or higher) or MacOS. It includes a general CFL-reachability solver and two specific solvers for field-sensitive alias analysis and context-sensitive value-flow analysis, where our fast CFL-reachability algorithm *POCR* is implemented.
 
 
 ## Setup POCR
@@ -49,7 +49,7 @@ source ./build.sh
 
 ### General CFL-reachability solver
 
-POCR provides a general standard CFL-reachability solver as the baseline, which accepts an input GRAMMAR_FILE and an input <GRAPH_FILE>. You can invoke the general solver using the following command:
+POCR provides a general standard CFL-reachability solver as the baseline, which accepts an input <GRAMMAR_FILE> and an input <GRAPH_FILE>. You can invoke the general solver using the following command:
 
 
 ```
