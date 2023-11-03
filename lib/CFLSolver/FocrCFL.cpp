@@ -147,3 +147,97 @@ void FocrCFL::countSumEdges()
 
     StdCFL::countSumEdges();
 }
+
+
+/* ------------------- Methods of TRFocrCFL ----------------- */
+
+
+void TRFocrCFL::procPrimaryItem(CFLItem item)
+{
+    CFGSymbTy symb = item.label().first;
+    NodeID src = item.src();
+    NodeID dst = item.dst();
+
+    if (ecgs[symb]->isReachable(src, dst))
+        return;
+
+    std::unordered_map<NodeID, NodeBS>* newEdgeMapPtr;
+
+    if (ecgs[symb]->isReachable(dst, src))    // src --> dst is a back edge
+        newEdgeMapPtr = &ecgs[symb]->insertBackEdge(src, dst);
+    else
+        newEdgeMapPtr = &ecgs[symb]->insertForwardEdge(src, dst);
+
+    for (auto& it : *newEdgeMapPtr)
+    {
+        // TODO: secondary edge in -tr
+        secondaryData.addEdges(it.first, it.second, item.label());
+        for (auto newDst : it.second)
+            pushIntoWorklist(it.first, newDst, item.label(), false);
+    }
+}
+
+
+NodeBS TRFocrCFL::checkAndAddEdges(NodeID src, const NodeBS& dstSet, Label lbl)
+{
+    /// Here will be no secondary edges generated
+    if (grammar()->isTransitive(lbl.first))
+    {
+        NodeBS diffDsts;
+        stat->checks += dstSet.count();
+        diffDsts.intersectWithComplement(dstSet, cflData()->getSuccs(src, lbl));
+        diffDsts.intersectWithComplement(diffDsts, secondaryData.getSuccs(src, lbl));
+        cflData()->addEdges(src, diffDsts, lbl);
+        return diffDsts;
+    }
+    return StdCFL::checkAndAddEdges(src, dstSet, lbl);
+}
+
+
+NodeBS TRFocrCFL::checkAndAddEdges(const NodeBS& srcSet, NodeID dst, Label lbl)
+{
+    /// Here will be no secondary edges generated
+    if (grammar()->isTransitive(lbl.first))
+    {
+        NodeBS diffSrcs;
+        stat->checks += srcSet.count();
+        diffSrcs.intersectWithComplement(srcSet, cflData()->getPreds(dst, lbl));
+        diffSrcs.intersectWithComplement(diffSrcs, secondaryData.getPreds(dst, lbl));
+        cflData()->addEdges(diffSrcs, dst, lbl);
+        return diffSrcs;
+    }
+    return StdCFL::checkAndAddEdges(srcSet, dst, lbl);
+}
+
+
+void TRFocrCFL::countSumEdges()
+{
+    /// calculate checks
+    for (auto it : ecgs)
+        stat->checks += it.second->checks;
+
+    /// calculate summary edges
+    stat->numOfSumEdges = 0;
+    for (auto it1 = cflData()->begin(); it1 != cflData()->end(); ++it1)
+        for (auto& it2 : it1->second)
+            stat->numOfSumEdges += it2.second.count();
+
+    /// calculate S edges
+    stat->sEdgeSet.clear();
+    for (auto& it1 : cflData()->getSuccMap())
+        for (auto& it2 : it1.second)
+            if (grammar()->isCountSymbol(it2.first.first))
+                stat->sEdgeSet[it1.first] |= it2.second;
+
+    for (auto& it1 : secondaryData.getSuccMap())
+        for (auto& it2 : it1.second)
+            if (grammar()->isCountSymbol(it2.first.first))
+                stat->sEdgeSet[it1.first] |= it2.second;
+
+    for (auto& it : stat->sEdgeSet)
+        it.second.reset(it.first);
+
+    stat->numOfCountEdges = 0;
+    for (auto& it1 : stat->sEdgeSet)
+        stat->numOfCountEdges += it1.second.count();
+}

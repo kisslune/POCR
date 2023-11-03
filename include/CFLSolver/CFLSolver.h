@@ -165,7 +165,7 @@ public:
 
     /// UCFL methods
     void initSolver() override;
-    void procPrimaryItem(CFLItem item);
+    virtual void procPrimaryItem(CFLItem item);
     bool pushIntoWorklist(NodeID src, NodeID dst, Label ty, bool isPrimary = true) override;
     void processCFLItem(CFLItem item) override;
     void checkPreds(Label newLbl, ECGNode* src, NodeID dst);
@@ -173,6 +173,24 @@ public:
 
     static bool isPrimary(CFLItem& item)
     { return item.isPrimary(); }
+
+    void countSumEdges() override;
+};
+
+
+class TRFocrCFL : public FocrCFL
+{
+protected:
+    CFLData secondaryData;
+
+public:
+    TRFocrCFL(std::string& _grammarName, std::string& _graphName) : FocrCFL(_grammarName, _graphName)
+    {}
+
+    /// UCFL methods
+    void procPrimaryItem(CFLItem item) override;
+    NodeBS checkAndAddEdges(NodeID src, const NodeBS& dstSet, Label lbl) override;
+    NodeBS checkAndAddEdges(const NodeBS& srcSet, NodeID dst, Label lbl) override;
 
     void countSumEdges() override;
 };

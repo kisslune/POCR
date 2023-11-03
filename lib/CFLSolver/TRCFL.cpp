@@ -104,9 +104,9 @@ void TRCFL::countSumEdges()
         for (auto& it2 : it1->second)
             stat->numOfSumEdges += it2.second.count();
 
-    for (auto it1 = secondaryData.begin(); it1 != secondaryData.end(); ++it1)
-        for (auto& it2 : it1->second)
-            stat->numOfSumEdges += it2.second.count();
+//    for (auto it1 = secondaryData.begin(); it1 != secondaryData.end(); ++it1)
+//        for (auto& it2 : it1->second)
+//            stat->numOfSumEdges += it2.second.count();
 
     /// calculate S edges
     stat->sEdgeSet.clear();

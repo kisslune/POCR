@@ -11,8 +11,8 @@ static Option<bool> Default_CFL("std", "Standard CFL-reachability analysis", fal
 static Option<bool> Pocr_CFL("pocr", "POCR CFL-reachability analysis", false);
 static Option<bool> HPocr_CFL("hpocr", "Hierarchical POCR CFL-reachability analysis", false);
 static Option<bool> Focr_CFL("focr", "Uni-directional CFL-reachability analysis", false);
-static Option<bool> Tr_CFL("tr", "Uni-directional CFL-reachability analysis", false);
-static Option<bool> TrFocr_CFL("trnew", "Uni-directional CFL-reachability analysis", false);
+static Option<bool> Tr_CFL("trold", "Uni-directional CFL-reachability analysis", false);
+static Option<bool> TrFocr_CFL("tr", "Uni-directional CFL-reachability analysis", false);
 
 
 int main(int argc, char** argv)
