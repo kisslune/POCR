@@ -14,7 +14,7 @@ sudo apt install cmake gcc g++ libtinfo-dev libz-dev zip wget npm
 ### 2. Install SVF
 
 ```
-git clone https://github.com/kisslune/SVF.git
+git clone -b svf-llvm14 https://github.com/kisslune/SVF.git
 cd SVF
 source ./build.sh
 ```
