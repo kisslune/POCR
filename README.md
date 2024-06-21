@@ -14,10 +14,10 @@ Under refractoring...
 
 ## Publications
 
-- Yuxiang Lei*, Camille Bossut*, Yulei Sui and Qirun Zhang. Context-Free Language Reachability via Skewed Tabulation. <i>ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI), 2024</i>.
-- Pei Xu, Yuxiang Lei*, Yulei Sui and Jingling Xue. <a href="https://dl.acm.org/doi/pdf/10.1145/3649862">Iterative-Epoch Online Cycle Elimination for Context-Free Language Reachability</a>. <i>Proceedings of the ACM on Programming Languages 8.OOPSLA1 (2024): 1437-1462</i>.
-- Yuxiang Lei, Yulei Sui, Shin Hwei Tan and Qirun Zhang. <a href="https://dl.acm.org/doi/pdf/10.1145/3591233">Recursive State Machine Guided Graph Folding for Context-Free Language Reachability</a>. <i>Proceedings of the ACM on Programming Languages 7. PLDI (2023): 318–342</i>.
-- Yuxiang Lei, Yulei Sui, Shuo Ding and Qirun Zhang. <a href="https://dl.acm.org/doi/pdf/10.1145/3563343">Taming Transitive Redundancy for Context-Free Language Reachability</a>. <i>Proceedings of the ACM on Programming Languages 6. OOPSLA2 (2022): 1556-1582</i>.
+- Yuxiang Lei*, Camille Bossut*, Yulei Sui and Qirun Zhang. <a href="https://dl.acm.org/doi/10.1145/3656451">Context-Free Language Reachability via Skewed Tabulation</a>. <i>ACM SIGPLAN Conference on Programming Language Design and Implementation (PLDI), 2024</i>.
+- Pei Xu, Yuxiang Lei*, Yulei Sui and Jingling Xue. <a href="https://dl.acm.org/doi/10.1145/3649862">Iterative-Epoch Online Cycle Elimination for Context-Free Language Reachability</a>. <i>Proceedings of the ACM on Programming Languages 8.OOPSLA1 (2024): 1437-1462</i>.
+- Yuxiang Lei, Yulei Sui, Shin Hwei Tan and Qirun Zhang. <a href="https://dl.acm.org/doi/10.1145/3591233">Recursive State Machine Guided Graph Folding for Context-Free Language Reachability</a>. <i>Proceedings of the ACM on Programming Languages 7. PLDI (2023): 318–342</i>.
+- Yuxiang Lei, Yulei Sui, Shuo Ding and Qirun Zhang. <a href="https://dl.acm.org/doi/10.1145/3563343">Taming Transitive Redundancy for Context-Free Language Reachability</a>. <i>Proceedings of the ACM on Programming Languages 6. OOPSLA2 (2022): 1556-1582</i>.
 
 ## Setup POCR
 
